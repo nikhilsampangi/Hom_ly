@@ -4,7 +4,7 @@ export default class FrontPage extends Component {
   render() {
     return (
       <Fragment>
-        <p>Sup nigga</p>
+        <p>Sup nigga 2</p>
       </Fragment>
     );
   }
