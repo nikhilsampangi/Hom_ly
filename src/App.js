@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from "react";
-import "./App.css";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
 
 import FrontPage from "./front_page/FrontPage";
