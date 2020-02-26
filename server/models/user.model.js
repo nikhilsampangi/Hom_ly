@@ -2,48 +2,31 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
-  username: { type: String, required: [true, "Username cannot be empty"] }
+    firstname: {type:String, required:[true, 'firstname cannot be empty']},
+    
+    lastname: {type:String, required:[true, 'lastname cannot be empty']},
 
-  // hashedPassword: {
-  //   type: String,
-  //   required: [true, "Password cannot be empty"]
-  // }
+    hashedPassword: {type:String, required:[true, 'Password cannot be empty']},
 
-  // phone: {
-  //   type: Number,
-  //   required: [true, "Phone number cannot be empty"],
+    email: {type:String, required: [true, 'email cannot be empty'],
 
-  //   validate: {
-  //     validator: function(v) {
-  //       var re = /^\d{10}$/;
-  //       return re.test(v);
-  //     },
-  //     message: "Phone number must be 10 digit number"
-  //   }
-  // },
+        validate: {
+            validator: function(v) {
+                var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                return re.test(v)
+            },
+            message: 'Please fill a valid email address'
+        }
 
-  // email: {
-  //   type: String,
-  //   required: [true, "email cannot be empty"],
+    },
 
-  //   validate: {
-  //     validator: function(v) {
-  //       var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  //       return re.test(v);
-  //     },
-  //     message: "Please fill a valid email address"
-  //   }
-  // },
+    isVerified: {type:Boolean, default: false},
+    
+    token: {type:String, default: null},    
 
-  // isVerified: { type: Boolean, default: false },
-
-  // gender: {
-  //   type: String,
-  //   enum: ["Male", "Female", "Prefer not to say"],
-  //   default: "Prefer not to say"
-  // }
+    passwordResetToken: {type:String, default:null},
 });
 
-// UserSchema.set("toJSON", { virtuals: true });
+UserSchema.set("toJSON", { virtuals: true });
 
-module.exports = mongoose.model("customers", UserSchema);
+module.exports = mongoose.model("User", UserSchema);
