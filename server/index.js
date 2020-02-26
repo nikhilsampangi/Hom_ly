@@ -1,10 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const pino = require("express-pino-logger")();
-
+const cors= require('cors');
+const mongoose= require('mongoose');
+const port= 8008;
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(pino);
+app.use(cors());
 
 // app.get("/api/greeting", (req, res) => {
 //   const name = req.query.name || "World";
@@ -15,3 +18,21 @@ app.use(pino);
 // app.listen(3001, () =>
 //   console.log("Express server is running on localhost:3001")
 // );
+
+mongoose.connect('mongodb://localhost:27017/ciodb', {useNewUrlParser: true});
+
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+
+const connection = mongoose.connection;
+
+connection.once('open', function(){
+    console.log("connected");
+});
+
+const route = require('./routes/user');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended:true}));
+app.use('/user', route);
+app.listen(port, () => console.info('REST API running on port '+ port));

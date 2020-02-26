@@ -2,8 +2,11 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const schema = new Schema({
+
     
-    username: {type:String, required:[true, 'Username cannot be empty']},
+    firstname: {type:String, required:[true, 'firstname cannot be empty']},
+    
+    lastname: {type:String, required:[true, 'lastname cannot be empty']},
 
     hashedPassword: {type:String, required:[true, 'Password cannot be empty']},
 
@@ -22,6 +25,8 @@ const schema = new Schema({
     isVerified: {type:Boolean, default: false},
     
     token: {type:String, default: null},    
+
+    passwordResetToken: {type:String, default:null},
 });
 
 schema.set('toJSON', {virtuals:true});

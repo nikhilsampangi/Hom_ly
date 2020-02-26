@@ -21,7 +21,8 @@ router.post('/register', register)
 function register(req, res) {
 
   const userData = {
-    username: req.body.username,
+    firstname: req.body.firstname,
+    lastname: req.body.lastname,
     hashedPassword: req.body.hashedPassword,
     email: req.body.email,
   }
@@ -105,7 +106,7 @@ function login(req, res) {
           const payload = {
             _id: user._id,
             email: user.email,
-            username: user.username
+            firstname: user.firstname
           }
           let token = jwt.sign(payload, process.SECRET_KEY, {
             algorithm: 'HS256',
@@ -227,6 +228,89 @@ function confirm_email(req, res) {
     });
 
 }
+
+router.post('/forgot_password',forgot_password)
+
+function forgot_password(req,res){
+  let req_email = req.body.email
+  User.findOne({
+    email:req_email
+  }).then(user => {
+    if (user) {
+      const gen_token = randomToken(55);
+      var newValues = { $set : {passwordResetToken : gen_token} }
+      User.updateOne({
+        email:req_email
+      },newValues)
+      .then(user => {
+        email.send_password_reset_token(gen_token,req_email)
+        res.status(200).send("Email is sent to your email id with details to reset your password")
+      })
+      .catch(err => {
+        console.log(err, "Not updated!!!")
+        res.status(404).send("Error")
+      })
+    }
+    else {
+      res.status(404).json({error: "Email not found"})
+    }
+  })
+}
+
+
+router.get('/password_reset/:token',password_reset)
+
+function password_reset(req,res){
+  let randToken = req.params.token;
+  User.findOne({
+    passwordResetToken:randToken
+  }).then(user => {
+    if(user){
+      const payload = {
+        _id: user._id,
+        email: user.email,
+        firstname: user.firstname
+      }
+      let token = jwt.sign(payload, process.SECRET_KEY, {
+        algorithm: 'HS256',
+        expiresIn: 86400
+      })
+      res.send({token: token}) 
+
+    }
+  })
+}
+
+router.post('/password_reset/reset/',auth,reset_password)
+
+function reset_password(req,res){
+  bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
+    if(err){
+      console.log("ERROR : ", err)
+      res.send("Error")
+    }
+    else{
+      req_email = req.user.email
+      newValues = {$set: {hashedPassword:hash}}
+      User.findOneAndUpdate({
+        email:req_email
+      },newValues)
+      .then( user =>{
+        res.send("Updated Passowrd")
+        
+      })
+      .catch(err => {
+        console.log("ERROR : ", err)
+        res.send("Error")
+  
+  
+      })
+    }
+  })
+}
+
+
+
 
 
 
