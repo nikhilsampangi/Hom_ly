@@ -32,16 +32,8 @@ mongoose.connection
 //   console.log("Express server is running on localhost:3001")
 // );
 
-mongoose.connect("mongodb://localhost:27017/ciodb", { useNewUrlParser: true });
-
 mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
-
-const connection = mongoose.connection;
-
-connection.once("open", function() {
-  console.log("connected");
-});
 
 const route = require("./routes/user");
 
