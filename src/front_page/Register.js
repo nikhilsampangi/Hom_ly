@@ -1,8 +1,65 @@
 import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
 import "./Register.css";
+import { register } from "./userFunctions";
 
 export default class Register extends Component {
+  constructor() {
+    super();
+    this.state = {
+      username: "",
+      hashedPassword: "",
+      confirmPassword: "",
+      phone: "",
+      email: "",
+      gender: "Prefer not to say",
+      authenticated: 0,
+      errorFlag: false,
+      errMsg: ""
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  handleSubmit(event) {
+    const newUser = {
+      username: this.state.username,
+      hashedPassword: this.state.hashedPassword,
+      email: this.state.email,
+      phone: this.state.phone,
+      gender: this.state.gender,
+      confirmPassword: this.state.confirmPassword
+    };
+
+    if (this.state.hashedPassword !== this.state.confirmPassword) {
+      this.setState({
+        errorFlag: true,
+        errMsg: "Password and Confirm Password Fields do not match"
+      });
+    } else {
+      register(newUser)
+        .then(res => {
+          console.log(res.status);
+          if (res.status) {
+            // this.props.history.push('/login')
+            this.setState({ authenticated: 1 });
+            // console.log(res.data)
+          } else {
+            this.setState({ errorFlag: true, errMsg: res.error });
+            // console.log(res.error)
+          }
+        })
+        .catch(err => {
+          console.log("error:-" + err);
+        });
+    }
+    event.preventDefault();
+  }
+
   render() {
     return (
       <Fragment>
@@ -16,19 +73,45 @@ export default class Register extends Component {
               className="text-center"
               style={{ color: "#757575" }}
             >
-              <div className="md-form">
+              <div className="form-row">
+                <div className="col">
+                  <input
+                    type="text"
+                    id="materialLoginFormEmail"
+                    className="form-control"
+                    name="username"
+                    placeholder="First Name"
+                    // onChange={this.onChange}
+                    // value={username}
+                  />
+                </div>
+                <div className="col">
+                  <input
+                    type="text"
+                    id="materialLoginFormEmail"
+                    className="form-control"
+                    name="username"
+                    placeholder="Last Name"
+                    // onChange={this.onChange}
+                    // value={username}
+                  />
+                </div>
+              </div>
+              <br />
+              <div className="form-row">
                 <input
-                  type="text"
-                  id="materialLoginFormEmail"
                   className="form-control"
-                  name="username"
-                  placeholder="User Name"
-                  // onChange={this.onChange}
-                  // value={username}
+                  id="signup-email"
+                  type="text"
+                  name="email"
+                  placeholder="Email id"
+                  value={this.state.email}
+                  onChange={this.handleChange}
+                  required
                 />
               </div>
               <br />
-              <div className="md-form">
+              <div className="form-row">
                 <input
                   type="password"
                   id="materialLoginFormPassword"
@@ -40,10 +123,10 @@ export default class Register extends Component {
                 />
               </div>
               <button
-                className="btn btn-outline-info btn-rounded btn-block my-4 waves-effect z-depth-0"
+                className="btn btn-outline-dark btn-rounded btn-block my-4 waves-effect z-depth-0"
                 type="submit"
               >
-                Login
+                Sign Up
               </button>
               <p>
                 Already have an account?&nbsp;
