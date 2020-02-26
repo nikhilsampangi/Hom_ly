@@ -19,7 +19,7 @@ mongoose.connection
     console.log("db connected");
   })
   .on("error", function() {
-    console.log("err: ", error);
+    console.log("db connection err: ", error);
   });
 
 // app.get("/api/greeting", (req, res) => {

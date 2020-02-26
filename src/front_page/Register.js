@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
 import "./Register.css";
 import { register } from "./userFunctions";
+import Modal from "react-responsive-modal";
 
 export default class Register extends Component {
   constructor() {
@@ -63,6 +64,18 @@ export default class Register extends Component {
   render() {
     return (
       <Fragment>
+        <Modal
+          open={this.state.errorFlag}
+          onClose={() => this.setState({ errorFlag: false })}
+          closeOnOverlayClick={true}
+        >
+          <div className="container" style={{ width: "35vw", padding: "5%" }}>
+            <div className="card text-center">
+              <div className="card-header">Error</div>
+              <div className="card-body">{this.state.errMsg}</div>
+            </div>
+          </div>
+        </Modal>
         <div className="row" style={{ height: "100vh" }}>
           <div className="col-6" />
           <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
@@ -116,10 +129,24 @@ export default class Register extends Component {
                   type="password"
                   id="materialLoginFormPassword"
                   className="form-control"
-                  name="password"
+                  name="hashedPassword"
                   placeholder="Password"
-                  // onChange={this.onChange}
-                  // value={password}
+                  value={this.state.hashedPassword}
+                  onChange={this.handleChange}
+                  required
+                />
+              </div>
+              <br />
+              <div className="form-row">
+                <input
+                  type="password"
+                  id="materialLoginFormPassword"
+                  className="form-control"
+                  name="confirmPassword"
+                  placeholder="Confirm Password"
+                  value={this.state.confirmPassword}
+                  onChange={this.handleChange}
+                  required
                 />
               </div>
               <button
