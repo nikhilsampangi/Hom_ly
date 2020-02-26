@@ -1,15 +1,15 @@
 import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
-import "./FrontPage.css";
+import "./Register.css";
 
-export default class FrontPage extends Component {
+export default class Register extends Component {
   render() {
     return (
       <Fragment>
         <div className="row" style={{ height: "100vh" }}>
           <div className="col-6" />
           <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
-            <h3 className="signin">Sign In</h3>
+            <h3 className="signin">Sign Up</h3>
             <br />
             <form
               // onSubmit={this.onSubmit}
@@ -46,19 +46,10 @@ export default class FrontPage extends Component {
                 Login
               </button>
               <p>
-                Don't have an account?&nbsp;
-                <Link to="/register">Register</Link>
+                Already have an account?&nbsp;
+                <Link to="/">Login</Link>
               </p>
             </form>
-            <hr />
-            <center>
-              <button
-                className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0"
-                type="submit"
-              >
-                <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
-              </button>
-            </center>
           </div>
         </div>
       </Fragment>
