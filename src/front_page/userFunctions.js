@@ -122,6 +122,7 @@ export const profile = prof => {
   return axios
     .get("user/profile", { headers: { Authorization: prof.token } })
     .then(res => {
+      console.log(res);
       if (res.data.error) {
         const check = {
           status: false,

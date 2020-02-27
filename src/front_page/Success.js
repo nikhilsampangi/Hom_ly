@@ -13,6 +13,7 @@ export default class Success extends Component {
   }
 
   handleprofile(event) {
+    console.log("sdfsdg");
     let prof;
     if (Cookies.get("usertoken")) {
       prof = {
@@ -21,7 +22,7 @@ export default class Success extends Component {
     }
     console.log(Cookies.get("usertoken"));
     profile(prof).then(res => {
-      console.log(res);
+      console.log("asdadfda");
       this.setState({
         firstname: res.data.firstname,
         lastname: res.data.lastname
@@ -32,7 +33,11 @@ export default class Success extends Component {
   render() {
     return (
       <Fragment>
-        <div className="container" style={{ paddingTop: "60px" }}>
+        <div
+          className="container"
+          style={{ paddingTop: "60px" }}
+          onLoad={this.handleprofile}
+        >
           Login Successful!!
           <br />
           Welcome {this.state.firstname}
