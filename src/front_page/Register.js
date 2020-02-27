@@ -8,7 +8,8 @@ export default class Register extends Component {
   constructor() {
     super();
     this.state = {
-      username: "",
+      firstname: "",
+      lastname: "",
       hashedPassword: "",
       confirmPassword: "",
       phone: "",
@@ -28,7 +29,8 @@ export default class Register extends Component {
 
   handleSubmit(event) {
     const newUser = {
-      username: this.state.username,
+      firstname: this.state.firstname,
+      lastname: this.state.lastname,
       hashedPassword: this.state.hashedPassword,
       email: this.state.email,
       phone: this.state.phone,
@@ -82,8 +84,9 @@ export default class Register extends Component {
             <h3 className="signin">Sign Up</h3>
             <br />
             <form
-              // onSubmit={this.onSubmit}
+              onSubmit={this.handleSubmit}
               className="text-center"
+              method="Post"
               style={{ color: "#757575" }}
             >
               <div className="form-row">
@@ -92,10 +95,10 @@ export default class Register extends Component {
                     type="text"
                     id="materialLoginFormEmail"
                     className="form-control"
-                    name="username"
+                    name="firstname"
                     placeholder="First Name"
-                    // onChange={this.onChange}
-                    // value={username}
+                    onChange={this.handleChange}
+                    value={this.state.firstname}
                   />
                 </div>
                 <div className="col">
@@ -103,10 +106,10 @@ export default class Register extends Component {
                     type="text"
                     id="materialLoginFormEmail"
                     className="form-control"
-                    name="username"
+                    name="lastname"
                     placeholder="Last Name"
-                    // onChange={this.onChange}
-                    // value={username}
+                    onChange={this.handleChange}
+                    value={this.state.lastname}
                   />
                 </div>
               </div>

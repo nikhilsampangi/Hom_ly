@@ -3,12 +3,11 @@ import Cookies from "js-cookie";
 
 export const register = newUser => {
   return axios
-    .post("user/register", {
-      username: newUser.username,
+    .post("http://localhost:8008/user/register", {
+      firstname: newUser.firstname,
+      lastname: newUser.lastname,
       hashedPassword: newUser.hashedPassword,
       email: newUser.email,
-      phone: newUser.phone,
-      gender: newUser.gender,
       confirmPassword: newUser.confirmPassword
     })
     .then(res => {
@@ -30,7 +29,7 @@ export const register = newUser => {
 
 export const login = user => {
   return axios
-    .post("user/login", {
+    .post("http://localhost:8008/user/login", {
       email: user.email,
       hashedPassword: user.hashedPassword
     })
@@ -47,6 +46,30 @@ export const login = user => {
           status: true,
           data: res.data
         };
+        return check;
+      }
+    });
+};
+
+export const pwdReset = user => {
+  return axios
+    .post("http://localhost:8008/user/forgot_password", {
+      email: user.email
+    })
+    .then(res => {
+      if (res.data.error) {
+        const check = {
+          status: false,
+          error: res.data.error
+        };
+        console.log(check);
+        return check;
+      } else {
+        const check = {
+          status: true,
+          data: res.data
+        };
+        console.log(check);
         return check;
       }
     });
@@ -108,10 +131,10 @@ export const profile = prof => {
       } else {
         const check = {
           status: true,
-          data: res.data.link
+          data: res.data
         };
-        console.log(res);
-        return res;
+        console.log(check);
+        return check;
       }
     });
 };

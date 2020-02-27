@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import "./FrontPage.css";
 import { login } from "./userFunctions";
 import Modal from "react-responsive-modal";
@@ -46,6 +46,9 @@ export default class FrontPage extends Component {
   }
 
   render() {
+    if (this.state.authenticated === 1) {
+      return <Redirect to="/Success" />;
+    }
     return (
       <Fragment>
         <div className="row" style={{ height: "100vh" }}>
@@ -54,8 +57,9 @@ export default class FrontPage extends Component {
             <h3 className="signin">Sign In</h3>
             <br />
             <form
-              onSubmit={this.onSubmit}
+              onSubmit={this.handleSubmit}
               className="text-center"
+              method="Post"
               style={{ color: "#757575" }}
             >
               <Modal
@@ -110,6 +114,10 @@ export default class FrontPage extends Component {
                 Login
               </button>
               <p>
+                <Link className="btn btn-sm btn-info" to="/ResetPassword">
+                  Forgot Password?
+                </Link>
+                <br />
                 Don't have an account?&nbsp;
                 <Link to="/register">Register</Link>
               </p>
