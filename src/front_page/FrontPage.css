@@ -1,0 +1,11 @@
+.fp {
+  background: #ECE9E6;
+  background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);
+  background: linear-gradient(to right, #FFFFFF, #ECE9E6);
+  background-image: url("../assets/bg.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  overflow: hidden;
+  background-position-x: left;
+  background-position-y: bottom;
+}
