@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 const auth = require("./middleware_jwt");
 const randomToken = require("random-token");
 
-const User = require("../models/user.model");
+const User = require("../models/customer.model");
 
 const email = require("./send_email");
 
