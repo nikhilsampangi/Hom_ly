@@ -35,9 +35,9 @@ mongoose.connection
 mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
 
-const route = require("./routes/user");
+const customer_route = require("./routes/customer");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/user", route);
+app.use("/customer", customer_route);
 app.listen(port, () => console.info("REST API running on port " + port));
