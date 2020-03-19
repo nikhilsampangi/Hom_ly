@@ -4,7 +4,7 @@
   background: linear-gradient(to right, #FFFFFF, #ECE9E6); */
   background-image: url("../assets/fp_bg.png");
   background-repeat: no-repeat;
-  background-size: contain;
+  background-size: cover;
   overflow: hidden;
   background-position-x: center;
   background-position-y: bottom;

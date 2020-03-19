@@ -1,8 +1,14 @@
 import React, { Component, Fragment } from "react";
 import { Link, Redirect } from "react-router-dom";
 import "./FrontPage.css";
-import { login } from "./userFunctions";
-import Modal from "react-responsive-modal";
+import { login } from "../authentication/userFunctions";
+
+function change_bg(cls) {
+  document
+    .getElementById("bd")
+    .classList.remove(document.getElementById("bd").classList[0]);
+  document.getElementById("bd").classList.add(cls);
+}
 
 export default class FrontPage extends Component {
   // constructor() {
@@ -139,38 +145,62 @@ export default class FrontPage extends Component {
 
   render() {
     return (
-      <Fragment>
+      <Fragment onLoad={change_bg("fp")}>
         <div
           className="container-fluid"
           style={{ width: "100vw", height: "100vh" }}
         >
-          <div className="row" style={{ fontFamily: "Sen", paddingTop: "25%" }}>
+          <div
+            className="row"
+            style={{
+              fontFamily: "Sen",
+              color: "whitesmoke"
+            }}
+          >
             <div
-              className="col-6"
-              style={{ marginTop: "90px", fontSize: "xx-large" }}
+              className="col-4"
+              style={{
+                marginTop: "50px",
+                fontSize: "2.4em",
+                textAlign: "left"
+              }}
             >
+              &nbsp;&nbsp;&nbsp;&nbsp; &lt;&lt; I want to cook
+              <br />
+            </div>
+            <div className="col" />
+            <div
+              className="col-4"
+              style={{
+                marginTop: "50px",
+                fontSize: "2.4em",
+                textAlign: "right"
+              }}
+            >
+              I want to eat &gt;&gt; &nbsp;&nbsp;&nbsp;&nbsp;
+              <br />
+            </div>
+          </div>
+          <div className="row" style={{ paddingTop: "30%" }}>
+            <div className="col-3">
               <center>
-                &lt;&lt; I want to cook....
-                <br />
                 <Link
-                  className="btn btn-outline-dark"
-                  style={{ fontSize: "x-large" }}
+                  className="btn btn-light btn-lg"
+                  style={{ fontSize: "x-large", opacity: "90%" }}
+                  to="/Chef/Login"
                 >
                   {" "}
                   <i class="fas fa-utensils"></i> Chef
                 </Link>
               </center>
             </div>
-            <div
-              className="col-6"
-              style={{ marginTop: "90px", fontSize: "xx-large" }}
-            >
+            <div className="col"></div>
+            <div className="col-3">
               <center>
-                ....I want to eat &gt;&gt;
-                <br />
                 <Link
-                  className="btn btn-outline-dark"
-                  style={{ fontSize: "x-large" }}
+                  className="btn btn-light btn-lg"
+                  style={{ fontSize: "x-large", opacity: "90%" }}
+                  to="/Login"
                 >
                   {" "}
                   <i class="fas fa-pizza-slice"></i> Explore
