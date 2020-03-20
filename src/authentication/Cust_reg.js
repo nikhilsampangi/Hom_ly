@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
-import Modal from "react-responsive-modal";
+// import Modal from "react-responsive-modal";
 
 function change_bg(cls) {
   document
@@ -26,10 +26,10 @@ export default class Cust_reg extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
   handleSubmit(event) {
-    const user = {
-      email: this.state.email,
-      hashedPassword: this.state.hashedPassword
-    };
+    // const user = {
+    //   email: this.state.email,
+    //   hashedPassword: this.state.hashedPassword
+    // };
   }
   render() {
     return (
@@ -119,12 +119,14 @@ export default class Cust_reg extends Component {
                   />
                 </div>
               </div>
+
               <button
                 className="btn btn-outline-dark btn-rounded btn-block my-4 waves-effect z-depth-0"
                 type="submit"
               >
                 Register
               </button>
+
               <p>
                 <Link className="btn btn-sm btn-info" to="/ResetPassword">
                   Forgot Password?

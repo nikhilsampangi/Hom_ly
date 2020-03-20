@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./FrontPage.css";
-import { login } from "../authentication/userFunctions";
+// import { login } from "../authentication/userFunctions";
 
 function change_bg(cls) {
   document

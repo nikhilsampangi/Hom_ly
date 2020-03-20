@@ -27,10 +27,10 @@ export default class Cust_login extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
   handleSubmit(event) {
-    const user = {
-      email: this.state.email,
-      hashedPassword: this.state.hashedPassword
-    };
+    // const user = {
+    //   email: this.state.email,
+    //   hashedPassword: this.state.hashedPassword
+    // };
   }
   render() {
     return (

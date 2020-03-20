@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
-import Modal from "react-responsive-modal";
+// import Modal from "react-responsive-modal";
 import "./Chef_reg.css";
 
 function change_bg(cls) {
@@ -27,10 +27,10 @@ export default class Chef_reg extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
   handleSubmit(event) {
-    const user = {
-      email: this.state.email,
-      hashedPassword: this.state.hashedPassword
-    };
+    // const user = {
+    //   email: this.state.email,
+    //   hashedPassword: this.state.hashedPassword
+    // };
   }
 
   render() {
