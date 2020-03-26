@@ -6,7 +6,7 @@ const bcrypt = require("bcryptjs");
 const auth = require("./middleware_jwt");
 const speakeasy = require('speakeasy');
 
-const User = require("../models/customer.model");
+const Chef = require("../models/chef.model");
 
 const email = require("./send_email");
 
@@ -41,7 +41,7 @@ router.post("/register", register);
 
 function register(req, res) {
 
-  User.findOne({
+  Chef.findOne({
     email: req.body.email
   })
     .then(user => {
@@ -58,7 +58,7 @@ function register(req, res) {
 
           var secret = speakeasy.generateSecret({length:20})
 
-          const userData = {
+          const chefData = {
             firstName: req.body.firstname,
             lastName: req.body.lastname,
             email: req.body.email,
@@ -67,12 +67,12 @@ function register(req, res) {
             passwordResetToken: secret.base32
           };
           
-          User.create(userData)
-            .then(customer => {
+          Chef.create(chefData)
+            .then(chef => {
 
-              var token = gen_OTP(customer.passwordResetToken);
+              var token = gen_OTP(chef.passwordResetToken);
               
-              email.send_verification_token(token, customer.email);
+              email.send_verification_token(token, chef.email);
               
               res.status(400).send("Please enter OTP!!!")
 
@@ -103,24 +103,24 @@ function register(req, res) {
 router.post("/verify_otp", verify)
 
 function verify(req, res){
-  User.findOne({
+  Chef.findOne({
     email: req.body.email
   })
-  .then(customer=>{
-    if(!customer){
+  .then(chef=>{
+    if(!chef){
       res.status(404).json({error: "account does not exist, please register!!!"})
     }
     else{
-      var tokenValidates = verify_OTP(customer.passwordResetToken, req.body.token);
+      var tokenValidates = verify_OTP(chef.passwordResetToken, req.body.token);
 
       if(!tokenValidates){
         res.status(404).json({error: "INVALID OTP!!!"});
       }
       else{
-        if(customer.isRegistered === false){
+        if(chef.isRegistered === false){
           const newValues= {$set: {isRegistered: true}}
 
-          User.updateOne({_id: customer._id}, newValues, function(err, success) {
+          Chef.updateOne({_id: chef._id}, newValues, function(err, success) {
             if(err){
               res.status(404).json({error: "Something went wrong, please try again!!!"});
             }
@@ -132,7 +132,7 @@ function verify(req, res){
         else{
           const newValues= {$set: {isValidated: true}}
 
-          User.updateOne({_id: customer._id}, newValues, function(err, success) {
+          Chef.updateOne({_id: chef._id}, newValues, function(err, success) {
             if(err){
               res.status(404).json({error: "Something went wrong, please try again!!!"});
             }
@@ -157,7 +157,7 @@ function resend(req, res){
 
   const newValues= {$set: {passwordResetToken: secret.base32}}
 
-  User.updateOne({email: req.body.email}, newValues, function(err, success) {
+  Chef.updateOne({email: req.body.email}, newValues, function(err, success) {
     if(err){
       res.status(404).json({error: "Something went wrong, please try again!!!"});
     }
@@ -176,7 +176,7 @@ router.post("/reset_password", reset)
 
 function reset(req, res){
 
-  User.findOne({
+  Chef.findOne({
     email: req.body.email
   }).then(user=>{
       if(user.isValidated === true){
@@ -188,7 +188,7 @@ function reset(req, res){
       
             const newValues= {$set:{hashedPassword: hash, isValidated: false}}
             
-            User.updateOne({email: req.body.email}, newValues, function(err, success) {
+            Chef.updateOne({email: req.body.email}, newValues, function(err, success) {
               if(err){
                 res.status(404).json({error: "Something went wrong, please try again!!!"});
               }
@@ -211,7 +211,7 @@ function reset(req, res){
 router.get("/login", login);
 
 function login(req, res) {
-  User.findOne({
+  Chef.findOne({
     email: req.body.email
   })
     .then(user => {
@@ -244,8 +244,3 @@ function login(req, res) {
 
 
 module.exports = router;
-
-
-
-
-

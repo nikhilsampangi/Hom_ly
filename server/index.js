@@ -36,8 +36,12 @@ mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
 
 const customer_route = require("./routes/customer");
+const deliveryAgent_route = require("./routes/delivery_agent");
+const chef_route = require("./routes/chef");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/customer", customer_route);
+app.use("/deliveryAgent", deliveryAgent_route);
+app.use("/chef", chef_route);
 app.listen(port, () => console.info("REST API running on port " + port));

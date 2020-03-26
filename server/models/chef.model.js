@@ -13,6 +13,10 @@ const ChefSchema = new Schema({
 
   passwordResetToken: { type: String, default: null },
 
+  isRegistered: {type: Boolean, default: false},
+
+  isValidated: {type: Boolean, default: false},
+
   email: {
     type: String,
     required: [true, "email cannot be empty"],
@@ -62,4 +66,4 @@ const ChefSchema = new Schema({
 
 ChefSchema.set("toJSON", { virtuals: true });
 
-module.exports = mongoose.model("chef", ChefSchema);
+module.exports = mongoose.model("chefs", ChefSchema);

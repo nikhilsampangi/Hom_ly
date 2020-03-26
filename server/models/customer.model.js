@@ -15,6 +15,8 @@ const CustomerSchema = new Schema({
 
   isRegistered: {type: Boolean, default: false},
 
+  isValidated: {type: Boolean, default: false},
+
   email: {
     type: String,
     required: [true, "email cannot be empty"],

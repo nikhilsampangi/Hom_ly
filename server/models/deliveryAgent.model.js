@@ -13,6 +13,12 @@ const DeliveryManSchema = new Schema({
 
   passwordResetToken: { type: String, default: null },
 
+  isRegistered: {type: Boolean, default: false},
+
+  isValidated: {type: Boolean, default: false},
+  
+  drivingLicense: {type: String, required: [true, "Driving License is mandatory!!!"]},
+
   email: {
     type: String,
     required: [true, "email cannot be empty"],

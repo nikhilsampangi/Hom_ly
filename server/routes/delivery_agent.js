@@ -4,15 +4,47 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const auth = require("./middleware_jwt");
+const randomToken = require("random-token");
 const speakeasy = require('speakeasy');
-
-const User = require("../models/customer.model");
-
+const Agent = require("../models/deliveryAgent.model");
 const email = require("./send_email");
+
+
+
+const multer  = require('multer');
+
+const store = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './Images/agentLicense')
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toDateString() + '-' + file.originalname)
+  }
+})
+
+const fileFilter= (req, file, cb) => {
+ 
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+    cb(null, true);
+  }
+  else{
+    cb(new Error('invalid filetype!!!'), false)
+  }
+}
+
+const upload = multer({ 
+  storage: store,
+  limits: {fileSize: 1024 * 1024 * 5},
+  fileFilter: fileFilter
+});
+
+
+
 
 router.use(cors());
 
 process.SECRET_KEY = "hackit";
+
 
 
 function gen_OTP(secret_token){
@@ -37,11 +69,13 @@ function verify_OTP(secret_token, OTP){
   return tokenValidates;
 }
 
-router.post("/register", register);
+
+
+router.post("/register", upload.single('licenseImage'), register);
 
 function register(req, res) {
 
-  User.findOne({
+  Agent.findOne({
     email: req.body.email
   })
     .then(user => {
@@ -56,23 +90,26 @@ function register(req, res) {
       else {
         bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
 
-          var secret = speakeasy.generateSecret({length:20})
+          var imagePath= req.file.path.replace(/\\/g, "/");
 
-          const userData = {
+          var secret = speakeasy.generateSecret({length:20});
+
+          const agentData = {
             firstName: req.body.firstname,
             lastName: req.body.lastname,
             email: req.body.email,
             phoneNum: req.body.phonenumber,
             hashedPassword: hash,
-            passwordResetToken: secret.base32
+            passwordResetToken: secret.base32,
+            drivingLicense: imagePath
           };
           
-          User.create(userData)
-            .then(customer => {
+          Agent.create(agentData)
+            .then(agent => {
 
-              var token = gen_OTP(customer.passwordResetToken);
+              var token = gen_OTP(agent.passwordResetToken);
               
-              email.send_verification_token(token, customer.email);
+              email.send_verification_token(token, agent.email);
               
               res.status(400).send("Please enter OTP!!!")
 
@@ -98,29 +135,30 @@ function register(req, res) {
       console.log(errors);
       res.status(401).json({ error: errors });
     });
+
 }
 
 router.post("/verify_otp", verify)
 
 function verify(req, res){
-  User.findOne({
+  Agent.findOne({
     email: req.body.email
   })
-  .then(customer=>{
-    if(!customer){
+  .then(agent=>{
+    if(!agent){
       res.status(404).json({error: "account does not exist, please register!!!"})
     }
     else{
-      var tokenValidates = verify_OTP(customer.passwordResetToken, req.body.token);
+      var tokenValidates = verify_OTP(agent.passwordResetToken, req.body.token);
 
       if(!tokenValidates){
         res.status(404).json({error: "INVALID OTP!!!"});
       }
       else{
-        if(customer.isRegistered === false){
+        if(agent.isRegistered === false){
           const newValues= {$set: {isRegistered: true}}
 
-          User.updateOne({_id: customer._id}, newValues, function(err, success) {
+          Agent.updateOne({_id: agent._id}, newValues, function(err, success) {
             if(err){
               res.status(404).json({error: "Something went wrong, please try again!!!"});
             }
@@ -132,7 +170,7 @@ function verify(req, res){
         else{
           const newValues= {$set: {isValidated: true}}
 
-          User.updateOne({_id: customer._id}, newValues, function(err, success) {
+          Agent.updateOne({_id: agent._id}, newValues, function(err, success) {
             if(err){
               res.status(404).json({error: "Something went wrong, please try again!!!"});
             }
@@ -157,7 +195,7 @@ function resend(req, res){
 
   const newValues= {$set: {passwordResetToken: secret.base32}}
 
-  User.updateOne({email: req.body.email}, newValues, function(err, success) {
+  Agent.updateOne({email: req.body.email}, newValues, function(err, success) {
     if(err){
       res.status(404).json({error: "Something went wrong, please try again!!!"});
     }
@@ -176,7 +214,7 @@ router.post("/reset_password", reset)
 
 function reset(req, res){
 
-  User.findOne({
+  Agent.findOne({
     email: req.body.email
   }).then(user=>{
       if(user.isValidated === true){
@@ -188,7 +226,7 @@ function reset(req, res){
       
             const newValues= {$set:{hashedPassword: hash, isValidated: false}}
             
-            User.updateOne({email: req.body.email}, newValues, function(err, success) {
+            Agent.updateOne({email: req.body.email}, newValues, function(err, success) {
               if(err){
                 res.status(404).json({error: "Something went wrong, please try again!!!"});
               }
@@ -211,7 +249,7 @@ function reset(req, res){
 router.get("/login", login);
 
 function login(req, res) {
-  User.findOne({
+  Agent.findOne({
     email: req.body.email
   })
     .then(user => {
