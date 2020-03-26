@@ -35,9 +35,9 @@ mongoose.connection
 mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
 
-const customer_route = require("./routes/customer");
-const deliveryAgent_route = require("./routes/delivery_agent");
-const chef_route = require("./routes/chef");
+const customer_route = require("./routes/customer/customer");
+const deliveryAgent_route = require("./routes/deliveryAgent/delivery_agent");
+const chef_route = require("./routes/chef/chef");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

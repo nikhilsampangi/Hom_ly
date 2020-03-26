@@ -3,11 +3,11 @@ const router = express.Router();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const auth = require("./middleware_jwt");
+const auth = require("../middleware_jwt");
 const randomToken = require("random-token");
 const speakeasy = require('speakeasy');
-const Agent = require("../models/deliveryAgent.model");
-const email = require("./send_email");
+const Agent = require("../../models/deliveryAgent.model");
+const email = require("../send_email");
 
 
 
