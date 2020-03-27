@@ -13,6 +13,10 @@ const CustomerSchema = new Schema({
 
   passwordResetToken: { type: String, default: null },
 
+  isRegistered: {type: Boolean, default: false},
+
+  isValidated: {type: Boolean, default: false},
+
   email: {
     type: String,
     required: [true, "email cannot be empty"],
