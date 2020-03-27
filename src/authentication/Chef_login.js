@@ -1,7 +1,8 @@
 import React, { Component, Fragment } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import Modal from "react-responsive-modal";
 import "./Chef_login.css";
+import { login } from "./userFunctions";
 
 function change_bg(cls) {
   document
@@ -27,15 +28,41 @@ export default class Chef_auth extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
   handleSubmit(event) {
-    // const user = {
-    //   email: this.state.email,
-    //   hashedPassword: this.state.hashedPassword
-    // };
+    const user = {
+      email: this.state.email,
+      hashedPassword: this.state.hashedPassword
+    };
+
+    login(user)
+      .then(res => {
+        if (res.status) {
+          // this.props.history.push('/')
+          this.setState({ authenticated: 1 });
+          // console.log(res.data)
+        } else {
+          this.setState({ errorFlag: true, errMsg: String(res.error) });
+          // console.log(res.error)
+        }
+      })
+      .catch(err => {
+        console.log("error:-" + err);
+      });
+
+    event.preventDefault();
   }
+
   render() {
+    if (this.state.authenticated === 1) {
+      return <Redirect to="Chef/Home" />;
+    }
+
     return (
-      <Fragment onLoad={change_bg("chf_lg")}>
-        <div className="row" style={{ height: "100vh" }}>
+      <Fragment>
+        <div
+          className="row"
+          style={{ height: "100vh" }}
+          onLoad={change_bg("chf_lg")}
+        >
           <div className="col-6" />
           <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
             <h3 className="signin">Sign In</h3>

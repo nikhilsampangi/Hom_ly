@@ -3,12 +3,13 @@ import Cookies from "js-cookie";
 
 export const register = newUser => {
   return axios
-    .post("http://localhost:8008/user/register", {
-      firstname: newUser.firstname,
-      lastname: newUser.lastname,
+    .post("/customer/register", {
+      firstName: newUser.firstname,
+      lastName: newUser.lastname,
       hashedPassword: newUser.hashedPassword,
       email: newUser.email,
-      confirmPassword: newUser.confirmPassword
+      phoneNum: newUser.phone
+      // confirmPassword: newUser.confirmPassword
     })
     .then(res => {
       if (res.data.error) {
@@ -29,7 +30,7 @@ export const register = newUser => {
 
 export const login = user => {
   return axios
-    .post("http://localhost:8008/user/login", {
+    .post("/customer/login", {
       email: user.email,
       hashedPassword: user.hashedPassword
     })
@@ -53,7 +54,7 @@ export const login = user => {
 
 export const pwdReset = user => {
   return axios
-    .post("http://localhost:8008/user/forgot_password", {
+    .post("/user/forgot_password", {
       email: user.email
     })
     .then(res => {

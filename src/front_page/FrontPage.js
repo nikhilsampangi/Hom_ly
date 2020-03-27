@@ -145,10 +145,11 @@ export default class FrontPage extends Component {
 
   render() {
     return (
-      <Fragment onLoad={change_bg("fp")}>
+      <Fragment>
         <div
           className="container-fluid"
           style={{ width: "100vw", height: "100vh" }}
+          onLoad={change_bg("fp")}
         >
           <div
             className="row"
@@ -190,7 +191,7 @@ export default class FrontPage extends Component {
                   to="/Chef/Login"
                 >
                   {" "}
-                  <i class="fas fa-utensils"></i> Chef
+                  <i className="fas fa-utensils"></i> Chef
                 </Link>
               </center>
             </div>
@@ -203,7 +204,7 @@ export default class FrontPage extends Component {
                   to="/Login"
                 >
                   {" "}
-                  <i class="fas fa-pizza-slice"></i> Explore
+                  <i className="fas fa-pizza-slice"></i> Explore
                 </Link>
               </center>
             </div>

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
-import { Link } from "react-router-dom";
-// import Modal from "react-responsive-modal";
+import { Link, Redirect } from "react-router-dom";
+import Modal from "react-responsive-modal";
+import { register } from "./userFunctions";
 
 function change_bg(cls) {
   document
@@ -13,8 +14,12 @@ export default class Cust_reg extends Component {
   constructor() {
     super();
     this.state = {
+      firstname: "",
+      lastname: "",
       email: "",
+      phone: "",
       hashedPassword: "",
+      confirmPassword: "",
       authenticated: 0,
       errorFlag: false,
       errMsg: ""
@@ -26,25 +31,61 @@ export default class Cust_reg extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
   handleSubmit(event) {
-    // const user = {
-    //   email: this.state.email,
-    //   hashedPassword: this.state.hashedPassword
-    // };
+    const newUser = {
+      firstname: this.state.firstname,
+      lastname: this.state.lastname,
+      hashedPassword: this.state.hashedPassword,
+      email: this.state.email,
+      phone: this.state.phone
+    };
+
+    if (this.state.hashedPassword !== this.state.confirmPassword) {
+      this.setState({
+        errorFlag: true,
+        errMsg: "Password and Confirm Password Fields do not match"
+      });
+    } else {
+      register(newUser)
+        .then(res => {
+          console.log(res.status);
+          if (res.status) {
+            // this.props.history.push('/login')
+            this.setState({ authenticated: 1 });
+            // console.log(res.data)
+          } else {
+            this.setState({ errorFlag: true, errMsg: res.error });
+            console.log(res.error);
+          }
+        })
+        .catch(err => {
+          console.log("res error:-" + err);
+          this.setState({ errorFlag: true, errMsg: String(err) });
+        });
+    }
+
+    event.preventDefault();
   }
   render() {
+    if (this.state.authenticated === 1) {
+      return <Redirect to="/Home" />;
+    }
     return (
-      <Fragment onLoad={change_bg("cust_lg")}>
-        <div className="row" style={{ height: "100vh" }}>
+      <Fragment>
+        <div
+          className="row"
+          style={{ height: "100vh" }}
+          onLoad={change_bg("cust_lg")}
+        >
           <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
             <h3 className="signin">Sign Up</h3>
             <br />
             <form
               onSubmit={this.handleSubmit}
+              method="post"
               className="text-center"
-              method="Post"
               style={{ color: "#757575" }}
             >
-              {/* <Modal
+              <Modal
                 open={this.state.errorFlag}
                 onClose={() => this.setState({ errorFlag: false })}
                 closeOnOverlayClick={true}
@@ -63,13 +104,16 @@ export default class Cust_reg extends Component {
                     <div className="card-body">{this.state.errMsg}</div>
                   </div>
                 </div>
-              </Modal> */}
+              </Modal>
               <div className="row">
                 <div className="col">
                   <input
                     type="text"
                     className="form-control"
                     placeholder="First name"
+                    name="firstname"
+                    value={this.state.firstname}
+                    onChange={this.handleChange}
                     required
                   />
                 </div>
@@ -78,6 +122,9 @@ export default class Cust_reg extends Component {
                     type="text"
                     className="form-control"
                     placeholder="Last name"
+                    name="lastname"
+                    value={this.state.lastname}
+                    onChange={this.handleChange}
                   />
                 </div>
               </div>
@@ -88,6 +135,9 @@ export default class Cust_reg extends Component {
                     type="text"
                     className="form-control"
                     placeholder="Phone Number"
+                    name="phone"
+                    value={this.state.phone}
+                    onChange={this.handleChange}
                     required
                   />
                 </div>
@@ -96,6 +146,9 @@ export default class Cust_reg extends Component {
                     type="text"
                     className="form-control"
                     placeholder="E-mail"
+                    name="email"
+                    value={this.state.email}
+                    onChange={this.handleChange}
                     required
                   />
                 </div>
@@ -107,6 +160,9 @@ export default class Cust_reg extends Component {
                     type="password"
                     className="form-control"
                     placeholder="Password"
+                    name="hashedPassword"
+                    value={this.state.hashedPassword}
+                    onChange={this.handleChange}
                     required
                   />
                 </div>
@@ -115,6 +171,9 @@ export default class Cust_reg extends Component {
                     type="password"
                     className="form-control"
                     placeholder="Re-type password"
+                    name="confirmPassword"
+                    value={this.state.confirmPassword}
+                    onChange={this.handleChange}
                     required
                   />
                 </div>
