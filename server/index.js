@@ -5,7 +5,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const port = 8008;
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(pino);
 app.use(cors());
 

@@ -2,7 +2,8 @@ import React, { Component, Fragment } from "react";
 import { Link, Redirect } from "react-router-dom";
 import Modal from "react-responsive-modal";
 import "./Chef_login.css";
-import { login } from "./userFunctions";
+import axios from "axios";
+import Cookies from "js-cookie";
 
 function change_bg(cls) {
   document
@@ -33,20 +34,17 @@ export default class Chef_auth extends Component {
       hashedPassword: this.state.hashedPassword
     };
 
-    login(user)
-      .then(res => {
-        if (res.status) {
-          // this.props.history.push('/')
-          this.setState({ authenticated: 1 });
-          // console.log(res.data)
-        } else {
-          this.setState({ errorFlag: true, errMsg: String(res.error) });
-          // console.log(res.error)
-        }
-      })
-      .catch(err => {
-        console.log("error:-" + err);
-      });
+    axios.post("/chef/login",user)
+    .then(res => {
+      Cookies.set("cheftoken", res.data);
+      this.setState({ authenticated: 1 });
+      // this.props.history.push('/')
+      // console.log(res.data)
+    })
+    .catch(err=>{
+      console.log(err.response.data.message);
+      this.setState({ errorFlag: true, errMsg: err.response.data.message });
+    })
 
     event.preventDefault();
   }

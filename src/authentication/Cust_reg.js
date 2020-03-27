@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { Link, Redirect } from "react-router-dom";
 import Modal from "react-responsive-modal";
-import { register } from "./userFunctions";
+import axios from 'axios';
 
 function change_bg(cls) {
   document
@@ -36,7 +36,7 @@ export default class Cust_reg extends Component {
       lastname: this.state.lastname,
       hashedPassword: this.state.hashedPassword,
       email: this.state.email,
-      phone: this.state.phone
+      phonenumber: this.state.phone
     };
 
     if (this.state.hashedPassword !== this.state.confirmPassword) {
@@ -45,24 +45,68 @@ export default class Cust_reg extends Component {
         errMsg: "Password and Confirm Password Fields do not match"
       });
     } else {
-      register(newUser)
+
+        // register api call
+
+        axios.post("/customer/register", newUser)
         .then(res => {
-          console.log(res.status);
-          if (res.status) {
-            // this.props.history.push('/login')
-            this.setState({ authenticated: 1 });
-            // console.log(res.data)
-          } else {
-            this.setState({ errorFlag: true, errMsg: res.error });
-            console.log(res.error);
+          //  this.props.history.push('/login')
+          this.setState({ authenticated: 1 });
+          // check for status err.message.data.status
+          const res_data= res.data;
+          if(res_data.status==="1"){
+            // ask customer to send otp to mail and call otp api and load otp component....
+            console.log(res_data.status)
+            console.log(res_data.message);
+          }
+          else{
+            // displaying response data...
+            console.log(res_data.message);
           }
         })
-        .catch(err => {
-          console.log("res error:-" + err);
-          this.setState({ errorFlag: true, errMsg: String(err) });
-        });
-    }
+        .catch(err=>{
+          console.log(err.response.data.message);
+        })
 
+
+        // send_otp api for resending otp... 
+        // make it as a function as we need to call whenever user request otp.....
+
+        // axios.post("/customer/send_otp", {email: this.state.email})
+        // .then(res => {
+        //   // load otp component
+        //   console.log(res.data);  
+        // })
+        // .catch(err=>{
+        //   console.log(err.response.data.message);
+        // })
+
+
+        // verify_OTP api
+        
+        // axios.post("/customer/verify_otp", {email: this.state.email, OTP: this.state.OTP})
+        // .then(res => {
+        //   load component which user requested (ex:- forgot password component)
+        //   console.log(res.data);  
+        // })
+        // .catch(err=>{
+        //   ask user for resending otp...
+        //   console.log(err.response.data.message);
+        // })
+
+        // reset password api
+        
+        // axios.post("/customer/reset_password", {email: this.state.email, newPassword: this.state.newPassword})
+        // .then(res => {
+        //   console.log(res.data);  
+        // })
+        // .catch(err=>{
+        //   ask user for resending otp....  
+        //   console.log(err.response.data.message);
+        // })
+
+
+    }
     event.preventDefault();
   }
   render() {

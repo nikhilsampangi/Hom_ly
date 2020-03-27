@@ -2,6 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
 // import Modal from "react-responsive-modal";
 import "./Chef_reg.css";
+import {sendOTP} from './userFunctions'
 
 function change_bg(cls) {
   document
