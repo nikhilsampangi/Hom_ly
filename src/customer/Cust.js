@@ -7,8 +7,8 @@ import change_bg from "../index";
 export default class Cust extends Component {
   render() {
     return (
-      <Fragment onLoad={change_bg("cust_hm")}>
-        <Navbar />
+      <Fragment>
+        <Navbar onLoad={change_bg("cust_hm")} />
         <br />
         <br />
         <br />
@@ -40,7 +40,7 @@ class SearchBar extends Component {
               type="button"
               id="button-addon2"
             >
-              <i class="fa fa-search" aria-hidden="true"></i>
+              <i className="fa fa-search" aria-hidden="true"></i>
             </button>
           </div>
         </div>

@@ -6,7 +6,6 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import change_bg from "../index";
 
-
 export default class Cust_login extends Component {
   constructor() {
     super();
@@ -29,17 +28,18 @@ export default class Cust_login extends Component {
       hashedPassword: this.state.hashedPassword
     };
 
-    axios.get("/customer/login",user)
-    .then(res => {
-      Cookies.set("usertoken", res.data);
-      this.setState({ authenticated: 1 });
-      // this.props.history.push('/')
-      // console.log(res.data)
-    })
-    .catch(err=>{
-      console.log(err.response.data.message);
-      this.setState({ errorFlag: true, errMsg: err.response.data.message });
-    })
+    axios
+      .get("/customer/login", user)
+      .then(res => {
+        Cookies.set("usertoken", res.data);
+        this.setState({ authenticated: 1 });
+        // this.props.history.push('/')
+        // console.log(res.data)
+      })
+      .catch(err => {
+        console.log(err.response.data.message);
+        this.setState({ errorFlag: true, errMsg: err.response.data.message });
+      });
 
     event.preventDefault();
   }

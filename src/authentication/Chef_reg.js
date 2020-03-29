@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
 // import Modal from "react-responsive-modal";
 import "./Chef_reg.css";
-import {sendOTP} from './userFunctions'
+// import {sendOTP} from './userFunctions'
 import change_bg from "../index";
 
 export default class Chef_reg extends Component {
@@ -30,8 +30,9 @@ export default class Chef_reg extends Component {
 
   render() {
     return (
-      <Fragment onLoad={change_bg("chf_rg")}>
+      <Fragment>
         <form
+          onLoad={change_bg("chf_rg")}
           onSubmit={this.handleSubmit}
           method="Post"
           // style={{ color: "#757575" }}
