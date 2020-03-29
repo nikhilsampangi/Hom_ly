@@ -3,6 +3,7 @@ import { Link, Redirect } from "react-router-dom";
 import Modal from "react-responsive-modal";
 import axios from "axios";
 import change_bg from "../index";
+import "./Cust_reg.css";
 
 export default class Cust_reg extends Component {
   constructor() {
@@ -54,7 +55,8 @@ export default class Cust_reg extends Component {
           const res_data = res.data;
           if (res_data.status === "1") {
             // ask customer to send otp to mail and call otp api and load otp component....
-            this.requestOTP();
+            // this.requestOTP();
+            this.setState({ otpFlag: true });
             console.log(res_data.status);
             console.log(res_data.message);
           } else {
@@ -70,17 +72,6 @@ export default class Cust_reg extends Component {
           });
           // console.log(err.response.data.message);
         });
-
-      // reset password api
-
-      // axios.post("/customer/reset_password", {email: this.state.email, newPassword: this.state.newPassword})
-      // .then(res => {
-      //   console.log(res.data);
-      // })
-      // .catch(err=>{
-      //   ask user for resending otp....
-      //   console.log(err.response.data.message);
-      // })
     }
     event.preventDefault();
   }
@@ -149,28 +140,38 @@ export default class Cust_reg extends Component {
                   <div className="card text-center border-danger">
                     <div
                       className="card-header"
-                      style={{ backgroundColor: "#dc3545", color: "white" }}
+                      style={{
+                        backgroundColor: "#dc3545",
+                        color: "white",
+                        fontSize: "x-large"
+                      }}
                     >
                       Error
                     </div>
-                    <div className="card-body">{this.state.errMsg}</div>
+                    <div className="card-body" style={{ padding: "10%" }}>
+                      {this.state.errMsg}
+                    </div>
                   </div>
                 </div>
               </Modal>
               {/* OTP verfication modal */}
               <Modal
                 open={this.state.otpFlag}
-                closeOnOverlayClick={false}
-                onClose={() => this.setState({ errorFlag: false })}
+                closeOnOverlayClick={true}
+                onClose={() => this.setState({ otpFlag: false })}
+                style={{ padding: "0" }}
               >
                 <div
                   className="container"
-                  style={{ width: "35vw", padding: "5%" }}
+                  style={{ width: "35vw", padding: "0" }}
                 >
                   <div className="card text-center border-light">
                     <div
                       className="card-header"
-                      style={{ backgroundColor: "#dc3545", color: "white" }}
+                      style={{
+                        backgroundColor: "rgb(86,88,255)",
+                        color: "white"
+                      }}
                     >
                       Verification
                     </div>
@@ -188,14 +189,20 @@ export default class Cust_reg extends Component {
                       </div>
                     ) : (
                       <div className="card-body">
-                        We've sent an OTP to your email id
+                        <span>
+                          We've sent an OTP to the email id you specified
+                        </span>
+                        <br />
+                        <br />
                         <input
+                          className="form-control"
                           type="text"
                           placeholder="Enter OTP"
                           name="otp"
                           value={this.state.otp}
                           onChange={this.handleChange}
                         />
+                        <br />
                         <button
                           className="btn btn-outline-dark btn-block"
                           onClick={this.verifyOTP}
@@ -289,10 +296,6 @@ export default class Cust_reg extends Component {
               </button>
 
               <p>
-                <Link className="btn btn-sm btn-info" to="/ResetPassword">
-                  Forgot Password?
-                </Link>
-                <br />
                 Already have an account?&nbsp;
                 <Link to="/Login">Login</Link>
               </p>

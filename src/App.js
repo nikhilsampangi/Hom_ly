@@ -36,10 +36,6 @@ export default class App extends Component {
             <Route exact path="/Wallet" component={Wlt} />
             <Route exact path="/About" component={Abt} />
             <Route exact path="/Profile" component={Prof} />
-
-            {/* <Route exact path="/ResetPassword" component={PwdReset} /> */}
-            {/* <Route exact path="/Success" component={Success} /> */}
-            {/* <Route exact path="/Register" component={Registration} /> */}
           </Switch>
         </Fragment>
       </Router>
