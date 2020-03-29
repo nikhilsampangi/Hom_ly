@@ -2,13 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Link, Redirect } from "react-router-dom";
 import Modal from "react-responsive-modal";
 import { register } from "./userFunctions";
-
-function change_bg(cls) {
-  document
-    .getElementById("bd")
-    .classList.remove(document.getElementById("bd").classList[0]);
-  document.getElementById("bd").classList.add(cls);
-}
+import change_bg from "../index";
 
 export default class Cust_reg extends Component {
   constructor() {
