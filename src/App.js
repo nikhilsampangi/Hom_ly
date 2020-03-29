@@ -2,63 +2,21 @@ import React, { Component, Fragment } from "react";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
 
 import FrontPage from "./front_page/FrontPage";
-import Cust from "./customer/Cust";
+
+import Chef_login from "./authentication/Chef_login";
+import Chef_reg from "./authentication/Chef_reg";
 import Chef from "./chef/Chef";
-import Staff from "./transport/Staff";
 
-// class App extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       name: "",
-//       greeting: ""
-//     };
-//     this.handleChange = this.handleChange.bind(this);
-//     this.handleSubmit = this.handleSubmit.bind(this);
-//   }
+import Cust_login from "./authentication/Cust_login";
+import Cust_reg from "./authentication/Cust_reg";
+import Cust from "./customer/Cust";
+import Wlt from "./customer/Wallet";
+import Abt from "./customer/About";
+import Prof from "./customer/Profile";
 
-//   handleChange(event) {
-//     this.setState({ name: event.target.value });
-//   }
-
-//   handleSubmit(event) {
-//     event.preventDefault();
-//     fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
-//       .then(response => response.json())
-//       .then(state => this.setState(state));
-//   }
-//   render() {
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <img src={logo} className="App-logo" alt="logo" />
-//           <p>
-//             Edit <code>src/App.js</code> and save to reload.
-//           </p>
-//           <form onSubmit={this.handleSubmit}>
-//             <label htmlFor="name">Enter your name: </label>
-//             <input
-//               id="name"
-//               type="text"
-//               value={this.state.name}
-//               onChange={this.handleChange}
-//             />
-//             <button type="submit">Submit</button>
-//           </form>
-//           <p>{this.state.greeting}</p>
-//           <a
-//             className="App-link"
-//             href="https://reactjs.org"
-//             target="_blank"
-//             rel="noopener noreferrer"
-//           >
-//             Learn React
-//           </a>
-//         </header>
-//       </div>
-//     );
-//   }
-// }
+// import PwdReset from "./front_page/PwdReset";
+// import Registration from "./front_page/Register";
+// import Success from "./front_page/Success";
 
 export default class App extends Component {
   render() {
@@ -67,9 +25,17 @@ export default class App extends Component {
         <Fragment>
           <Switch>
             <Route exact path="/" component={FrontPage} />
+            {/* Chef url's */}
+            <Route exact path="/Chef/Login" component={Chef_login} />
+            <Route exact path="/Chef/Register" component={Chef_reg} />
+            <Route exact path="/Chef/Home" component={Chef} />
+            {/* Customer url's */}
+            <Route exact path="/Login" component={Cust_login} />
+            <Route exact path="/Register" component={Cust_reg} />
             <Route exact path="/Home" component={Cust} />
-            <Route exact path="/Chef" component={Chef} />
-            <Route exact path="/Transport" component={Staff} />
+            <Route exact path="/Wallet" component={Wlt} />
+            <Route exact path="/About" component={Abt} />
+            <Route exact path="/Profile" component={Prof} />
           </Switch>
         </Fragment>
       </Router>

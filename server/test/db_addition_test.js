@@ -5,7 +5,10 @@ const Customer = require("../models/user.model");
 describe("saving records", function() {
   it("user addition", function(done) {
     var char = new Customer({
-      username: "xyz"
+      firstname: "xyz",
+      lastname: "abc",
+      hashedPassword: "a",
+      email: "a@a.com"
     });
 
     char.save().then(function() {

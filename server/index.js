@@ -5,7 +5,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const port = 8008;
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(pino);
 app.use(cors());
 
@@ -19,7 +19,7 @@ mongoose.connection
     console.log("db connected");
   })
   .on("error", function() {
-    console.log("err: ", error);
+    console.log("db connection err: ", error);
   });
 
 // app.get("/api/greeting", (req, res) => {
@@ -35,9 +35,13 @@ mongoose.connection
 mongoose.set("useFindAndModify", false);
 mongoose.set("useCreateIndex", true);
 
-const route = require("./routes/user");
+const customer_route = require("./routes/customer/customer");
+const deliveryAgent_route = require("./routes/deliveryAgent/delivery_agent");
+const chef_route = require("./routes/chef/chef");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("/user", route);
+app.use("/customer", customer_route);
+app.use("/deliveryAgent", deliveryAgent_route);
+app.use("/chef", chef_route);
 app.listen(port, () => console.info("REST API running on port " + port));

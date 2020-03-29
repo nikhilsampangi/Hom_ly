@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-process.SECRET_KEY = 'secret';
+process.SECRET_KEY = 'hackit';
 
 function auth(req, res, next){
     const token= req.header('Authorization');
