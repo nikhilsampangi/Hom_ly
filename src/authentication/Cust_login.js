@@ -23,14 +23,14 @@ export default class Cust_login extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
   handleSubmit(event) {
-    const user = {
+    const userData = {
       email: this.state.email,
       hashedPassword: this.state.hashedPassword
     };
-
-    axios
-      .get("/customer/login", user)
+    console.log(userData)
+    axios.get("/customer/login", {params: userData})
       .then(res => {
+        console.log(res.data);
         Cookies.set("usertoken", res.data);
         this.setState({ authenticated: 1 });
         // this.props.history.push('/')
