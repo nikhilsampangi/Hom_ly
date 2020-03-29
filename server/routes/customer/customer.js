@@ -46,9 +46,7 @@ function register(req, res) {
         // if status is '1' call send_otp api and load otp component,
 
         if (user.isRegistered === false) {
-          res
-            .status(200)
-            .send({ message: "Please verify your account!!!", status: "1" });
+          res.status(200).send({ message: "Please verify your account!!!", status: "1" });
         } else {
           res.status(400).send({ message: "Account already exist" });
         }
@@ -69,11 +67,9 @@ function register(req, res) {
             .then(customer => {
               var token = gen_OTP(customer.passwordResetToken);
 
-              // email.send_verification_token(token, customer.email);
+              email.send_verification_token(token, customer.email);
 
-              res
-                .status(200)
-                .send({ message: "Please enter OTP!!!", status: "1" });
+              res.status(200).send({ message: "Please enter OTP!!!"});
             })
             .catch(err => {
               var arr = Object.keys(err["errors"]);
@@ -87,9 +83,7 @@ function register(req, res) {
       }
     })
     .catch(err => {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
+      res.status(400).send({ message: "Something went wrong, please try again!!!" });
     });
 }
 
@@ -101,13 +95,12 @@ function verify(req, res) {
   })
     .then(customer => {
       if (!customer) {
-        res
-          .status(400)
-          .send({ message: "account does not exist, please register!!!" });
+        res.status(400).send({ message: "account does not exist, please register!!!" });
       } else {
+
         var tokenValidates = verify_OTP(
           customer.passwordResetToken,
-          req.body.token
+          req.body.OTP
         );
 
         if (!tokenValidates) {
@@ -116,10 +109,7 @@ function verify(req, res) {
           if (customer.isRegistered === false) {
             const newValues = { $set: { isRegistered: true } };
 
-            User.updateOne({ _id: customer._id }, newValues, function(
-              err,
-              success
-            ) {
+            User.updateOne({ _id: customer._id }, newValues, function(err,success) {
               if (err) {
                 res.status(400).send({
                   message: "Something went wrong, please try again!!!"
@@ -131,10 +121,7 @@ function verify(req, res) {
           } else {
             const newValues = { $set: { isValidated: true } };
 
-            User.updateOne({ _id: customer._id }, newValues, function(
-              err,
-              success
-            ) {
+            User.updateOne({ _id: customer._id }, newValues, function(err,success) {
               if (err) {
                 res.status(400).send({
                   message: "Something went wrong, please try again!!!"
@@ -148,9 +135,7 @@ function verify(req, res) {
       }
     })
     .catch(err => {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
+      res.status(400).send({ message: "Something went wrong, please try again!!!" });
     });
 }
 
@@ -163,9 +148,7 @@ function resend(req, res) {
 
   User.updateOne({ email: req.body.email }, newValues, function(err, success) {
     if (err) {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
+      res.status(400).send({ message: "Something went wrong, please try again!!!" });
     } else {
       var token = gen_OTP(secret.base32);
 
@@ -186,9 +169,7 @@ function reset(req, res) {
       if (user.isValidated === true) {
         bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
           if (err) {
-            res
-              .status(400)
-              .send({ message: "Something went wrong, please try again!!!" });
+            res.status(400).send({ message: "Something went wrong, please try again!!!" });
           } else {
             const newValues = {
               $set: { hashedPassword: hash, isValidated: false }
@@ -224,6 +205,7 @@ function reset(req, res) {
 router.get("/login", login);
 
 function login(req, res) {
+  req.body= req.query;
   User.findOne({
     email: req.body.email
   })
@@ -250,9 +232,7 @@ function login(req, res) {
       }
     })
     .catch(err => {
-      res
-        .status(400)
-        .send({ messsage: "Something went wrong, please try again!!!" });
+      res.status(400).send({ messsage: "Something went wrong, please try again!!!" });
     });
 }
 

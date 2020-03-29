@@ -40,23 +40,22 @@ function verify_OTP(secret_token, OTP){
 router.post("/register", register);
 
 function register(req, res) {
-
   Chef.findOne({
     email: req.body.email
   })
-    .then(user => {
-      if (user) {
-        if(user.isRegistered === false){
-          res.status(200).send({ message: "Please verify your account!!!", status: "1"});  
-        }
-        else{
-          res.status(400).send({ message: "Account already exist"});
-        }
-      } 
-      else {
-        bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
+    .then(chef => {
+      if (chef) {
+        // In front-end check the status,
+        // if status is '1' call send_otp api and load otp component,
 
-          var secret = speakeasy.generateSecret({length:20})
+        if (chef.isRegistered === false) {
+          res.status(200).send({ message: "Please verify your account!!!", status: "1" });
+        } else {
+          res.status(400).send({ message: "Account already exist" });
+        }
+      } else {
+        bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
+          var secret = speakeasy.generateSecret({ length: 20 });
 
           const chefData = {
             firstName: req.body.firstname,
@@ -66,16 +65,14 @@ function register(req, res) {
             hashedPassword: hash,
             passwordResetToken: secret.base32
           };
-          
+
           Chef.create(chefData)
-            .then(chef => {
+            .then(user => {
+              var token = gen_OTP(user.passwordResetToken);
 
-              var token = gen_OTP(chef.passwordResetToken);
-              
-              email.send_verification_token(token, chef.email);
-              
-              res.status(200).send("Please enter OTP!!!")
+              email.send_verification_token(token, user.email);
 
+              res.status(200).send({ message: "Please enter OTP!!!"});
             })
             .catch(err => {
               var arr = Object.keys(err["errors"]);
@@ -93,69 +90,69 @@ function register(req, res) {
     });
 }
 
-router.post("/verify_otp", verify)
+router.post("/verify_otp", verify);
 
-function verify(req, res){
+function verify(req, res) {
   Chef.findOne({
     email: req.body.email
   })
-  .then(chef=>{
-    if(!chef){
-      res.status(400).send({message: "account does not exist, please register!!!"})
-    }
-    else{
-      var tokenValidates = verify_OTP(chef.passwordResetToken, req.body.token);
+    .then(chef => {
+      if (!chef) {
+        res.status(400).send({ message: "account does not exist, please register!!!" });
+      } else {
 
-      if(!tokenValidates){
-        res.status(400).send({message: "INVALID OTP!!!"});
-      }
-      else{
-        if(chef.isRegistered === false){
-          const newValues= {$set: {isRegistered: true}}
+        var tokenValidates = verify_OTP(
+          chef.passwordResetToken,
+          req.body.OTP
+        );
 
-          Chef.updateOne({_id: chef._id}, newValues, function(err, success) {
-            if(err){
-              res.status(400).send({message: "Something went wrong, please try again!!!"});
-            }
-            else{
-              res.status(200).send("Successfully registered your account!!!");
-            }
-          });
+        if (!tokenValidates) {
+          res.status(400).send({ message: "INVALID OTP!!!" });
+        } else {
+          if (chef.isRegistered === false) {
+            const newValues = { $set: { isRegistered: true } };
+
+            Chef.updateOne({ _id: chef._id }, newValues, function(err,success) {
+              if (err) {
+                res.status(400).send({
+                  message: "Something went wrong, please try again!!!"
+                });
+              } else {
+                res.status(200).send("Successfully registered your account!!!");
+              }
+            });
+          } else {
+            const newValues = { $set: { isValidated: true } };
+
+            Chef.updateOne({ _id: chef._id }, newValues, function(err,success) {
+              if (err) {
+                res.status(400).send({
+                  message: "Something went wrong, please try again!!!"
+                });
+              } else {
+                res.status(200).send("Validated!!!");
+              }
+            });
+          }
         }
-        else{
-          const newValues= {$set: {isValidated: true}}
-
-          Chef.updateOne({_id: chef._id}, newValues, function(err, success) {
-            if(err){
-              res.status(400).send({message: "Something went wrong, please try again!!!"});
-            }
-            else{
-              res.status(200).send("Validated!!!");
-            }
-          });
-        }
       }
-    }
-  })
-  .catch(err=>{
-    res.status(400).send({message: "Something went wrong, please try again!!!"});
-  })
+    })
+    .catch(err => {
+      res.status(400).send({ message: "Something went wrong, please try again!!!" });
+    });
 }
 
-router.post("/send_otp", resend)
+router.post("/send_otp", resend);
 
-function resend(req, res){
+function resend(req, res) {
+  var secret = speakeasy.generateSecret({ length: 20 });
 
-  var secret = speakeasy.generateSecret({length:20})
+  const newValues = { $set: { passwordResetToken: secret.base32 } };
 
-  const newValues= {$set: {passwordResetToken: secret.base32}}
-
-  Chef.updateOne({email: req.body.email}, newValues, function(err, success) {
-    if(err){
-      res.status(400).send({message: "Something went wrong, please try again!!!"});
-    }
-    else{  
-
+  Chef.updateOne({ email: req.body.email }, newValues, function(err, success) {
+    if (err) {
+      res.status(400).send({ message: "Something went wrong, please try again!!!" });
+    } else {
       var token = gen_OTP(secret.base32);
 
       email.send_verification_token(token, req.body.email);
@@ -165,53 +162,60 @@ function resend(req, res){
   });
 }
 
-router.post("/reset_password", reset)
+router.post("/reset_password", reset);
 
-function reset(req, res){
-
+function reset(req, res) {
   Chef.findOne({
     email: req.body.email
-  }).then(user=>{
-      if(user.isValidated === true){
+  })
+    .then(user => {
+      if (user.isValidated === true) {
         bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
-          if(err){
-            res.status(400).send({message: "Something went wrong, please try again!!!"});
-          }
-          else{
-      
-            const newValues= {$set:{hashedPassword: hash, isValidated: false}}
-            
-            Chef.updateOne({email: req.body.email}, newValues, function(err, success) {
-              if(err){
-                res.status(400).send({message: "Something went wrong, please try again!!!"});
-              }
-              else{  
+          if (err) {
+            res.status(400).send({ message: "Something went wrong, please try again!!!" });
+          } else {
+            const newValues = {
+              $set: { hashedPassword: hash, isValidated: false }
+            };
+
+            Chef.updateOne({ email: req.body.email }, newValues, function(
+              err,
+              success
+            ) {
+              if (err) {
+                res.status(400).send({
+                  message: "Something went wrong, please try again!!!"
+                });
+              } else {
                 res.status(200).send("Password updated!!!");
               }
             });
-      
           }
         });
+      } else {
+        // In frontend check status, call send_otp api and load otp component.
+        res.status(400).send({
+          message: "Please verify with otp to update passwords",
+          status: "1"
+        });
       }
-      else{
-        res.status(400).send({message: "Please verify with otp to update passwords"});
-      }
-  }).catch(err=>{
-      res.status(400).send({message: "Something went wrong!!!"});
-  })
+    })
+    .catch(err => {
+      res.status(400).send({ message: "Something went wrong!!!" });
+    });
 }
 
 router.get("/login", login);
 
 function login(req, res) {
+  req.body= req.query;
   Chef.findOne({
     email: req.body.email
   })
     .then(user => {
-      if((!user)||(user.isRegistered === false)){
-        res.status(401).send({ message: "User does not exist" });
-      } 
-      else{
+      if (!user || user.isRegistered === false) {
+        res.status(400).send({ message: "Account does not exist" });
+      } else {
         if (bcrypt.compareSync(req.body.hashedPassword, user.hashedPassword)) {
           // Passwords match
           const payload = {
@@ -231,9 +235,8 @@ function login(req, res) {
       }
     })
     .catch(err => {
-      res.status(400).send({message: "Something went wrong, please try again!!!"});
+      res.status(400).send({ messsage: "Something went wrong, please try again!!!" });
     });
 }
-
 
 module.exports = router;
