@@ -47,10 +47,10 @@ function register(req, res) {
     .then(user => {
       if (user) {
         if(user.isRegistered === false){
-          res.status(400).json({ error: "Please verify your account!!!", status: 0});  
+          res.status(200).send({ message: "Please verify your account!!!", status: "1"});  
         }
         else{
-          res.status(400).json({ error: "Account already exist", status: 1 });
+          res.status(400).send({ message: "Account already exist"});
         }
       } 
       else {
@@ -74,7 +74,7 @@ function register(req, res) {
               
               email.send_verification_token(token, chef.email);
               
-              res.status(400).send("Please enter OTP!!!")
+              res.status(200).send("Please enter OTP!!!")
 
             })
             .catch(err => {
@@ -83,20 +83,13 @@ function register(req, res) {
               for (i in arr) {
                 errors.push(err["errors"][arr[i]].message);
               }
-              console.log(errors);
-              res.status(400).json({ error: errors });
+              res.status(400).send({ message: errors[0] });
             });
         });
       }
     })
     .catch(err => {
-      var arr = Object.keys(err["errors"]);
-      var errors = [];
-      for (i in arr) {
-        errors.push(err["errors"][arr[i]].message);
-      }
-      console.log(errors);
-      res.status(401).json({ error: errors });
+      res.status(400).send({ message: "Something went wrong, please try again!!!" });
     });
 }
 
@@ -108,13 +101,13 @@ function verify(req, res){
   })
   .then(chef=>{
     if(!chef){
-      res.status(404).json({error: "account does not exist, please register!!!"})
+      res.status(400).send({message: "account does not exist, please register!!!"})
     }
     else{
       var tokenValidates = verify_OTP(chef.passwordResetToken, req.body.token);
 
       if(!tokenValidates){
-        res.status(404).json({error: "INVALID OTP!!!"});
+        res.status(400).send({message: "INVALID OTP!!!"});
       }
       else{
         if(chef.isRegistered === false){
@@ -122,10 +115,10 @@ function verify(req, res){
 
           Chef.updateOne({_id: chef._id}, newValues, function(err, success) {
             if(err){
-              res.status(404).json({error: "Something went wrong, please try again!!!"});
+              res.status(400).send({message: "Something went wrong, please try again!!!"});
             }
             else{
-              res.send("Successfully registered your account!!!");
+              res.status(200).send("Successfully registered your account!!!");
             }
           });
         }
@@ -134,10 +127,10 @@ function verify(req, res){
 
           Chef.updateOne({_id: chef._id}, newValues, function(err, success) {
             if(err){
-              res.status(404).json({error: "Something went wrong, please try again!!!"});
+              res.status(400).send({message: "Something went wrong, please try again!!!"});
             }
             else{
-              res.send("Validated!!!");
+              res.status(200).send("Validated!!!");
             }
           });
         }
@@ -145,7 +138,7 @@ function verify(req, res){
     }
   })
   .catch(err=>{
-    res.status(404).json({error: "Something went wrong, please try again!!!"});
+    res.status(400).send({message: "Something went wrong, please try again!!!"});
   })
 }
 
@@ -159,7 +152,7 @@ function resend(req, res){
 
   Chef.updateOne({email: req.body.email}, newValues, function(err, success) {
     if(err){
-      res.status(404).json({error: "Something went wrong, please try again!!!"});
+      res.status(400).send({message: "Something went wrong, please try again!!!"});
     }
     else{  
 
@@ -167,7 +160,7 @@ function resend(req, res){
 
       email.send_verification_token(token, req.body.email);
 
-      res.status(400).send("OTP sent!!!");
+      res.status(200).send("OTP sent!!!");
     }
   });
 }
@@ -182,7 +175,7 @@ function reset(req, res){
       if(user.isValidated === true){
         bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
           if(err){
-            res.status(404).json({error: "Something went wrong, please try again!!!"});
+            res.status(400).send({message: "Something went wrong, please try again!!!"});
           }
           else{
       
@@ -190,10 +183,10 @@ function reset(req, res){
             
             Chef.updateOne({email: req.body.email}, newValues, function(err, success) {
               if(err){
-                res.status(404).json({error: "Something went wrong, please try again!!!"});
+                res.status(400).send({message: "Something went wrong, please try again!!!"});
               }
               else{  
-                res.status(400).send("Password updated!!!");
+                res.status(200).send("Password updated!!!");
               }
             });
       
@@ -201,10 +194,10 @@ function reset(req, res){
         });
       }
       else{
-        res.status(404).json({error: "Please verify with otp to update passwords"});
+        res.status(400).send({message: "Please verify with otp to update passwords"});
       }
   }).catch(err=>{
-      res.status(404).json({error: "Something went wrong!!!"});
+      res.status(400).send({message: "Something went wrong!!!"});
   })
 }
 
@@ -216,7 +209,7 @@ function login(req, res) {
   })
     .then(user => {
       if((!user)||(user.isRegistered === false)){
-        res.status(401).json({ error: "User does not exist" });
+        res.status(401).send({ message: "User does not exist" });
       } 
       else{
         if (bcrypt.compareSync(req.body.hashedPassword, user.hashedPassword)) {
@@ -230,15 +223,15 @@ function login(req, res) {
             algorithm: "HS256",
             expiresIn: 86400
           });
-          res.send(token);
+          res.status(200).send(token);
         } else {
           // Passwords don't match
-          res.status(401).json({ error: "Incorrect Password" });
+          res.status(400).send({ message: "Incorrect Password" });
         }
       }
     })
     .catch(err => {
-      res.status(400).send("error: " + err);
+      res.status(400).send({message: "Something went wrong, please try again!!!"});
     });
 }
 

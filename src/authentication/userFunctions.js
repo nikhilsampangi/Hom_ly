@@ -1,33 +1,6 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-export const register = newUser => {
-  return axios
-    .post("/customer/register", {
-      firstName: newUser.firstname,
-      lastName: newUser.lastname,
-      hashedPassword: newUser.hashedPassword,
-      email: newUser.email,
-      phoneNum: newUser.phone
-      // confirmPassword: newUser.confirmPassword
-    })
-    .then(res => {
-      if (res.data.error) {
-        const check = {
-          status: false,
-          error: res.data.error
-        };
-        return check;
-      } else {
-        const check = {
-          status: true,
-          data: res.data
-        };
-        return check;
-      }
-    });
-};
-
 export const login = user => {
   return axios
     .post("/customer/login", {

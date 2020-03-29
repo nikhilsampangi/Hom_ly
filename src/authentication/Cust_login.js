@@ -2,8 +2,10 @@ import React, { Component, Fragment } from "react";
 import { Link, Redirect } from "react-router-dom";
 import Modal from "react-responsive-modal";
 import "./Cust_login.css";
-import { login } from "./userFunctions";
+import axios from "axios";
+import Cookies from "js-cookie";
 import change_bg from "../index";
+
 
 export default class Cust_login extends Component {
   constructor() {
@@ -27,21 +29,17 @@ export default class Cust_login extends Component {
       hashedPassword: this.state.hashedPassword
     };
 
-    login(user)
-      .then(res => {
-        if (res.status) {
-          // this.props.history.push('/')
-          this.setState({ authenticated: 1 });
-          // console.log(res.data)
-        } else {
-          this.setState({ errorFlag: true, errMsg: String(res.error) });
-          console.log(res.error);
-        }
-      })
-      .catch(err => {
-        console.log("error:-" + err);
-        this.setState({ errorFlag: true, errMsg: String(err) });
-      });
+    axios.get("/customer/login",user)
+    .then(res => {
+      Cookies.set("usertoken", res.data);
+      this.setState({ authenticated: 1 });
+      // this.props.history.push('/')
+      // console.log(res.data)
+    })
+    .catch(err=>{
+      console.log(err.response.data.message);
+      this.setState({ errorFlag: true, errMsg: err.response.data.message });
+    })
 
     event.preventDefault();
   }
