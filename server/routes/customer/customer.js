@@ -67,9 +67,9 @@ function register(req, res) {
             .then(customer => {
               var token = gen_OTP(customer.passwordResetToken);
 
-              // email.send_verification_token(token, customer.email);
+              email.send_verification_token(token, customer.email);
 
-              res.status(200).send({ message: "Please enter OTP!!!", status: "1" });
+              res.status(200).send({ message: "Please enter OTP!!!"});
             })
             .catch(err => {
               var arr = Object.keys(err["errors"]);
