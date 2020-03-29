@@ -2,13 +2,7 @@ import React, { Component, Fragment } from "react";
 import { Link } from "react-router-dom";
 import "./FrontPage.css";
 // import { login } from "../authentication/userFunctions";
-
-function change_bg(cls) {
-  document
-    .getElementById("bd")
-    .classList.remove(document.getElementById("bd").classList[0]);
-  document.getElementById("bd").classList.add(cls);
-}
+import change_bg from "../index";
 
 export default class FrontPage extends Component {
   // constructor() {

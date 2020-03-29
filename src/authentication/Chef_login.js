@@ -4,13 +4,8 @@ import Modal from "react-responsive-modal";
 import "./Chef_login.css";
 import axios from "axios";
 import Cookies from "js-cookie";
+import change_bg from "../index";
 
-function change_bg(cls) {
-  document
-    .getElementById("bd")
-    .classList.remove(document.getElementById("bd").classList[0]);
-  document.getElementById("bd").classList.add(cls);
-}
 
 export default class Chef_auth extends Component {
   constructor() {

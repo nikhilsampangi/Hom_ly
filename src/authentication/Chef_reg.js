@@ -3,13 +3,7 @@ import { Link } from "react-router-dom";
 // import Modal from "react-responsive-modal";
 import "./Chef_reg.css";
 import {sendOTP} from './userFunctions'
-
-function change_bg(cls) {
-  document
-    .getElementById("bd")
-    .classList.remove(document.getElementById("bd").classList[0]);
-  document.getElementById("bd").classList.add(cls);
-}
+import change_bg from "../index";
 
 export default class Chef_reg extends Component {
   constructor() {
