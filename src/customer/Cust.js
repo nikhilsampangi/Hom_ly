@@ -1,24 +1,29 @@
 import React, { Component, Fragment } from "react";
-// import { Link } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 import "./Cust.css";
 import Navbar from "./Navbar";
+import Cookies from "js-cookie";
 import change_bg from "../index";
 
 export default class Cust extends Component {
   render() {
-    return (
-      <Fragment>
-        <Navbar onLoad={change_bg("cust_hm")} />
-        <br />
-        <br />
-        <br />
-        <br />
-        <br />
-        <div className="container" style={{ textAlign: "-moz-center" }}>
-          <SearchBar />
-        </div>
-      </Fragment>
-    );
+    if (Cookies.get("usertoken")) {
+      return (
+        <Fragment>
+          <Navbar onLoad={change_bg("cust_hm")} />
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          <div className="container" style={{ textAlign: "-moz-center" }}>
+            <SearchBar />
+          </div>
+        </Fragment>
+      );
+    } else {
+      return <Redirect to="/Login"></Redirect>;
+    }
   }
 }
 
