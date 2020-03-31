@@ -21,6 +21,7 @@ export default class Cust_login extends Component {
       disableOTPFlag: true,
       resetPasswordFlag: false,
       newPassword: "",
+      newPasswordCnf: "",
       resetPswdSuccess: ""
     };
     this.handleChange = this.handleChange.bind(this);
@@ -123,6 +124,23 @@ export default class Cust_login extends Component {
     }
     return (
       <Fragment>
+        <Modal
+          open={this.state.errorFlag}
+          onClose={() => this.setState({ errorFlag: false })}
+          closeOnOverlayClick={true}
+        >
+          <div className="container" style={{ width: "35vw", padding: "5%" }}>
+            <div className="card text-center border-danger">
+              <div
+                className="card-header"
+                style={{ backgroundColor: "#dc3545", color: "white" }}
+              >
+                Error
+              </div>
+              <div className="card-body">{this.state.errMsg}</div>
+            </div>
+          </div>
+        </Modal>
         <div
           className="row"
           style={{ height: "100vh" }}
@@ -170,7 +188,15 @@ export default class Cust_login extends Component {
                   </span>
                   <br />
                   <span>
-                    Back to <Link to="/">Login</Link>
+                    Back to{" "}
+                    <button
+                      className="btn btn-outline-dark"
+                      onClick={() => {
+                        this.setState({ pswdResetFlag: false });
+                      }}
+                    >
+                      Login
+                    </button>
                   </span>
                 </div>
               ) : (
@@ -230,26 +256,6 @@ export default class Cust_login extends Component {
                 method="Post"
                 style={{ color: "#757575" }}
               >
-                <Modal
-                  open={this.state.errorFlag}
-                  onClose={() => this.setState({ errorFlag: false })}
-                  closeOnOverlayClick={true}
-                >
-                  <div
-                    className="container"
-                    style={{ width: "35vw", padding: "5%" }}
-                  >
-                    <div className="card text-center border-danger">
-                      <div
-                        className="card-header"
-                        style={{ backgroundColor: "#dc3545", color: "white" }}
-                      >
-                        Error
-                      </div>
-                      <div className="card-body">{this.state.errMsg}</div>
-                    </div>
-                  </div>
-                </Modal>
                 <div className="md-form">
                   <input
                     type="text"

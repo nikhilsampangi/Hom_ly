@@ -13,9 +13,9 @@ const ChefSchema = new Schema({
 
   passwordResetToken: { type: String, default: null },
 
-  isRegistered: {type: Boolean, default: false},
+  isRegistered: { type: Boolean, default: false },
 
-  isValidated: {type: Boolean, default: false},
+  isValidated: { type: Boolean, default: false },
 
   email: {
     type: String,
@@ -43,7 +43,11 @@ const ChefSchema = new Schema({
 
   bio: {
     type: String,
-    default: "Noob"
+    default: "Not Specified"
+  },
+  specialities: {
+    type: String,
+    default: "Not Specified"
   },
 
   expertiseLevel: {
