@@ -9,7 +9,7 @@ export default class About extends Component {
     if (Cookies.get("usertoken")) {
       return (
         <Fragment>
-          <Navbar />
+          <Navbar aboutPage={true} />
           <br />
           <br />
           <br />

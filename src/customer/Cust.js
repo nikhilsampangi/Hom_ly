@@ -10,7 +10,7 @@ export default class Cust extends Component {
     if (Cookies.get("usertoken")) {
       return (
         <Fragment>
-          <Navbar onLoad={change_bg("cust_hm")} />
+          <Navbar onLoad={change_bg("cust_hm")} homePage={true} />
           <br />
           <br />
           <br />

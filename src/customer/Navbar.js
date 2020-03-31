@@ -23,7 +23,7 @@ export default class Navbar extends Component {
         >
           <div className="col"></div>
           <div className="col-1">
-            {this.state.nav_h ? (
+            {this.props.homePage || this.state.nav_h ? (
               <Link
                 to="/Home"
                 style={{ textDecoration: "none", color: "#72be44" }}
@@ -45,7 +45,7 @@ export default class Navbar extends Component {
             <Melon style={{ height: "69px" }} />
           </div>
           <div className="col-2" style={{ textAlign: "center" }}>
-            {this.state.nav_w ? (
+            {this.props.walletPage || this.state.nav_w ? (
               <Link
                 to="/Wallet"
                 style={{ textDecoration: "none", color: "#ee3d59" }}
@@ -67,7 +67,7 @@ export default class Navbar extends Component {
             <NavLg style={{ height: "69px" }} />
           </div>
           <div className="col-2" style={{ textAlign: "center" }}>
-            {this.state.nav_a ? (
+            {this.props.aboutPage || this.state.nav_a ? (
               <Link
                 to="/About"
                 style={{ textDecoration: "none", color: "#ee3d59" }}
@@ -89,7 +89,7 @@ export default class Navbar extends Component {
             <Melon style={{ height: "69px" }} />
           </div>
           <div className="col-1" style={{ textAlign: "right" }}>
-            {this.state.nav_p ? (
+            {this.props.profilePage || this.state.nav_p ? (
               <Link
                 to="/Profile"
                 style={{ textDecoration: "none", color: "#72be44" }}
