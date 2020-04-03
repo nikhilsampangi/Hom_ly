@@ -5,7 +5,10 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const port = 8008;
 const app = express();
+const passport = require("passport");
 
+
+app.use(passport.initialize()); 
 app.use(pino);
 app.use(cors());
 

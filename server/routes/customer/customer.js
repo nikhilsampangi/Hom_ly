@@ -5,7 +5,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
-
+const passport = require('passport');
+const passportSetup= require("../../config/customerPassport");
 const User = require("../../models/customer.model");
 
 const email = require("../send_email");
@@ -45,7 +46,7 @@ function register(req, res) {
         // In front-end check the status,
         // if status is '1' call send_otp api and load otp component,
 
-        if (user.isRegistered === false) {
+        if (user.isVerified === false) {
           res
             .status(200)
             .send({ message: "Please verify your account!!!", status: "1" });
@@ -60,14 +61,16 @@ function register(req, res) {
             firstName: req.body.firstname,
             lastName: req.body.lastname,
             email: req.body.email,
-            phoneNum: req.body.phonenumber,
-            hashedPassword: hash,
-            passwordResetToken: secret.base32
+            internalAuth:{
+              hashedPassword: hash,
+              passwordResetToken: secret.base32,
+              phoneNum: req.body.phonenumber,
+            }
           };
 
           User.create(userData)
             .then(customer => {
-              var token = gen_OTP(customer.passwordResetToken);
+              var token = gen_OTP(customer.internalAuth[0].passwordResetToken);
 
               email.send_verification_token(token, customer.email);
 
@@ -106,15 +109,15 @@ function verify(req, res) {
           .send({ message: "account does not exist, please register!!!" });
       } else {
         var tokenValidates = verify_OTP(
-          customer.passwordResetToken,
+          customer.internalAuth[0].passwordResetToken,
           req.body.OTP
         );
 
         if (!tokenValidates) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
-          if (customer.isRegistered === false) {
-            const newValues = { $set: { isRegistered: true } };
+          if (customer.isVerified === false) {
+            const newValues = { $set: { isVerified: true } };
 
             User.updateOne({ _id: customer._id }, newValues, function(
               err,
@@ -129,7 +132,7 @@ function verify(req, res) {
               }
             });
           } else {
-            const newValues = { $set: { isValidated: true } };
+            const newValues = { $set: {isValidated: true } };
 
             User.updateOne({ _id: customer._id }, newValues, function(
               err,
@@ -157,11 +160,12 @@ function verify(req, res) {
 router.post("/send_otp", resend);
 
 function resend(req, res) {
+  console.log("\n"+"send_otp called"+"\n");
   User.findOne({
     email: req.body.email
   })
   .then(customer=>{
-    if((!customer)||(customer && customer.isRegistered===false)){
+    if(!customer){
       res.status(400).send({
         message: "account does not exist, please register!!!",
         status: "1"
@@ -169,20 +173,23 @@ function resend(req, res) {
     }else {
       var secret = speakeasy.generateSecret({ length: 20 });
 
-      const newValues = { $set: { passwordResetToken: secret.base32 } };
+      const newValues = { $set: { "internalAuth.$.passwordResetToken": secret.base32 } };
     
-      User.updateOne({ email: req.body.email }, newValues, function(err, success) {
-        if (err) {
-          res
-            .status(400)
-            .send({ message: "Something went wrong, please try again!!!" });
-        } else {
-          var token = gen_OTP(secret.base32);
-    
-          email.send_verification_token(token, req.body.email);
-    
-          res.status(200).send("OTP sent!!!");
-        }
+      User.updateOne({ 
+        email: customer.email,
+        "internalAuth._id":customer.internalAuth[0]._id  
+      }, newValues, function(err, success) {
+          if (err) {
+            res
+              .status(400)
+              .send({ message: "Something went wrong, please try again!!!" });
+          } else {
+            var token = gen_OTP(secret.base32);
+
+            email.send_verification_token(token, req.body.email);
+      
+            res.status(200).send("OTP sent!!!");
+          }
       });
     }
   })
@@ -204,14 +211,18 @@ function reset(req, res) {
               .send({ message: "Something went wrong, please try again!!!" });
           } else {
             const newValues = {
-              $set: { hashedPassword: hash, isValidated: false }
+              $set: { "internalAuth.$.hashedPassword": hash, isValidated: false }
             };
 
-            User.updateOne({ email: req.body.email }, newValues, function(
+            User.updateOne({ 
+              email: user.email, 
+              "internalAuth._id":user.internalAuth[0]._id 
+            }, newValues, function(
               err,
               success
             ) {
               if (err) {
+                console.log("\n"+err+"\n");
                 res.status(400).send({
                   message: "Something went wrong, please try again!!!"
                 });
@@ -242,10 +253,10 @@ function login(req, res) {
     email: req.body.email
   })
     .then(user => {
-      if (!user || user.isRegistered === false) {
+      if (!user || user.isVerified === false) {
         res.status(400).send({ message: "Account does not exist" });
       } else {
-        if (bcrypt.compareSync(req.body.hashedPassword, user.hashedPassword)) {
+        if (bcrypt.compareSync(req.body.hashedPassword, user.internalAuth[0].hashedPassword)) {
           // Passwords match
           const payload = {
             _id: user._id,
@@ -257,7 +268,7 @@ function login(req, res) {
             expiresIn: 86400
           });
           res.status(200).send(token);
-        } else {
+        }else {
           // Passwords don't match
           res.status(400).send({ message: "Incorrect Password" });
         }
@@ -269,5 +280,45 @@ function login(req, res) {
         .send({ messsage: "Something went wrong, please try again!!!" });
     });
 }
+
+
+router.get("/profile", auth, profile);
+
+function profile(req, res) {
+  const user= req.user;
+  User.findOne({
+    email: user.email
+  })
+    .then(user => {
+      if(!user){
+        res.status(400).send({message: "User does not exist!!!!"});  
+      }else {
+        res.status(200).send({message: user});
+      }
+    })
+    .catch(err => {
+      res
+        .status(400)
+        .send({ messsage: "Something went wrong, please try again!!!" });
+    });
+}
+
+/* Google Authentication API. */
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { 
+      scope: ["profile", "email"] 
+  })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/customer/auth/google", session: false }), (req, res) => {
+      const token= req.user;
+      console.log("\n"+token+"\n");
+      res.redirect("http://localhost:3000/"+`${token}`);
+  }
+);
 
 module.exports = router;

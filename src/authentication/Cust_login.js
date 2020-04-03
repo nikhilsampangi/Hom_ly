@@ -303,12 +303,9 @@ export default class Cust_login extends Component {
               </form>
               <hr />
               <center>
-                <button
-                  className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0"
-                  type="submit"
-                >
-                  <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
-                </button>
+                <a href="http://localhost:8008/customer/auth/google" className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0">
+                <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
+                </a>
               </center>
             </div>
           )}
