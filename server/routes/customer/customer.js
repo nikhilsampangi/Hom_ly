@@ -96,9 +96,9 @@ function register(req, res) {
     });
 }
 
-router.post("/verify_otp", verify);
+router.post("/verify_registration_otp", verifyRegistrationOtp);
 
-function verify(req, res) {
+function verifyRegistrationOtp(req, res) {
   User.findOne({
     email: req.body.email
   })
@@ -116,7 +116,6 @@ function verify(req, res) {
         if (!tokenValidates) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
-          if (customer.isVerified === false) {
             const newValues = { $set: { isVerified: true } };
 
             User.updateOne({ _id: customer._id }, newValues, function(
@@ -131,7 +130,38 @@ function verify(req, res) {
                 res.status(200).send("Successfully registered your account!!!");
               }
             });
-          } else {
+        }
+      }
+    })
+    .catch(err => {
+      res
+        .status(400)
+        .send({ message: "Something went wrong, please try again!!!" });
+    });
+}
+
+
+router.post("/verify_reset_password_otp", verifyPasswordOtp);
+
+function verifyPasswordOtp(req, res) {
+  User.findOne({
+    email: req.body.email
+  })
+    .then(customer => {
+      if (!customer) {
+        res
+          .status(400)
+          .send({ message: "account does not exist, please register!!!" });
+      } else {
+        var tokenValidates = verify_OTP(
+          customer.internalAuth[0].passwordResetToken,
+          req.body.OTP
+        );
+
+        if (!tokenValidates) {
+          res.status(400).send({ message: "INVALID OTP!!!" });
+        } else {
+
             const newValues = { $set: {isValidated: true } };
 
             User.updateOne({ _id: customer._id }, newValues, function(
@@ -146,7 +176,6 @@ function verify(req, res) {
                 res.status(200).send("Validated!!!");
               }
             });
-          }
         }
       }
     })
@@ -156,6 +185,7 @@ function verify(req, res) {
         .send({ message: "Something went wrong, please try again!!!" });
     });
 }
+
 
 router.post("/send_otp", resend);
 
