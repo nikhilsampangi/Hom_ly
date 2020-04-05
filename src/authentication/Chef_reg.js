@@ -22,7 +22,7 @@ export default class Chef_reg extends Component {
       errMsg: "",
       otpFlag: false,
       otp: "",
-      otpErr: false
+      otpErr: false,
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -36,7 +36,7 @@ export default class Chef_reg extends Component {
     if (this.state.hashedPassword !== this.state.confirmPassword) {
       this.setState({
         errorFlag: true,
-        errMsg: "Password and Confirm Password Fields do not match"
+        errMsg: "Password and Confirm Password Fields do not match",
       });
     } else {
       const newChef = {
@@ -46,12 +46,12 @@ export default class Chef_reg extends Component {
         email: this.state.email,
         hashedPassword: this.state.hashedPassword,
         bio: this.state.bio,
-        specialities: this.state.specialities
+        specialities: this.state.specialities,
       };
 
       axios
         .post("/chef/register", newChef)
-        .then(res => {
+        .then((res) => {
           if (res.data.status === "1") {
             // otp verification step
             this.setState({ otpFlag: true });
@@ -60,10 +60,10 @@ export default class Chef_reg extends Component {
             console.log(res.data.message);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           this.setState({
             errorFlag: true,
-            errMsg: String(err.response.data.message)
+            errMsg: String(err.response.data.message),
           });
         });
     }
@@ -75,15 +75,15 @@ export default class Chef_reg extends Component {
     this.setState({ otpErr: false });
     axios
       .post("/chef/send_otp", { email: this.state.email })
-      .then(res => {
+      .then((res) => {
         // load otp component
         this.setState({ otpFlag: true });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
         // console.log(err.response.data.message);
       });
@@ -93,13 +93,13 @@ export default class Chef_reg extends Component {
     axios
       .post("/chef/verify_otp", {
         email: this.state.email,
-        OTP: this.state.otp
+        OTP: this.state.otp,
       })
-      .then(res => {
+      .then((res) => {
         this.setState({ authenticated: true });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         // ask user for resending otp...
         this.setState({ otpErr: true });
         console.log(err.response.data.message);
@@ -108,7 +108,7 @@ export default class Chef_reg extends Component {
 
   render() {
     if (this.state.authenticated) {
-      return <Redirect to="/Chef/Home" />;
+      return <Redirect to="/Chef/Profile" />;
     }
     return (
       <Fragment>
@@ -126,7 +126,7 @@ export default class Chef_reg extends Component {
                   style={{
                     backgroundColor: "#dc3545",
                     color: "white",
-                    fontSize: "x-large"
+                    fontSize: "x-large",
                   }}
                 >
                   Error
@@ -150,7 +150,7 @@ export default class Chef_reg extends Component {
                   className="card-header"
                   style={{
                     backgroundColor: "rgb(86,88,255)",
-                    color: "white"
+                    color: "white",
                   }}
                 >
                   Verification
@@ -291,7 +291,7 @@ export default class Chef_reg extends Component {
               style={{
                 padding: "3%",
                 marginTop: "294px",
-                borderLeft: "2px solid #ededed"
+                borderLeft: "2px solid #ededed",
               }}
             >
               <div>
