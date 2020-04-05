@@ -17,7 +17,7 @@ process.SECRET_KEY = "hackit";
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
     secret: secret_token,
-    encoding: "base32"
+    encoding: "base32",
   });
 
   return token;
@@ -28,7 +28,7 @@ function verify_OTP(secret_token, OTP) {
     secret: secret_token,
     encoding: "base32",
     token: OTP,
-    window: 3
+    window: 3,
   });
 
   return tokenValidates;
@@ -38,9 +38,9 @@ router.post("/register", register);
 
 function register(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(user => {
+    .then((user) => {
       if (user) {
         // In front-end check the status,
         // if status is '1' call send_otp api and load otp component,
@@ -62,11 +62,11 @@ function register(req, res) {
             email: req.body.email,
             phoneNum: req.body.phonenumber,
             hashedPassword: hash,
-            passwordResetToken: secret.base32
+            passwordResetToken: secret.base32,
           };
 
           User.create(userData)
-            .then(customer => {
+            .then((customer) => {
               var token = gen_OTP(customer.passwordResetToken);
 
               email.send_verification_token(token, customer.email);
@@ -75,7 +75,7 @@ function register(req, res) {
                 .status(200)
                 .send({ message: "Please enter OTP!!!", status: "1" });
             })
-            .catch(err => {
+            .catch((err) => {
               var arr = Object.keys(err["errors"]);
               var errors = [];
               for (i in arr) {
@@ -86,7 +86,7 @@ function register(req, res) {
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
@@ -97,9 +97,9 @@ router.post("/verify_otp", verify);
 
 function verify(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(customer => {
+    .then((customer) => {
       if (!customer) {
         res
           .status(400)
@@ -116,13 +116,13 @@ function verify(req, res) {
           if (customer.isRegistered === false) {
             const newValues = { $set: { isRegistered: true } };
 
-            User.updateOne({ _id: customer._id }, newValues, function(
+            User.updateOne({ _id: customer._id }, newValues, function (
               err,
               success
             ) {
               if (err) {
                 res.status(400).send({
-                  message: "Something went wrong, please try again!!!"
+                  message: "Something went wrong, please try again!!!",
                 });
               } else {
                 res.status(200).send("Successfully registered your account!!!");
@@ -131,13 +131,13 @@ function verify(req, res) {
           } else {
             const newValues = { $set: { isValidated: true } };
 
-            User.updateOne({ _id: customer._id }, newValues, function(
+            User.updateOne({ _id: customer._id }, newValues, function (
               err,
               success
             ) {
               if (err) {
                 res.status(400).send({
-                  message: "Something went wrong, please try again!!!"
+                  message: "Something went wrong, please try again!!!",
                 });
               } else {
                 res.status(200).send("Validated!!!");
@@ -147,7 +147,7 @@ function verify(req, res) {
         }
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
@@ -161,7 +161,7 @@ function resend(req, res) {
 
   const newValues = { $set: { passwordResetToken: secret.base32 } };
 
-  User.updateOne({ email: req.body.email }, newValues, function(err, success) {
+  User.updateOne({ email: req.body.email }, newValues, function (err, success) {
     if (err) {
       res
         .status(400)
@@ -180,9 +180,9 @@ router.post("/reset_password", reset);
 
 function reset(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(user => {
+    .then((user) => {
       if (user.isValidated === true) {
         bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
           if (err) {
@@ -191,16 +191,16 @@ function reset(req, res) {
               .send({ message: "Something went wrong, please try again!!!" });
           } else {
             const newValues = {
-              $set: { hashedPassword: hash, isValidated: false }
+              $set: { hashedPassword: hash, isValidated: false },
             };
 
-            User.updateOne({ email: req.body.email }, newValues, function(
+            User.updateOne({ email: req.body.email }, newValues, function (
               err,
               success
             ) {
               if (err) {
                 res.status(400).send({
-                  message: "Something went wrong, please try again!!!"
+                  message: "Something went wrong, please try again!!!",
                 });
               } else {
                 res.status(200).send("Password updated!!!");
@@ -212,11 +212,11 @@ function reset(req, res) {
         // In frontend check status, call send_otp api and load otp component.
         res.status(400).send({
           message: "Please verify with otp to update passwords",
-          status: "1"
+          status: "1",
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(400).send({ message: "Something went wrong!!!" });
     });
 }
@@ -226,9 +226,9 @@ router.get("/login", login);
 function login(req, res) {
   req.body = req.query;
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(user => {
+    .then((user) => {
       if (!user || user.isRegistered === false) {
         res.status(400).send({ message: "Account does not exist" });
       } else {
@@ -237,11 +237,11 @@ function login(req, res) {
           const payload = {
             _id: user._id,
             email: user.email,
-            firstname: user.firstname
+            firstname: user.firstname,
           };
           let token = jwt.sign(payload, process.SECRET_KEY, {
             algorithm: "HS256",
-            expiresIn: 86400
+            expiresIn: 86400,
           });
           res.status(200).send(token);
         } else {
@@ -250,10 +250,69 @@ function login(req, res) {
         }
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(400)
         .send({ messsage: "Something went wrong, please try again!!!" });
+    });
+}
+
+router.get("/profile", auth, get_profile);
+
+function get_profile(req, res) {
+  User.findOne({
+    _id: req.user._id,
+  })
+    .then((user) => {
+      if (user) {
+        res.send(user);
+      } else {
+        res.json({ error: "user does not exist" });
+      }
+    })
+    .catch((err) => {
+      res.json("error:" + err);
+    });
+}
+
+router.post("/edit_profile", edit_profile);
+
+function edit_profile(req, res) {
+  User.findOne({
+    email: req.body.email,
+  })
+    .then((user) => {
+      const userData = {
+        $set: {
+          firstName: req.body.firstname,
+          lastName: req.body.lastname,
+          phoneNum: req.body.phonenumber,
+          isVeg: req.body.veg,
+          Address: {
+            Localty: req.body.localty,
+            City: req.body.city,
+            State: req.body.state,
+            Pincode: req.body.pincode,
+          },
+        },
+      };
+      User.updateOne({ email: req.body.email }, userData, function (
+        err,
+        success
+      ) {
+        if (err) {
+          res.status(400).send({
+            message: "Something went wrong, please try again!!!",
+          });
+        } else {
+          res.status(200).send("Details Updated");
+        }
+      });
+    })
+    .catch((err) => {
+      res
+        .status(400)
+        .send({ message: "Something went wrong, please try again!!!" });
     });
 }
 

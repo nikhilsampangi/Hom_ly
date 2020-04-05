@@ -8,43 +8,52 @@ const CustomerSchema = new Schema({
 
   hashedPassword: {
     type: String,
-    required: [true, "Password cannot be empty"]
+    required: [true, "Password cannot be empty"],
   },
 
   passwordResetToken: { type: String, default: null },
 
-  isRegistered: {type: Boolean, default: false},
+  isRegistered: { type: Boolean, default: false },
 
-  isValidated: {type: Boolean, default: false},
+  isValidated: { type: Boolean, default: false },
 
   email: {
     type: String,
     required: [true, "email cannot be empty"],
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         return re.test(v);
       },
-      message: "Please fill a valid email address"
-    }
+      message: "Please fill a valid email address",
+    },
   },
 
   phoneNum: {
     type: Number,
     required: [true, "Phone number cannot be empty"],
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         var re = /^\d{10}$/;
         return re.test(v);
       },
-      message: "Phone number must be 10 digit number"
-    }
+      message: "Phone number must be 10 digit number",
+    },
   },
+
+  Address: [
+    {
+      Localty: { type: String },
+      City: { type: String },
+      State: { type: String },
+      Pincode: { type: String },
+    },
+  ],
 
   favChef: [
     {
-      chefId: { type: Number, required: true }
-    }
+      chefId: { type: Number, required: true },
+    },
   ],
 
   balance: { type: String, default: "0.00" },
@@ -57,11 +66,12 @@ const CustomerSchema = new Schema({
     {
       contrTitle: { type: String, require: true },
       contrDescription: { type: String },
-      contrStatus: { type: Number, default: 0 }
+      contrStatus: { type: Number, default: 0 },
       //   plan to use contrStatus field to store chef id when contract gets taken
-    }
-  ]
-  //   Need to add: Address, Profile photo
+    },
+  ],
+
+  //   Need to add:  Profile photo
 });
 
 CustomerSchema.set("toJSON", { virtuals: true });

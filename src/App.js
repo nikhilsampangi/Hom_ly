@@ -13,6 +13,7 @@ import Cust from "./customer/Cust";
 import Wlt from "./customer/Wallet";
 import Abt from "./customer/About";
 import Prof from "./customer/Profile";
+import Prof_edit from "./customer/EditProfile";
 
 // import PwdReset from "./front_page/PwdReset";
 // import Registration from "./front_page/Register";
@@ -36,6 +37,7 @@ export default class App extends Component {
             <Route exact path="/Wallet" component={Wlt} />
             <Route exact path="/About" component={Abt} />
             <Route exact path="/Profile" component={Prof} />
+            <Route exact path="/Profile/Edit" component={Prof_edit} />
           </Switch>
         </Fragment>
       </Router>
