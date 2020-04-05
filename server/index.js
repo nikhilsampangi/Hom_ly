@@ -3,13 +3,15 @@ const bodyParser = require("body-parser");
 const pino = require("express-pino-logger")();
 const cors = require("cors");
 const mongoose = require("mongoose");
+//remove 
+const path = require('path');
 const port = 8008;
 const app = express();
 
 app.use(pino);
 app.use(cors());
 
-mongoose.connect("mongodb://localhost:27017/ciodb", {
+mongoose.connect("mongodb://localhost:27017/ciodb", { //ciodbTest //mongodb://localhost:27017/ciodbTest
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
