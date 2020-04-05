@@ -157,21 +157,35 @@ function verify(req, res) {
 router.post("/send_otp", resend);
 
 function resend(req, res) {
-  var secret = speakeasy.generateSecret({ length: 20 });
-
-  const newValues = { $set: { passwordResetToken: secret.base32 } };
-
-  User.updateOne({ email: req.body.email }, newValues, function (err, success) {
-    if (err) {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
+  User.findOne({
+    email: req.body.email,
+  }).then((customer) => {
+    if (!customer || (customer && customer.isRegistered === false)) {
+      res.status(400).send({
+        message: "account does not exist, please register!!!",
+        status: "1",
+      });
     } else {
-      var token = gen_OTP(secret.base32);
+      var secret = speakeasy.generateSecret({ length: 20 });
 
-      email.send_verification_token(token, req.body.email);
+      const newValues = { $set: { passwordResetToken: secret.base32 } };
 
-      res.status(200).send("OTP sent!!!");
+      User.updateOne({ email: req.body.email }, newValues, function (
+        err,
+        success
+      ) {
+        if (err) {
+          res
+            .status(400)
+            .send({ message: "Something went wrong, please try again!!!" });
+        } else {
+          var token = gen_OTP(secret.base32);
+
+          email.send_verification_token(token, req.body.email);
+
+          res.status(200).send("OTP sent!!!");
+        }
+      });
     }
   });
 }
