@@ -14,7 +14,7 @@ export default class Profile extends Component {
       email: "email",
       phoneNumber: "phone",
       veg: false,
-      localty: "",
+      localty: "unspecified",
       city: "",
       st: "",
       pinCode: "",
@@ -40,11 +40,16 @@ export default class Profile extends Component {
           email: res.data.email,
           phoneNumber: res.data.phoneNum,
           veg: res.data.isVeg,
-          localty: res.data.Address[0].Localty,
-          city: res.data.Address[0].City,
-          st: res.data.Address[0].State,
-          pinCode: res.data.Address[0].Pincode,
         });
+
+        if (res.data.Address[0]) {
+          this.setState({
+            localty: res.data.Address[0].Localty,
+            city: res.data.Address[0].City,
+            st: res.data.Address[0].State,
+            pinCode: res.data.Address[0].Pincode,
+          });
+        }
       });
   }
 

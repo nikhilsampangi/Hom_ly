@@ -1,12 +1,12 @@
 import React, { Component, Fragment } from "react";
-import Navbar from "./Navbar.js";
+import { Link, Redirect } from "react-router-dom";
+import ChNavbar from "./ChNavbar";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Link, Redirect } from "react-router-dom";
 import change_bg from "../index";
 import Modal from "react-responsive-modal";
 
-export default class EditProfile extends Component {
+export default class ChProf_edit extends Component {
   constructor() {
     super();
     this.state = {
@@ -14,38 +14,34 @@ export default class EditProfile extends Component {
       lastname: "",
       phone: "",
       email: "",
-      veg: false,
       localty: "",
       city: "",
       st: "",
       pinCode: "",
+      bio: "",
+      spec: "",
       responseFlag: false,
       response: "",
       redFlag: false,
     };
     this.handleChange = this.handleChange.bind(this);
-    this.handleRadioChange = this.handleRadioChange.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
     this.updateProfile = this.updateProfile.bind(this);
   }
 
   componentDidMount(event) {
+    change_bg("chf_hm");
     this.handleProfile();
-    change_bg("cust_hm");
   }
 
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  handleRadioChange(event) {
-    this.setState({ veg: !this.state.veg });
-  }
-
   handleProfile(event) {
     axios
-      .get("customer/profile", {
-        headers: { Authorization: Cookies.get("usertoken") },
+      .get("chef/profile", {
+        headers: { Authorization: Cookies.get("cheftoken") },
       })
       .then((res) => {
         this.setState({
@@ -53,9 +49,9 @@ export default class EditProfile extends Component {
           lastname: res.data.lastName,
           email: res.data.email,
           phone: res.data.phoneNum,
-          veg: res.data.isVeg,
+          bio: res.data.bio,
+          spec: res.data.specialities,
         });
-
         if (res.data.Address[0]) {
           this.setState({
             localty: res.data.Address[0].Localty,
@@ -73,14 +69,15 @@ export default class EditProfile extends Component {
       lastname: this.state.lastname,
       email: this.state.email,
       phonenumber: this.state.phone,
-      veg: this.state.veg,
+      bio: this.state.bio,
+      specialities: this.state.spec,
       localty: this.state.localty,
       city: this.state.city,
       state: this.state.st,
       pincode: this.state.pinCode,
     };
     axios
-      .post("/customer/edit_profile", newDetails)
+      .post("/chef/edit_profile", newDetails)
       .then(
         this.setState({
           responseFlag: true,
@@ -97,10 +94,10 @@ export default class EditProfile extends Component {
   }
 
   render() {
-    if (Cookies.get("usertoken")) {
+    if (Cookies.get("cheftoken")) {
       return (
         <Fragment>
-          <Navbar profilePage={true} />
+          <ChNavbar profilePage={true} />
           <Modal
             open={this.state.responseFlag}
             onClose={() => this.setState({ responseFlag: false })}
@@ -122,7 +119,7 @@ export default class EditProfile extends Component {
                   {this.state.response}
                   <br />
                   {this.state.redFlag ? (
-                    <Link to="/Profile">Back to Profile ></Link>
+                    <Link to="/Chef/Profile">Back to Profile ></Link>
                   ) : (
                     <div></div>
                   )}
@@ -191,29 +188,27 @@ export default class EditProfile extends Component {
               </div>
               <br />
               <div className="row">
-                <div className="col-3">Food Preference</div>
-                <div className="radio">
-                  <label className="text-success">
-                    <input
-                      type="radio"
-                      name="pref"
-                      value="Veg"
-                      checked={this.state.veg === true}
-                      onChange={this.handleRadioChange}
-                    />
-                    &nbsp;&nbsp;Vegetarian
-                  </label>
-                  &nbsp;&nbsp;&nbsp;&nbsp;
-                  <label className="text-danger">
-                    <input
-                      type="radio"
-                      name="pref"
-                      value="NonVeg"
-                      checked={this.state.veg === false}
-                      onChange={this.handleRadioChange}
-                    />
-                    &nbsp;&nbsp;Non-Vegetarian
-                  </label>
+                <div className="col">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="bio"
+                    name="bio"
+                    value={this.state.bio}
+                    onChange={this.handleChange}
+                    required
+                  />
+                </div>
+                <div className="col">
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Specialities"
+                    name="spec"
+                    value={this.state.spec}
+                    onChange={this.handleChange}
+                    required
+                  />
                 </div>
               </div>
               <br />
@@ -283,7 +278,7 @@ export default class EditProfile extends Component {
         </Fragment>
       );
     } else {
-      return <Redirect to="/Login" />;
+      return <Redirect to="/Chef/Login" />;
     }
   }
 }

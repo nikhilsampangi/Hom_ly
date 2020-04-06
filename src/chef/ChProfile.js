@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { Link, Redirect } from "react-router-dom";
 import ChNavbar from "./ChNavbar";
+import axios from "axios";
 import Cookies from "js-cookie";
 import change_bg from "../index";
 import "./ChProfile.css";
@@ -13,16 +14,45 @@ export default class ChProfile extends Component {
       lastName: "Last Name",
       email: "email",
       phoneNumber: "phone",
-      localty: "",
+      localty: "not specified !!",
       city: "",
       st: "",
       pinCode: "",
+      bio: "",
+      spec: "",
     };
     this.logOut = this.logOut.bind(this);
+    this.handleProfile = this.handleProfile.bind(this);
   }
 
   componentDidMount(event) {
     change_bg("chf_hm");
+    this.handleProfile();
+  }
+
+  handleProfile(event) {
+    axios
+      .get("chef/profile", {
+        headers: { Authorization: Cookies.get("cheftoken") },
+      })
+      .then((res) => {
+        this.setState({
+          firstName: res.data.firstName,
+          lastName: res.data.lastName,
+          email: res.data.email,
+          phoneNumber: res.data.phoneNum,
+          bio: res.data.bio,
+          spec: res.data.specialities,
+        });
+        if (res.data.Address[0]) {
+          this.setState({
+            localty: res.data.Address[0].Localty,
+            city: res.data.Address[0].City,
+            st: res.data.Address[0].State,
+            pinCode: res.data.Address[0].Pincode,
+          });
+        }
+      });
   }
 
   logOut(event) {
@@ -107,10 +137,16 @@ export default class ChProfile extends Component {
                           </div>
                         </li>
                         <li style={{ fontSize: "1.2em", padding: "4%" }}>
-                          Bio :
+                          Bio&nbsp;:&nbsp;
+                          <span style={{ color: "dimgrey" }}>
+                            {this.state.bio}
+                          </span>
                         </li>
                         <li style={{ fontSize: "1.2em", padding: "4%" }}>
-                          Specialities
+                          Specialities&nbsp;:&nbsp;
+                          <span style={{ color: "dimgrey" }}>
+                            {this.state.spec}
+                          </span>
                         </li>
                         <li
                           style={{

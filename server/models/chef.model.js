@@ -8,7 +8,7 @@ const ChefSchema = new Schema({
 
   hashedPassword: {
     type: String,
-    required: [true, "Password cannot be empty"]
+    required: [true, "Password cannot be empty"],
   },
 
   passwordResetToken: { type: String, default: null },
@@ -21,39 +21,48 @@ const ChefSchema = new Schema({
     type: String,
     required: [true, "email cannot be empty"],
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         return re.test(v);
       },
-      message: "Please fill a valid email address"
-    }
+      message: "Please fill a valid email address",
+    },
   },
 
   phoneNum: {
     type: Number,
     required: [true, "Phone number cannot be empty"],
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         var re = /^\d{10}$/;
         return re.test(v);
       },
-      message: "Phone number must be 10 digit number"
-    }
+      message: "Phone number must be 10 digit number",
+    },
   },
+
+  Address: [
+    {
+      Localty: { type: String },
+      City: { type: String },
+      State: { type: String },
+      Pincode: { type: String },
+    },
+  ],
 
   bio: {
     type: String,
-    default: "Not Specified"
+    default: "Not Specified",
   },
   specialities: {
     type: String,
-    default: "Not Specified"
+    default: "Not Specified",
   },
 
   expertiseLevel: {
     type: String,
     enum: ["Freelancer", "CIO Certified Chef"],
-    default: "Freelancer"
+    default: "Freelancer",
   },
 
   menu: [
@@ -62,9 +71,9 @@ const ChefSchema = new Schema({
       itemDescr: { type: String },
       itemCost: { type: Number },
       // Need to add food items photo
-      isVeg: { type: Boolean, default: true }
-    }
-  ]
+      isVeg: { type: Boolean, default: true },
+    },
+  ],
   //   Need to add: Address, Profile photo
 });
 

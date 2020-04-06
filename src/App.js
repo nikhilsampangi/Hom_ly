@@ -6,6 +6,7 @@ import FrontPage from "./front_page/FrontPage";
 import Chef_login from "./authentication/Chef_login";
 import Chef_reg from "./authentication/Chef_reg";
 import ChProfile from "./chef/ChProfile";
+import ChProf_edit from "./chef/ChProf_edit";
 import ChContracts from "./chef/ChContracts";
 import ChMenu from "./chef/ChMenu";
 import ChAnalytics from "./chef/ChAnalytics";
@@ -32,6 +33,7 @@ export default class App extends Component {
             <Route exact path="/Chef/Register" component={Chef_reg} />
             {/* Chef url's */}
             <Route exact path="/Chef/Profile" component={ChProfile} />
+            <Route exact path="/Chef/Profile/Edit" component={ChProf_edit} />
             <Route exact path="/Chef/Contracts" component={ChContracts} />
             <Route exact path="/Chef/Menu" component={ChMenu} />
             <Route exact path="/Chef/Analytics" component={ChAnalytics} />
