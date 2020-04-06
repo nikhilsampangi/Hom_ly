@@ -1,0 +1,10 @@
+.chf_lg {
+  background: rgb(253, 253, 253);
+  background-image: url("../assets/auth_bg.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  overflow: hidden;
+  background-position-x: left;
+  background-position-y: bottom;
+
+}
