@@ -316,4 +316,21 @@ function edit_profile(req, res) {
     });
 }
 
+router.post("/update_status", status_update);
+
+function status_update(req, res) {
+  const status = {
+    $set: {
+      workingStatus: req.body.status,
+    },
+  };
+  Chef.updateOne({ email: req.body.email }, status)
+    .then(res.status(200).send("Status Updated"))
+    .catch((err) => {
+      res
+        .status(400)
+        .send({ message: "Something went wrong, please try again!!!" });
+    });
+}
+
 module.exports = router;

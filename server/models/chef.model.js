@@ -60,9 +60,13 @@ const ChefSchema = new Schema({
   },
 
   expertiseLevel: {
-    type: String,
-    enum: ["Freelancer", "CIO Certified Chef"],
-    default: "Freelancer",
+    type: Boolean,
+    default: false,
+  },
+
+  workingStatus: {
+    type: Boolean,
+    default: false,
   },
 
   menu: [
@@ -72,6 +76,15 @@ const ChefSchema = new Schema({
       itemCost: { type: Number },
       // Need to add food items photo
       isVeg: { type: Boolean, default: true },
+    },
+  ],
+
+  rating: { type: Number, default: 0 },
+
+  feedbacks: [
+    {
+      date: { type: Date, default: Date.now, required: true },
+      content: { type: String, default: "No Feedback given", required: true },
     },
   ],
   //   Need to add: Address, Profile photo

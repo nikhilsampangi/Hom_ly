@@ -5,6 +5,8 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import change_bg from "../index";
 import "./ChProfile.css";
+import Rating from "react-rating";
+import Switch from "react-switch";
 
 export default class ChProfile extends Component {
   constructor() {
@@ -20,9 +22,13 @@ export default class ChProfile extends Component {
       pinCode: "",
       bio: "",
       spec: "",
+      level: false,
+      status: false,
+      rating: 0,
     };
     this.logOut = this.logOut.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
+    this.handleStateCheck = this.handleStateCheck.bind(this);
   }
 
   componentDidMount(event) {
@@ -43,16 +49,31 @@ export default class ChProfile extends Component {
           phoneNumber: res.data.phoneNum,
           bio: res.data.bio,
           spec: res.data.specialities,
+          rating: res.data.rating,
+          level: res.data.expertiseLevel,
+          status: res.data.workingStatus,
         });
-        if (res.data.Address[0]) {
+        try {
           this.setState({
             localty: res.data.Address[0].Localty,
             city: res.data.Address[0].City,
             st: res.data.Address[0].State,
             pinCode: res.data.Address[0].Pincode,
           });
+        } catch (err) {
+          console.log(err);
         }
       });
+  }
+
+  handleStateCheck(event) {
+    const status_upd = {
+      email: this.state.email,
+      status: !this.state.status,
+    };
+    axios
+      .post("chef/update_status", status_upd)
+      .then(this.setState({ status: !this.state.status }));
   }
 
   logOut(event) {
@@ -170,7 +191,7 @@ export default class ChProfile extends Component {
                 <br />
                 <br />
                 <div>
-                  <div className="card" style={{ fontFamily: "Sen" }}>
+                  {/* <div className="card" style={{ fontFamily: "Sen" }}>
                     <div
                       className="p-card-header"
                       style={{ textAlign: "center", paddingTop: "7%" }}
@@ -201,7 +222,7 @@ export default class ChProfile extends Component {
                         View Contract Status
                       </button>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
                 <br />
                 <br />
@@ -209,11 +230,90 @@ export default class ChProfile extends Component {
                 <br />
               </div>
               <div className="col">Today's Menu</div>
-              <div className="col-2" style={{ fontFamily: "Sen" }}>
+              <div className="col-3" style={{ fontFamily: "Sen" }}>
+                <div>
+                  <div className="card" style={{ fontFamily: "Sen" }}>
+                    <div
+                      className="p-card-body"
+                      style={{
+                        paddingTop: "4%",
+                        paddingBottom: "7%",
+                        textAlign: "center",
+                      }}
+                    >
+                      Current Status -
+                      <br />
+                      {this.state.status ? (
+                        <span className="text-success">
+                          <i className="fas fa-pizza-slice"></i>&nbsp;Cooking
+                        </span>
+                      ) : (
+                        <span className="text-danger">
+                          <i className="far fa-times-circle"></i>&nbsp;Inactive
+                        </span>
+                      )}
+                      &nbsp;&nbsp;&nbsp;
+                      <Switch
+                        checked={this.state.status}
+                        onChange={this.handleStateCheck}
+                        height={15}
+                        width={35}
+                      />
+                      <br />
+                      <br />
+                      Chef Level
+                      <br />
+                      <span>
+                        <i class="fal fa-bread-loaf"></i>
+                        {this.state.level ? (
+                          <span className="text-success">
+                            <i className="fas fa-trophy"></i>&nbsp;Certified
+                            Chef
+                          </span>
+                        ) : (
+                          <span className="text-primary">
+                            <i class="fas fa-bread-slice"></i>&nbsp;Beginner
+                          </span>
+                        )}
+                        <br />
+                        <Link
+                          to="/Chef/Validate"
+                          className="btn btn-sm btn-dark"
+                          style={{ borderRadius: "0", marginTop: "10px" }}
+                        >
+                          Get Certified
+                        </Link>
+                      </span>
+                      <br />
+                      <br />
+                      Rating
+                      <br />
+                      <Rating
+                        placeholderRating={this.state.rating}
+                        readonly={true}
+                        emptySymbol={<i class="far fa-star"></i>}
+                        fullSymbol={<i class="fas fa-star"></i>}
+                      />
+                      &nbsp;{this.state.rating}
+                      <br />
+                      <br />
+                      <Link
+                        to="/Chef/Analytics/Feedbacks"
+                        className="btn btn-outline-info"
+                        style={{ borderRadius: "0" }}
+                      >
+                        View Feedbacks
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+
+                <br />
+                <br />
                 <div>
                   <div
                     className="card border-dark"
-                    style={{ backgroundColor: "#343a40" }}
+                    style={{ backgroundColor: "#343a40", borderRadius: "0" }}
                   >
                     <div
                       className="p-card-body"
