@@ -58,6 +58,7 @@ export default class Cust_login extends Component {
     event.preventDefault();
   }
   requestOTP() {
+    console.log("send otp api called!!!")
     axios
       .post("/customer/send_otp", { email: this.state.email })
       .then(res => {
@@ -76,7 +77,7 @@ export default class Cust_login extends Component {
 
   verifyOTP() {
     axios
-      .post("/customer/verify_reset_password_otp", {
+      .post("/customer/verify_otp", {
         email: this.state.email,
         OTP: this.state.otp
       })
@@ -303,9 +304,12 @@ export default class Cust_login extends Component {
               </form>
               <hr />
               <center>
-                <a href="http://localhost:8008/customer/auth/google" className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0">
-                <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
-                </a>
+                <button
+                  className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0"
+                  type="submit"
+                >
+                  <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
+                </button>
               </center>
             </div>
           )}

@@ -8,6 +8,7 @@ const speakeasy = require("speakeasy");
 const passport = require('passport');
 const passportSetup= require("../../config/customerPassport");
 const User = require("../../models/customer.model");
+const Customer= require("../../joi_models/customer.model"); 
 
 const email = require("../send_email");
 
@@ -68,11 +69,19 @@ function register(req, res) {
             }
           };
 
+          try {
+            const value = Customer.validateAsync(userData);
+            console.log(value);
+          }
+          catch (error) { 
+            console.log(error);
+          }
+
           User.create(userData)
             .then(customer => {
-              var token = gen_OTP(customer.internalAuth[0].passwordResetToken);
+              var token = gen_OTP(customer.internalAuth.passwordResetToken);
 
-              email.send_verification_token(token, customer.email);
+              // email.send_verification_token(token, customer.email);
 
               res
                 .status(200)
@@ -201,6 +210,7 @@ function resend(req, res) {
         status: "1"
       });
     }else {
+      console.log("\n"+"send_otp for customer"+customer+"\n");
       var secret = speakeasy.generateSecret({ length: 20 });
 
       const newValues = { $set: { "internalAuth.$.passwordResetToken": secret.base32 } };

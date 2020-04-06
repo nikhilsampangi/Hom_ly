@@ -10,28 +10,30 @@ const CustomerSchema = new Schema({
 
   isValidated: {type: Boolean, default: false},
 
-  internalAuth:[{
+  internalAuth:{
       
     hashedPassword: {
       type: String,
-      required: [true, "Password cannot be empty"]
+      default: null
+      // required: [true, "Password cannot be empty"]
     }, 
 
     passwordResetToken: { type: String, default: null },
 
     phoneNum: {
       type: Number,
-      required: [true, "Phone number cannot be empty"],
-      validate: {
-        validator: function(v) {
-          var re = /^\d{10}$/;
-          return re.test(v);
-        },
-        message: "Phone number must be 10 digit number"
-      }
+      default: null
+      // required: [true, "Phone number cannot be empty"],
+      // validate: {
+      //   validator: function(v) {
+      //     var re = /^\d{10}$/;
+      //     return re.test(v);
+      //   },
+      //   message: "Phone number must be 10 digit number"
+      // }
     }
 
-}],
+},
 
 googleOAuth: {
   
