@@ -209,6 +209,23 @@ class ListItems extends Component {
 }
 
 class Item extends Component {
+  constructor() {
+    super();
+    this.deleteItem = this.deleteItem.bind(this);
+    this.editItem = this.editItem.bind(this);
+  }
+
+  deleteItem(event) {
+    let temp = {
+      itemName: this.props.name,
+    };
+    axios
+      .post("chef/delete_item", temp, {
+        headers: { Authorization: Cookies.get("cheftoken") },
+      })
+      .then(window.location.reload(false));
+  }
+
   render() {
     return (
       <div className="row">
@@ -263,6 +280,7 @@ class Item extends Component {
                   <button
                     className="btn btn-outline-danger btn-block"
                     style={{ borderRadius: "0" }}
+                    onClick={this.deleteItem}
                   >
                     Delete Item
                   </button>
@@ -276,3 +294,5 @@ class Item extends Component {
     );
   }
 }
+
+class EditModal extends Component {}

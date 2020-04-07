@@ -353,4 +353,21 @@ function add_item(req, res) {
     .catch(res.status(400).send("error: Item not added"));
 }
 
+router.post("/delete_item", auth, delete_item);
+
+function delete_item(req, res) {
+  Chef.updateOne(
+    { _id: req.user._id },
+    {
+      $pull: {
+        menu: {
+          itemName: req.body.itemName,
+        },
+      },
+    }
+  )
+    .then(res.status(200).send("Item Removed"))
+    .catch(res.status(400).send("error: Item not removed"));
+}
+
 module.exports = router;
