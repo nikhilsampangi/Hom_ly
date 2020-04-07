@@ -27,6 +27,7 @@ export default class ChProfile extends Component {
       level: false,
       status: false,
       rating: 0,
+      arr: [],
     };
     this.logOut = this.logOut.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
@@ -54,6 +55,7 @@ export default class ChProfile extends Component {
           rating: res.data.rating,
           level: res.data.expertiseLevel,
           status: res.data.workingStatus,
+          arr: res.data.menu,
         });
         try {
           this.setState({
@@ -85,6 +87,18 @@ export default class ChProfile extends Component {
   }
 
   render() {
+    var items = [];
+    for (let i = 0; i < this.state.arr.length; i++) {
+      items.push(
+        <Item
+          name={this.state.arr[i].itemName}
+          cost={this.state.arr[i].itemCost}
+          descr={this.state.arr[i].itemDescr}
+          isVeg={this.state.arr[i].isVeg}
+        />
+      );
+      items.push(<br />);
+    }
     if (Cookies.get("cheftoken")) {
       return (
         <Fragment>
@@ -225,43 +239,7 @@ export default class ChProfile extends Component {
                   <h3>Menu</h3>
                 </center>
                 <br />
-                <div className="card" style={{ fontFamily: "Sen" }}>
-                  <div
-                    className="p-card-body"
-                    style={{
-                      paddingTop: "4%",
-                      paddingBottom: "7%",
-                    }}
-                  >
-                    <div
-                      className="row"
-                      style={{ marginLeft: "0", marginRight: "0" }}
-                    >
-                      <div
-                        className="col-4"
-                        style={{ padding: "3%", textAlign: "center" }}
-                      >
-                        <i
-                          className="fas fa-pizza-slice"
-                          style={{ fontSize: "6em" }}
-                        ></i>
-                      </div>
-                      <div className="col-8">
-                        <h5>Item Name</h5>
-                        <ul style={{ color: "dimgrey" }}>
-                          <li>Item Description</li>
-                        </ul>
-                        <NonVeg style={{ height: "25px", width: "25px" }} />
-                        <div
-                          className="text-success"
-                          style={{ textAlign: "right", paddingRight: "25px" }}
-                        >
-                          <i className="fas fa-rupee-sign"></i>&nbsp;69.69
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {items}
               </div>
               <div className="col-3" style={{ fontFamily: "Sen" }}>
                 <div>
@@ -372,5 +350,47 @@ export default class ChProfile extends Component {
     } else {
       return <Redirect to="/Chef/Login" />;
     }
+  }
+}
+
+class Item extends Component {
+  render() {
+    return (
+      <div className="card" style={{ fontFamily: "Sen" }}>
+        <div
+          className="p-card-body"
+          style={{
+            paddingTop: "4%",
+            paddingBottom: "7%",
+          }}
+        >
+          <div className="row" style={{ marginLeft: "0", marginRight: "0" }}>
+            <div
+              className="col-4"
+              style={{ padding: "3%", textAlign: "center" }}
+            >
+              <i className="fas fa-pizza-slice" style={{ fontSize: "6em" }}></i>
+            </div>
+            <div className="col-8">
+              <h5>{this.props.name}</h5>
+              <ul style={{ color: "dimgrey" }}>
+                <li>{this.props.descr}</li>
+              </ul>
+              {this.props.isVeg ? (
+                <Veg style={{ height: "25px", width: "25px" }} />
+              ) : (
+                <NonVeg style={{ height: "25px", width: "25px" }} />
+              )}
+              <div
+                className="text-success"
+                style={{ textAlign: "right", paddingRight: "25px" }}
+              >
+                <i className="fas fa-rupee-sign"></i>&nbsp;{this.props.cost}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 }

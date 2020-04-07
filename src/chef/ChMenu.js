@@ -86,7 +86,10 @@ export default class ChMenu extends Component {
             closeOnOverlayClick={true}
             center
           >
-            <div className="container" style={{ width: "57vw", padding: "5%" }}>
+            <div
+              className="container"
+              style={{ width: "60vw", padding: "5%", display: "table-cell" }}
+            >
               <h3>Add Item</h3>
               <br />
               <div className="row">
@@ -169,16 +172,43 @@ export default class ChMenu extends Component {
 }
 
 class ListItems extends Component {
-  componentDidMount(event) {
-    // axios
-    //   .get("/chef/profile", {
-    //     headers: { Authorization: Cookies.get("cheftoken") },
-    //   })
-    //   .then((res) => {
-    //     let arr = res.data.menu;
-    //     // console(arr.size());
-    //   });
+  constructor() {
+    super();
+    this.state = {
+      arr: [],
+    };
   }
+
+  componentDidMount(event) {
+    axios
+      .get("/chef/profile", {
+        headers: { Authorization: Cookies.get("cheftoken") },
+      })
+      .then((res) => {
+        var arr = res.data.menu;
+        this.setState({
+          arr: res.data.menu,
+        });
+      });
+  }
+  render() {
+    var items = [];
+    for (let i = 0; i < this.state.arr.length; i++) {
+      items.push(
+        <Item
+          name={this.state.arr[i].itemName}
+          cost={this.state.arr[i].itemCost}
+          descr={this.state.arr[i].itemDescr}
+          isVeg={this.state.arr[i].isVeg}
+        />
+      );
+      items.push(<br />);
+    }
+    return <Fragment>{items}</Fragment>;
+  }
+}
+
+class Item extends Component {
   render() {
     return (
       <div className="row">
@@ -205,16 +235,20 @@ class ListItems extends Component {
                   ></i>
                 </div>
                 <div className="col-6">
-                  <h5>Item Name</h5>
+                  <h5>{this.props.name}</h5>
                   <ul style={{ color: "dimgrey" }}>
-                    <li>Item Description</li>
+                    <li>{this.props.descr}</li>
                   </ul>
-                  <NonVeg style={{ height: "25px", width: "25px" }} />
+                  {this.props.isVeg ? (
+                    <Veg style={{ height: "25px", width: "25px" }} />
+                  ) : (
+                    <NonVeg style={{ height: "25px", width: "25px" }} />
+                  )}
                   <div
                     className="text-success"
                     style={{ textAlign: "right", paddingRight: "25px" }}
                   >
-                    <i class="fas fa-rupee-sign"></i>&nbsp;69.69
+                    <i class="fas fa-rupee-sign"></i>&nbsp;{this.props.cost}
                   </div>
                 </div>
                 <div className="col-3" style={{ padding: "2%" }}>
