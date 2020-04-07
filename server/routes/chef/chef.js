@@ -370,4 +370,31 @@ function delete_item(req, res) {
     .catch(res.status(400).send("error: Item not removed"));
 }
 
+router.get("/avail_items", avail_items);
+
+function avail_items(req, res) {
+  Chef.find(
+    { workingStatus: true },
+    { firstName: 1, lastName: 1, menu: 1 }
+  ).then((items) => {
+    if (items) {
+      res.send(items);
+    } else {
+      res.json({ error: "no chefs are cooking right now" });
+    }
+  });
+
+  // Chef.find({ workingStatus: { $eq: true } })
+  //   .then((chefs) => {
+  //     if (chefs) {
+  //       res.send(chefs);
+  //     } else {
+  //       res.json({ error: "no chefs are cooking right now" });
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     res.json("error: " + err);
+  //   });
+}
+
 module.exports = router;

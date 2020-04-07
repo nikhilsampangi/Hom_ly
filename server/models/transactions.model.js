@@ -9,7 +9,8 @@ const TransactionSchema = new Schema({
   items: [
     {
       itemName: { type: String, required: true },
-      itemCost: { type: Number },
+      itemQnty: { type: Number, required: true, default: 1 },
+      itemCost: { type: Number, required: true },
     },
   ],
   rating: {
