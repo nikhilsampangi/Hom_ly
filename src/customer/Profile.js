@@ -274,7 +274,7 @@ export default class Profile extends Component {
                 <div>
                   <div
                     className="card border-dark"
-                    style={{ backgroundColor: "#343a40" }}
+                    style={{ backgroundColor: "#343a40", borderRadius: "0" }}
                   >
                     <div
                       className="p-card-body"

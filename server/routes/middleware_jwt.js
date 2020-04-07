@@ -11,7 +11,8 @@ function auth(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.SECRET_KEY);
     req.user = decoded;
-    next();
+    res.end();
+    // next();
   } catch (event) {
     res.status(400).json({ msg: "token is not valid" });
   }

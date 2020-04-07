@@ -64,10 +64,12 @@ const CustomerSchema = new Schema({
 
   contracts: [
     {
+      date: { type: Date, default: Date.now, required: true },
       contrTitle: { type: String, require: true },
+      contrType: { type: Number, default: 0, required: true },
       contrDescription: { type: String },
       contrStatus: { type: Number, default: 0 },
-      //   plan to use contrStatus field to store chef id when contract gets taken
+      // need another attribute for storing chef id's who are in contact with the customer
     },
   ],
 

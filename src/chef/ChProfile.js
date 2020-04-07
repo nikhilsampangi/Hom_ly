@@ -7,6 +7,8 @@ import change_bg from "../index";
 import "./ChProfile.css";
 import Rating from "react-rating";
 import Switch from "react-switch";
+import { ReactComponent as Veg } from "../assets/Veg.svg";
+import { ReactComponent as NonVeg } from "../assets/Nonveg.svg";
 
 export default class ChProfile extends Component {
   constructor() {
@@ -92,7 +94,7 @@ export default class ChProfile extends Component {
           <br />
           <br />
           <br />
-          <div className="container" style={{ textAlign: "-moz-center" }}>
+          <div className="container">
             <div className="row">
               <div className="col-4">
                 <div>
@@ -191,12 +193,12 @@ export default class ChProfile extends Component {
                 <br />
                 <br />
                 <div>
-                  {/* <div className="card" style={{ fontFamily: "Sen" }}>
+                  <div className="card" style={{ fontFamily: "Sen" }}>
                     <div
                       className="p-card-header"
                       style={{ textAlign: "center", paddingTop: "7%" }}
                     >
-                      <h3>Commercial Column</h3>
+                      <h3>Current Orders</h3>
                     </div>
                     <div
                       className="p-card-body"
@@ -206,30 +208,61 @@ export default class ChProfile extends Component {
                         textAlign: "center",
                       }}
                     >
-                      <button
-                        className="btn btn-outline-info"
-                        style={{ borderRadius: "0" }}
-                      >
-                        <i className="far fa-plus-square"></i>&nbsp;Post
-                        Contracts
-                      </button>
-                      <br />
-                      <br />
-                      <button
-                        className="btn btn-outline-warning"
-                        style={{ borderRadius: "0" }}
-                      >
-                        View Contract Status
-                      </button>
+                      <ul>
+                        <li>List items</li>
+                        <li>List items</li>
+                        <li>List items</li>
+                        <li>List items</li>
+                      </ul>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
                 <br />
                 <br />
-                <br />
-                <br />
               </div>
-              <div className="col">Today's Menu</div>
+              <div className="col">
+                <center>
+                  <h3>Menu</h3>
+                </center>
+                <br />
+                <div className="card" style={{ fontFamily: "Sen" }}>
+                  <div
+                    className="p-card-body"
+                    style={{
+                      paddingTop: "4%",
+                      paddingBottom: "7%",
+                    }}
+                  >
+                    <div
+                      className="row"
+                      style={{ marginLeft: "0", marginRight: "0" }}
+                    >
+                      <div
+                        className="col-4"
+                        style={{ padding: "3%", textAlign: "center" }}
+                      >
+                        <i
+                          class="fas fa-pizza-slice"
+                          style={{ fontSize: "6em" }}
+                        ></i>
+                      </div>
+                      <div className="col-8">
+                        <h5>Item Name</h5>
+                        <ul style={{ color: "dimgrey" }}>
+                          <li>Item Description</li>
+                        </ul>
+                        <NonVeg style={{ height: "25px", width: "25px" }} />
+                        <div
+                          className="text-success"
+                          style={{ textAlign: "right", paddingRight: "25px" }}
+                        >
+                          <i class="fas fa-rupee-sign"></i>&nbsp;69.69
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               <div className="col-3" style={{ fontFamily: "Sen" }}>
                 <div>
                   <div className="card" style={{ fontFamily: "Sen" }}>
@@ -307,7 +340,6 @@ export default class ChProfile extends Component {
                     </div>
                   </div>
                 </div>
-
                 <br />
                 <br />
                 <div>
