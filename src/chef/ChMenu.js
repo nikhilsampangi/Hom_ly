@@ -36,7 +36,10 @@ export default class ChMenu extends Component {
       .post("/chef/add_item", item, {
         headers: { Authorization: Cookies.get("cheftoken") },
       })
-      .then(this.setState({ addItemFlag: false }));
+      .then(() => {
+        this.setState({ addItemFlag: false, rrFlag: true });
+        window.location.reload(false);
+      });
   }
 
   handleChange(event) {
@@ -185,7 +188,6 @@ class ListItems extends Component {
         headers: { Authorization: Cookies.get("cheftoken") },
       })
       .then((res) => {
-        var arr = res.data.menu;
         this.setState({
           arr: res.data.menu,
         });
@@ -211,8 +213,57 @@ class ListItems extends Component {
 class Item extends Component {
   constructor() {
     super();
+    this.state = {
+      editItemFlag: false,
+      itemName: "",
+      itemCost: "",
+      itemDescr: "",
+      isVeg: false,
+    };
     this.deleteItem = this.deleteItem.bind(this);
+    this.handleEdit = this.handleEdit.bind(this);
     this.editItem = this.editItem.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSwitchChange = this.handleSwitchChange.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  handleSwitchChange(event) {
+    this.setState({ isVeg: !this.state.isVeg });
+  }
+
+  handleEdit(event) {
+    this.setState({
+      itemName: this.props.name,
+      itemCost: this.props.cost,
+      itemDescr: this.props.descr,
+      isVeg: this.props.isVeg,
+      editItemFlag: true,
+    });
+  }
+
+  editItem(event) {
+    let temp1 = {
+      itemName: this.props.name,
+    };
+    axios.post("chef/delete_item", temp1, {
+      headers: { Authorization: Cookies.get("cheftoken") },
+    });
+
+    let temp2 = {
+      itemName: this.state.itemName,
+      itemCost: this.state.itemCost,
+      itemDescr: this.state.itemDescr,
+      isVeg: this.state.isVeg,
+    };
+    axios
+      .post("/chef/add_item", temp2, {
+        headers: { Authorization: Cookies.get("cheftoken") },
+      })
+      .then(window.location.reload(false));
   }
 
   deleteItem(event) {
@@ -228,71 +279,154 @@ class Item extends Component {
 
   render() {
     return (
-      <div className="row">
-        <div className="col-1" />
-        <div className="col">
-          <div className="card" style={{ fontFamily: "Sen" }}>
-            <div
-              className="p-card-body"
-              style={{
-                padding: "2%",
-              }}
-            >
+      <Fragment>
+        <div className="row">
+          <div className="col-1" />
+          <div className="col">
+            <div className="card" style={{ fontFamily: "Sen" }}>
               <div
-                className="row"
-                style={{ marginLeft: "0", marginRight: "0" }}
+                className="p-card-body"
+                style={{
+                  padding: "2%",
+                }}
               >
                 <div
-                  className="col-3"
-                  style={{ padding: "3%", textAlign: "center" }}
+                  className="row"
+                  style={{ marginLeft: "0", marginRight: "0" }}
                 >
-                  <i
-                    className="fas fa-pizza-slice"
-                    style={{ fontSize: "6em" }}
-                  ></i>
-                </div>
-                <div className="col-6">
-                  <h5>{this.props.name}</h5>
-                  <ul style={{ color: "dimgrey" }}>
-                    <li>{this.props.descr}</li>
-                  </ul>
-                  {this.props.isVeg ? (
-                    <Veg style={{ height: "25px", width: "25px" }} />
-                  ) : (
-                    <NonVeg style={{ height: "25px", width: "25px" }} />
-                  )}
                   <div
-                    className="text-success"
-                    style={{ textAlign: "right", paddingRight: "25px" }}
+                    className="col-3"
+                    style={{ padding: "3%", textAlign: "center" }}
                   >
-                    <i class="fas fa-rupee-sign"></i>&nbsp;{this.props.cost}
+                    <i
+                      className="fas fa-pizza-slice"
+                      style={{ fontSize: "6em" }}
+                    ></i>
                   </div>
-                </div>
-                <div className="col-3" style={{ padding: "2%" }}>
-                  <button
-                    className="btn btn-info btn-block"
-                    style={{ borderRadius: "0" }}
-                  >
-                    Edit Item
-                  </button>
-                  <br />
-
-                  <button
-                    className="btn btn-outline-danger btn-block"
-                    style={{ borderRadius: "0" }}
-                    onClick={this.deleteItem}
-                  >
-                    Delete Item
-                  </button>
+                  <div className="col-6">
+                    <h5>{this.props.name}</h5>
+                    <ul style={{ color: "dimgrey" }}>
+                      <li>{this.props.descr}</li>
+                    </ul>
+                    {this.props.isVeg ? (
+                      <Veg style={{ height: "25px", width: "25px" }} />
+                    ) : (
+                      <NonVeg style={{ height: "25px", width: "25px" }} />
+                    )}
+                    <div
+                      className="text-success"
+                      style={{ textAlign: "right", paddingRight: "25px" }}
+                    >
+                      <i class="fas fa-rupee-sign"></i>&nbsp;{this.props.cost}
+                    </div>
+                  </div>
+                  <div className="col-3" style={{ padding: "2%" }}>
+                    <button
+                      className="btn btn-info btn-block"
+                      style={{ borderRadius: "0" }}
+                      onClick={this.handleEdit}
+                    >
+                      Edit Item
+                    </button>
+                    <br />
+                    <button
+                      className="btn btn-outline-danger btn-block"
+                      style={{ borderRadius: "0" }}
+                      onClick={this.deleteItem}
+                    >
+                      Delete Item
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+          <div className="col-1" />
         </div>
-        <div className="col-1" />
-      </div>
+        <Modal
+          open={this.state.editItemFlag}
+          onClose={() => this.setState({ editItemFlag: false })}
+          closeOnOverlayClick={true}
+          center
+        >
+          <div
+            className="container"
+            style={{ width: "60vw", padding: "5%", display: "table-cell" }}
+          >
+            <h3>Edit Item</h3>
+            <br />
+            <div className="row">
+              <div className="col">
+                <input
+                  type="text"
+                  placeholder="Item Name"
+                  className="form-control"
+                  name="itemName"
+                  value={this.state.itemName}
+                  onChange={this.handleChange}
+                />
+              </div>
+              <div className="col">
+                <input
+                  type="text"
+                  placeholder="Item Cost"
+                  className="form-control"
+                  name="itemCost"
+                  value={this.state.itemCost}
+                  onChange={this.handleChange}
+                />
+              </div>
+            </div>
+            <br />
+            <div className="row">
+              <div className="col">
+                <input
+                  type="text"
+                  placeholder="Item Description"
+                  className="form-control"
+                  name="itemDescr"
+                  value={this.state.itemDescr}
+                  onChange={this.handleChange}
+                />
+              </div>
+            </div>
+            <br />
+            <div className="row">
+              <div className="col">
+                <span>
+                  <Veg style={{ height: "25px", width: "25px" }} />
+                  &nbsp;Vegetarian
+                </span>
+                &nbsp;&nbsp;
+                <Switch
+                  checked={this.state.isVeg}
+                  onChange={this.handleSwitchChange}
+                  height={20}
+                  width={40}
+                />
+              </div>
+              <div className="col">
+                <span>Item Image</span>
+                <input type="file" className="form-control" />
+              </div>
+            </div>
+            <br />
+            <div className="row">
+              <div className="col-3" />
+              <div className="col">
+                <button
+                  className="btn btn-outline-dark btn-block"
+                  style={{ borderRadius: "0" }}
+                  onClick={this.editItem}
+                >
+                  Edit
+                </button>
+              </div>
+              <div className="col-3" />
+            </div>
+          </div>
+        </Modal>
+      </Fragment>
     );
   }
 }
-
-class EditModal extends Component {}
