@@ -10,6 +10,19 @@ const passportSetup= require("../../config/customerPassport");
 const User = require("../../models/customer.model");
 const Customer= require("../../joi_models/customer.model"); 
 
+const MID= "VVdwCu48262795226018";
+const MC= "MlZSaA0@T0WuIBW1";
+
+const https= require('https');
+
+ 
+/**
+* import checksum generation utility
+* You can get this utility from https://developer.paytm.com/docs/checksum/
+*/
+const checksum_lib = require('../paytm_config/checksum');
+
+
 const email = require("../send_email");
 
 router.use(cors());
@@ -342,6 +355,106 @@ function profile(req, res) {
         .send({ messsage: "Something went wrong, please try again!!!" });
     });
 }
+
+router.get("/payment",  payment)
+
+function payment(req, res){
+
+      let params ={}
+      params['MID'] = MID,
+      params['WEBSITE'] = 'WEBSTAGING',
+      params['CHANNEL_ID'] = 'WEB',
+      params['INDUSTRY_TYPE_ID'] = 'Retail',
+      params['ORDER_ID'] = 'ORD0009',
+      params['CUST_ID'] = 'CUST0011',
+      params['TXN_AMOUNT'] = '1',
+      params['CALLBACK_URL'] = 'http://localhost:8008/customer/success',
+      params['EMAIL'] = 'xyz@gmail.com',
+      params['MOBILE_NO'] = '9876543211'
+
+      checksum_lib.genchecksum(params, MC ,function(err,checksum){
+          let txn_url = "https://securegw-stage.paytm.in/order/process"
+
+          let form_fields = ""
+          for(x in params)
+          {
+              form_fields += "<input type='hidden' name='"+x+"' value='"+params[x]+"'/>"
+
+          }
+
+          form_fields+="<input type='hidden' name='CHECKSUMHASH' value='"+checksum+"' />"
+
+          var html = '<html><body><center><h1>Please wait! Do not refresh the page</h1></center><form method="post" action="'+txn_url+'" name="f1">'+form_fields +'</form><script type="text/javascript">document.f1.submit()</script></body></html>'
+          res.writeHead(200,{'Content-Type' : 'text/html'})
+          res.write(html)
+          res.end()
+      })
+            
+}
+
+router.post('/success', success)
+
+function success(req, res){
+
+  console.log(req.body);
+  res.send(req.body);
+}
+
+router.get('/status', status)
+
+function status(req, res){
+
+/* initialize an object */
+var paytmParams = {};
+
+/* Find your MID in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys */
+paytmParams["MID"] = MID;
+
+/* Enter your order id which needs to be check status for */
+paytmParams["ORDERID"] = "ORD0009";
+
+/**
+* Generate checksum by parameters we have
+* Find your Merchant Key in your Paytm Dashboard at https://dashboard.paytm.com/next/apikeys 
+*/
+checksum_lib.genchecksum(paytmParams, MC, function(err, checksum){
+    /* put generated checksum value here */
+    paytmParams["CHECKSUMHASH"] = "vP4RTEi6WQ+Y0zgZNWh77OCfdmCrMienOU9fGoLdBEA+orUlD3+9au26/7SGYP6bIA3zE7VNqtzoKvjV4hfUd4iaVPIKIXde7TDk//snLJ0=";
+
+    /* prepare JSON string for request */
+    var post_data = JSON.stringify(paytmParams);
+
+    var options = {
+
+        /* for Staging */
+        hostname: 'securegw-stage.paytm.in',
+
+        /* for Production */
+        // hostname: 'securegw.paytm.in',
+
+        port: 443,
+        path: '/order/status',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': post_data.length
+        }
+    };
+
+    // Set up the request
+    var response = "";
+    var post_req = https.request(options, function(post_res) {
+        post_res.on('data', function (chunk) {
+            response += chunk;
+        });
+
+        post_res.on('end', function(){
+            console.log('Response: ', response);
+        });
+    });
+});
+}
+
 
 /* Google Authentication API. */
 
