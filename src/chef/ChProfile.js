@@ -242,7 +242,7 @@ export default class ChProfile extends Component {
                         style={{ padding: "3%", textAlign: "center" }}
                       >
                         <i
-                          class="fas fa-pizza-slice"
+                          className="fas fa-pizza-slice"
                           style={{ fontSize: "6em" }}
                         ></i>
                       </div>
@@ -256,7 +256,7 @@ export default class ChProfile extends Component {
                           className="text-success"
                           style={{ textAlign: "right", paddingRight: "25px" }}
                         >
-                          <i class="fas fa-rupee-sign"></i>&nbsp;69.69
+                          <i className="fas fa-rupee-sign"></i>&nbsp;69.69
                         </div>
                       </div>
                     </div>
@@ -297,7 +297,7 @@ export default class ChProfile extends Component {
                       Chef Level
                       <br />
                       <span>
-                        <i class="fal fa-bread-loaf"></i>
+                        <i className="fal fa-bread-loaf"></i>
                         {this.state.level ? (
                           <span className="text-success">
                             <i className="fas fa-trophy"></i>&nbsp;Certified
@@ -305,7 +305,7 @@ export default class ChProfile extends Component {
                           </span>
                         ) : (
                           <span className="text-primary">
-                            <i class="fas fa-bread-slice"></i>&nbsp;Beginner
+                            <i className="fas fa-bread-slice"></i>&nbsp;Beginner
                           </span>
                         )}
                         <br />
@@ -324,8 +324,8 @@ export default class ChProfile extends Component {
                       <Rating
                         placeholderRating={this.state.rating}
                         readonly={true}
-                        emptySymbol={<i class="far fa-star"></i>}
-                        fullSymbol={<i class="fas fa-star"></i>}
+                        emptySymbol={<i className="far fa-star"></i>}
+                        fullSymbol={<i className="fas fa-star"></i>}
                       />
                       &nbsp;{this.state.rating}
                       <br />

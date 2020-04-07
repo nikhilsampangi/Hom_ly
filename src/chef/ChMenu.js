@@ -78,64 +78,7 @@ export default class ChMenu extends Component {
             </div>
             <br />
             <br />
-            <div className="row">
-              <div className="col-1" />
-              <div className="col">
-                <div className="card" style={{ fontFamily: "Sen" }}>
-                  <div
-                    className="p-card-body"
-                    style={{
-                      padding: "2%",
-                    }}
-                  >
-                    <div
-                      className="row"
-                      style={{ marginLeft: "0", marginRight: "0" }}
-                    >
-                      <div
-                        className="col-3"
-                        style={{ padding: "3%", textAlign: "center" }}
-                      >
-                        <i
-                          class="fas fa-pizza-slice"
-                          style={{ fontSize: "6em" }}
-                        ></i>
-                      </div>
-                      <div className="col-6">
-                        <h5>Item Name</h5>
-                        <ul style={{ color: "dimgrey" }}>
-                          <li>Item Description</li>
-                        </ul>
-                        <NonVeg style={{ height: "25px", width: "25px" }} />
-                        <div
-                          className="text-success"
-                          style={{ textAlign: "right", paddingRight: "25px" }}
-                        >
-                          <i class="fas fa-rupee-sign"></i>&nbsp;69.69
-                        </div>
-                      </div>
-                      <div className="col-3" style={{ padding: "2%" }}>
-                        <button
-                          className="btn btn-info btn-block"
-                          style={{ borderRadius: "0" }}
-                        >
-                          Edit Item
-                        </button>
-                        <br />
-
-                        <button
-                          className="btn btn-outline-danger btn-block"
-                          style={{ borderRadius: "0" }}
-                        >
-                          Delete Item
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-1" />
-            </div>
+            <ListItems />
           </div>
           <Modal
             open={this.state.addItemFlag}
@@ -222,5 +165,80 @@ export default class ChMenu extends Component {
     } else {
       return <Redirect to="/Chef/Login"></Redirect>;
     }
+  }
+}
+
+class ListItems extends Component {
+  componentDidMount(event) {
+    // axios
+    //   .get("/chef/profile", {
+    //     headers: { Authorization: Cookies.get("cheftoken") },
+    //   })
+    //   .then((res) => {
+    //     let arr = res.data.menu;
+    //     // console(arr.size());
+    //   });
+  }
+  render() {
+    return (
+      <div className="row">
+        <div className="col-1" />
+        <div className="col">
+          <div className="card" style={{ fontFamily: "Sen" }}>
+            <div
+              className="p-card-body"
+              style={{
+                padding: "2%",
+              }}
+            >
+              <div
+                className="row"
+                style={{ marginLeft: "0", marginRight: "0" }}
+              >
+                <div
+                  className="col-3"
+                  style={{ padding: "3%", textAlign: "center" }}
+                >
+                  <i
+                    className="fas fa-pizza-slice"
+                    style={{ fontSize: "6em" }}
+                  ></i>
+                </div>
+                <div className="col-6">
+                  <h5>Item Name</h5>
+                  <ul style={{ color: "dimgrey" }}>
+                    <li>Item Description</li>
+                  </ul>
+                  <NonVeg style={{ height: "25px", width: "25px" }} />
+                  <div
+                    className="text-success"
+                    style={{ textAlign: "right", paddingRight: "25px" }}
+                  >
+                    <i class="fas fa-rupee-sign"></i>&nbsp;69.69
+                  </div>
+                </div>
+                <div className="col-3" style={{ padding: "2%" }}>
+                  <button
+                    className="btn btn-info btn-block"
+                    style={{ borderRadius: "0" }}
+                  >
+                    Edit Item
+                  </button>
+                  <br />
+
+                  <button
+                    className="btn btn-outline-danger btn-block"
+                    style={{ borderRadius: "0" }}
+                  >
+                    Delete Item
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-1" />
+      </div>
+    );
   }
 }

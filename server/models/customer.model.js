@@ -66,10 +66,23 @@ const CustomerSchema = new Schema({
     {
       date: { type: Date, default: Date.now, required: true },
       contrTitle: { type: String, require: true },
-      contrType: { type: Number, default: 0, required: true },
+      contrType: { type: Number, default: 0, required: true }, // work from home, work at hotel, work at customer's house
       contrDescription: { type: String },
-      contrStatus: { type: Number, default: 0 },
-      // need another attribute for storing chef id's who are in contact with the customer
+      // contrStatus: { type: Number, default: 0 },
+      chefs: [
+        {
+          chefId: { type: Number, required: true },
+          // chatting schema
+          messages: [
+            {
+              time: { type: Date, default: Date.now, required: true },
+              text: { type: String, required: true },
+              flag: { type: Boolean, required: true }, // to differentiate between sent and recived messages
+            },
+          ],
+          contrStatus: { type: Number, default: 0 }, // in-touch, accepted , rejected
+        },
+      ],
     },
   ],
 
