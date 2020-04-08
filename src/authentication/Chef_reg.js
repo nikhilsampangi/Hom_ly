@@ -197,6 +197,7 @@ export default class Chef_reg extends Component {
               className="col-6"
               style={{ padding: "3%", marginTop: "200px" }}
             >
+              <Link to="/">&lt;&lt;&nbsp;Back to Front Page</Link>
               <h2 className="signin">Register</h2>
               <hr />
               <br />
