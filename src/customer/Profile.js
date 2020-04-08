@@ -4,6 +4,7 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Link, Redirect } from "react-router-dom";
 import change_bg from "../index";
+import Rating from "react-rating";
 
 export default class Profile extends Component {
   constructor() {
@@ -18,14 +19,17 @@ export default class Profile extends Component {
       city: "",
       st: "",
       pinCode: "",
+      orders: [],
     };
     this.logOut = this.logOut.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
+    this.handleOrders = this.handleOrders.bind(this);
   }
 
   componentDidMount(event) {
-    this.handleProfile();
     change_bg("cust_hm");
+    this.handleProfile();
+    this.handleOrders();
   }
 
   handleProfile(event) {
@@ -53,6 +57,18 @@ export default class Profile extends Component {
       });
   }
 
+  handleOrders(event) {
+    axios
+      .get("/transaction/get_orders", {
+        headers: { Authorization: Cookies.get("usertoken") },
+      })
+      .then((res) => {
+        this.setState({
+          orders: res.data,
+        });
+      });
+  }
+
   logOut(event) {
     event.preventDefault();
     Cookies.remove("usertoken");
@@ -61,6 +77,44 @@ export default class Profile extends Component {
 
   render() {
     if (Cookies.get("usertoken")) {
+      var recOrd = [];
+      var recFdbck = [];
+      for (let i = 0; i < this.state.orders.length; i++) {
+        recOrd.push(
+          <li style={{ marginBottom: "7px" }}>
+            <span style={{ color: "dimgrey", fontSize: "small" }}>
+              {this.state.orders[i].date}
+            </span>
+            &nbsp;-&nbsp;
+            <i className="fas fa-user-circle"></i>
+            &nbsp;
+            {this.state.orders[i].chefName}&nbsp;-&nbsp;
+            <span className="text-success">
+              <i className="fas fa-rupee-sign"></i>&nbsp;
+              {this.state.orders[i].amount}
+            </span>
+          </li>
+        );
+        recFdbck.push(
+          <li style={{ marginBottom: "7px" }}>
+            <i className="fas fa-user-circle"></i>
+            &nbsp;
+            {this.state.orders[i].chefName}&nbsp;-&nbsp;
+            <Rating
+              placeholderRating={this.state.orders[i].rating}
+              readonly={true}
+              emptySymbol={<i className="far fa-star"></i>}
+              fullSymbol={<i className="fas fa-star"></i>}
+              placeholderSymbol={<i className="fas fa-star"></i>}
+            />
+            &nbsp;-&nbsp;
+            <span style={{ color: "dimgrey", fontSize: "small" }}>
+              "{this.state.orders[i].feedBack}"
+            </span>
+          </li>
+        );
+      }
+
       return (
         <Fragment>
           <Navbar profilePage={true} />
@@ -70,7 +124,7 @@ export default class Profile extends Component {
           <br />
           <br />
           <br />
-          <div className="container">
+          <div className="container" style={{ maxWidth: "1180px" }}>
             <div className="row">
               <div className="col">
                 <div>
@@ -274,7 +328,7 @@ export default class Profile extends Component {
                 <div>
                   <div
                     className="card border-dark"
-                    style={{ backgroundColor: "#343a40" }}
+                    style={{ backgroundColor: "#343a40", borderRadius: "0" }}
                   >
                     <div
                       className="p-card-body"
@@ -310,9 +364,7 @@ export default class Profile extends Component {
                         paddingBottom: "7%",
                       }}
                     >
-                      <ul>
-                        <li>time stamp - chef name - items</li>
-                      </ul>
+                      <ul>{recOrd}</ul>
                     </div>
                   </div>
                 </div>
@@ -333,9 +385,7 @@ export default class Profile extends Component {
                         paddingBottom: "7%",
                       }}
                     >
-                      <ul>
-                        <li>chef name - rating - feedback</li>
-                      </ul>
+                      <ul>{recFdbck}</ul>
                     </div>
                   </div>
                 </div>

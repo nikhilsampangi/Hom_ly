@@ -333,4 +333,68 @@ function status_update(req, res) {
     });
 }
 
+router.post("/add_item", auth, add_item);
+
+function add_item(req, res) {
+  Chef.updateOne(
+    { _id: req.user._id },
+    {
+      $push: {
+        menu: {
+          itemName: req.body.itemName,
+          itemDescr: req.body.itemDescr,
+          itemCost: req.body.itemCost,
+          isVeg: req.body.isVeg,
+        },
+      },
+    }
+  )
+    .then(res.status(200).send("Item Added"))
+    .catch(res.status(400).send("error: Item not added"));
+}
+
+router.post("/delete_item", auth, delete_item);
+
+function delete_item(req, res) {
+  Chef.updateOne(
+    { _id: req.user._id },
+    {
+      $pull: {
+        menu: {
+          itemName: req.body.itemName,
+        },
+      },
+    }
+  )
+    .then(res.status(200).send("Item Removed"))
+    .catch(res.status(400).send("error: Item not removed"));
+}
+
+router.get("/avail_items", avail_items);
+
+function avail_items(req, res) {
+  Chef.find(
+    { workingStatus: true },
+    { firstName: 1, lastName: 1, menu: 1 }
+  ).then((items) => {
+    if (items) {
+      res.send(items);
+    } else {
+      res.json({ error: "no chefs are cooking right now" });
+    }
+  });
+
+  // Chef.find({ workingStatus: { $eq: true } })
+  //   .then((chefs) => {
+  //     if (chefs) {
+  //       res.send(chefs);
+  //     } else {
+  //       res.json({ error: "no chefs are cooking right now" });
+  //     }
+  //   })
+  //   .catch((err) => {
+  //     res.json("error: " + err);
+  //   });
+}
+
 module.exports = router;

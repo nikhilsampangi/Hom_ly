@@ -73,20 +73,20 @@ const ChefSchema = new Schema({
     {
       itemName: { type: String, required: true },
       itemDescr: { type: String },
-      itemCost: { type: Number },
+      itemCost: { type: Number, required: true },
       // Need to add food items photo
-      isVeg: { type: Boolean, default: true },
+      isVeg: { type: Boolean, required: true },
     },
   ],
 
-  rating: { type: Number, default: 0 },
+  // rating: { type: Number, default: 0 },
 
-  feedbacks: [
-    {
-      date: { type: Date, default: Date.now, required: true },
-      content: { type: String, default: "No Feedback given", required: true },
-    },
-  ],
+  // feedbacks: [
+  //   {
+  //     date: { type: Date, default: Date.now, required: true },
+  //     content: { type: String, default: "No Feedback given", required: true },
+  //   },
+  // ],
   //   Need to add: Address, Profile photo
 });
 

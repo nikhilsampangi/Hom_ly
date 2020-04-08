@@ -20,7 +20,7 @@ export default class Cust_reg extends Component {
       errMsg: "",
       otpFlag: false,
       otp: "",
-      otpErr: false
+      otpErr: false,
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -36,19 +36,19 @@ export default class Cust_reg extends Component {
       lastname: this.state.lastname,
       hashedPassword: this.state.hashedPassword,
       email: this.state.email,
-      phonenumber: this.state.phone
+      phonenumber: this.state.phone,
     };
 
     if (this.state.hashedPassword !== this.state.confirmPassword) {
       this.setState({
         errorFlag: true,
-        errMsg: "Password and Confirm Password Fields do not match"
+        errMsg: "Password and Confirm Password Fields do not match",
       });
     } else {
       // register api call
       axios
         .post("/customer/register", newUser)
-        .then(res => {
+        .then((res) => {
           //  this.props.history.push('/login')
 
           // check for status err.message.data.status
@@ -65,10 +65,10 @@ export default class Cust_reg extends Component {
             console.log(res_data.message);
           }
         })
-        .catch(err => {
+        .catch((err) => {
           this.setState({
             errorFlag: true,
-            errMsg: err.response.data.message
+            errMsg: err.response.data.message,
           });
           // console.log(err.response.data.message);
         });
@@ -81,15 +81,15 @@ export default class Cust_reg extends Component {
     this.setState({ otpErr: false });
     axios
       .post("/customer/send_otp", { email: this.state.email })
-      .then(res => {
+      .then((res) => {
         // load otp component
         this.setState({ otpFlag: true });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
         // console.log(err.response.data.message);
       });
@@ -99,13 +99,13 @@ export default class Cust_reg extends Component {
     axios
       .post("/customer/verify_otp", {
         email: this.state.email,
-        OTP: this.state.otp
+        OTP: this.state.otp,
       })
-      .then(res => {
+      .then((res) => {
         this.setState({ authenticated: true });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         // ask user for resending otp...
         this.setState({ otpErr: true });
         console.log(err.response.data.message);
@@ -124,6 +124,7 @@ export default class Cust_reg extends Component {
           onLoad={change_bg("cust_lg")}
         >
           <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
+            <Link to="/">&lt;&lt;&nbsp;Back to Front Page</Link>
             <h3 className="signin">Sign Up</h3>
             <br />
             <form className="text-center" style={{ color: "#757575" }}>
@@ -143,7 +144,7 @@ export default class Cust_reg extends Component {
                       style={{
                         backgroundColor: "#dc3545",
                         color: "white",
-                        fontSize: "x-large"
+                        fontSize: "x-large",
                       }}
                     >
                       Error
@@ -170,7 +171,7 @@ export default class Cust_reg extends Component {
                       className="card-header"
                       style={{
                         backgroundColor: "rgb(86,88,255)",
-                        color: "white"
+                        color: "white",
                       }}
                     >
                       Verification

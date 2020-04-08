@@ -64,10 +64,25 @@ const CustomerSchema = new Schema({
 
   contracts: [
     {
+      date: { type: Date, default: Date.now, required: true },
       contrTitle: { type: String, require: true },
+      contrType: { type: Number, default: 0, required: true }, // work from home, work at hotel, work at customer's house
       contrDescription: { type: String },
-      contrStatus: { type: Number, default: 0 },
-      //   plan to use contrStatus field to store chef id when contract gets taken
+      // contrStatus: { type: Number, default: 0 },
+      chefs: [
+        {
+          chefId: { type: Number, required: true },
+          // chatting schema
+          messages: [
+            {
+              time: { type: Date, default: Date.now, required: true },
+              text: { type: String, required: true },
+              flag: { type: Boolean, required: true }, // to differentiate between sent and recived messages
+            },
+          ],
+          contrStatus: { type: Number, default: 0 }, // in-touch, accepted , rejected
+        },
+      ],
     },
   ],
 

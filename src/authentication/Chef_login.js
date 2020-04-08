@@ -51,7 +51,6 @@ export default class Chef_auth extends Component {
 
     event.preventDefault();
   }
-
   requestOTP() {
     axios
       .post("/chef/send_otp", { email: this.state.email })
@@ -68,7 +67,6 @@ export default class Chef_auth extends Component {
         // console.log(err.response.data.message);
       });
   }
-
   verifyOTP() {
     axios
       .post("/chef/verify_otp", {
@@ -86,7 +84,6 @@ export default class Chef_auth extends Component {
         });
       });
   }
-
   resetPassword() {
     if (this.state.newPassword === this.state.newPasswordCnf) {
       axios
@@ -113,7 +110,6 @@ export default class Chef_auth extends Component {
       });
     }
   }
-
   render() {
     if (this.state.authenticated) {
       return <Redirect to="/Chef/Profile" />;
@@ -246,6 +242,7 @@ export default class Chef_auth extends Component {
             </div>
           ) : (
             <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
+              <Link to="/">&lt;&lt;&nbsp;Back to Front Page</Link>
               <h3 className="signin">Sign In</h3>
               <br />
               <form className="text-center" style={{ color: "#757575" }}>

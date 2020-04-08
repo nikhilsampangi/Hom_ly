@@ -18,7 +18,7 @@ export default class Navbar extends Component {
             fontFamily: "Neptune",
             fontSize: "1.6em",
             borderBottom: "3.5px solid #72be44",
-            backgroundColor: "#f1ebeb"
+            backgroundColor: "#f1ebeb",
           }}
         >
           <div className="col"></div>
@@ -54,12 +54,12 @@ export default class Navbar extends Component {
                   onMouseLeave={() => this.setState({ nav_w: false })}
                   style={{ cursor: "pointer" }}
                 >
-                  wallet
+                  purchase
                 </span>
               </Link>
             ) : (
               <span onMouseEnter={() => this.setState({ nav_w: true })}>
-                WALLET
+                PURCHASE
               </span>
             )}
           </div>

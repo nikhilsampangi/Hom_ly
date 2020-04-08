@@ -7,6 +7,8 @@ import change_bg from "../index";
 import "./ChProfile.css";
 import Rating from "react-rating";
 import Switch from "react-switch";
+import { ReactComponent as Veg } from "../assets/Veg.svg";
+import { ReactComponent as NonVeg } from "../assets/Nonveg.svg";
 
 export default class ChProfile extends Component {
   constructor() {
@@ -25,15 +27,19 @@ export default class ChProfile extends Component {
       level: false,
       status: false,
       rating: 0,
+      numR: 0,
+      arr: [],
     };
     this.logOut = this.logOut.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
     this.handleStateCheck = this.handleStateCheck.bind(this);
+    this.getRatings = this.getRatings.bind(this);
   }
 
   componentDidMount(event) {
     change_bg("chf_hm");
     this.handleProfile();
+    this.getRatings();
   }
 
   handleProfile(event) {
@@ -49,9 +55,9 @@ export default class ChProfile extends Component {
           phoneNumber: res.data.phoneNum,
           bio: res.data.bio,
           spec: res.data.specialities,
-          rating: res.data.rating,
           level: res.data.expertiseLevel,
           status: res.data.workingStatus,
+          arr: res.data.menu,
         });
         try {
           this.setState({
@@ -76,6 +82,25 @@ export default class ChProfile extends Component {
       .then(this.setState({ status: !this.state.status }));
   }
 
+  getRatings(event) {
+    axios
+      .get("/transaction/chef_rating", {
+        headers: { Authorization: Cookies.get("cheftoken") },
+      })
+      .then((res) => {
+        var len = res.data.length;
+        var temp = 0;
+        for (let i = 0; i < len; i++) {
+          temp = temp + res.data[i].rating;
+        }
+        temp = temp / len;
+        this.setState({
+          rating: temp,
+          numR: len,
+        });
+      });
+  }
+
   logOut(event) {
     event.preventDefault();
     Cookies.remove("cheftoken");
@@ -83,6 +108,18 @@ export default class ChProfile extends Component {
   }
 
   render() {
+    var items = [];
+    for (let i = 0; i < this.state.arr.length; i++) {
+      items.push(
+        <Item
+          name={this.state.arr[i].itemName}
+          cost={this.state.arr[i].itemCost}
+          descr={this.state.arr[i].itemDescr}
+          isVeg={this.state.arr[i].isVeg}
+        />
+      );
+      items.push(<br />);
+    }
     if (Cookies.get("cheftoken")) {
       return (
         <Fragment>
@@ -92,7 +129,7 @@ export default class ChProfile extends Component {
           <br />
           <br />
           <br />
-          <div className="container" style={{ textAlign: "-moz-center" }}>
+          <div className="container">
             <div className="row">
               <div className="col-4">
                 <div>
@@ -191,12 +228,12 @@ export default class ChProfile extends Component {
                 <br />
                 <br />
                 <div>
-                  {/* <div className="card" style={{ fontFamily: "Sen" }}>
+                  <div className="card" style={{ fontFamily: "Sen" }}>
                     <div
                       className="p-card-header"
                       style={{ textAlign: "center", paddingTop: "7%" }}
                     >
-                      <h3>Commercial Column</h3>
+                      <h3>Current Orders</h3>
                     </div>
                     <div
                       className="p-card-body"
@@ -206,30 +243,25 @@ export default class ChProfile extends Component {
                         textAlign: "center",
                       }}
                     >
-                      <button
-                        className="btn btn-outline-info"
-                        style={{ borderRadius: "0" }}
-                      >
-                        <i className="far fa-plus-square"></i>&nbsp;Post
-                        Contracts
-                      </button>
-                      <br />
-                      <br />
-                      <button
-                        className="btn btn-outline-warning"
-                        style={{ borderRadius: "0" }}
-                      >
-                        View Contract Status
-                      </button>
+                      <ul>
+                        <li>List items</li>
+                        <li>List items</li>
+                        <li>List items</li>
+                        <li>List items</li>
+                      </ul>
                     </div>
-                  </div> */}
+                  </div>
                 </div>
                 <br />
                 <br />
-                <br />
-                <br />
               </div>
-              <div className="col">Today's Menu</div>
+              <div className="col">
+                <center>
+                  <h3>Menu</h3>
+                </center>
+                <br />
+                {items}
+              </div>
               <div className="col-3" style={{ fontFamily: "Sen" }}>
                 <div>
                   <div className="card" style={{ fontFamily: "Sen" }}>
@@ -264,7 +296,7 @@ export default class ChProfile extends Component {
                       Chef Level
                       <br />
                       <span>
-                        <i class="fal fa-bread-loaf"></i>
+                        <i className="fal fa-bread-loaf"></i>
                         {this.state.level ? (
                           <span className="text-success">
                             <i className="fas fa-trophy"></i>&nbsp;Certified
@@ -272,7 +304,7 @@ export default class ChProfile extends Component {
                           </span>
                         ) : (
                           <span className="text-primary">
-                            <i class="fas fa-bread-slice"></i>&nbsp;Beginner
+                            <i className="fas fa-bread-slice"></i>&nbsp;Beginner
                           </span>
                         )}
                         <br />
@@ -291,10 +323,11 @@ export default class ChProfile extends Component {
                       <Rating
                         placeholderRating={this.state.rating}
                         readonly={true}
-                        emptySymbol={<i class="far fa-star"></i>}
-                        fullSymbol={<i class="fas fa-star"></i>}
+                        emptySymbol={<i className="far fa-star"></i>}
+                        fullSymbol={<i className="fas fa-star"></i>}
+                        placeholderSymbol={<i className="fas fa-star"></i>}
                       />
-                      &nbsp;{this.state.rating}
+                      &nbsp;{this.state.rating}({this.state.numR})
                       <br />
                       <br />
                       <Link
@@ -307,7 +340,6 @@ export default class ChProfile extends Component {
                     </div>
                   </div>
                 </div>
-
                 <br />
                 <br />
                 <div>
@@ -340,5 +372,47 @@ export default class ChProfile extends Component {
     } else {
       return <Redirect to="/Chef/Login" />;
     }
+  }
+}
+
+class Item extends Component {
+  render() {
+    return (
+      <div className="card" style={{ fontFamily: "Sen" }}>
+        <div
+          className="p-card-body"
+          style={{
+            paddingTop: "4%",
+            paddingBottom: "7%",
+          }}
+        >
+          <div className="row" style={{ marginLeft: "0", marginRight: "0" }}>
+            <div
+              className="col-4"
+              style={{ padding: "3%", textAlign: "center" }}
+            >
+              <i className="fas fa-pizza-slice" style={{ fontSize: "6em" }}></i>
+            </div>
+            <div className="col-8">
+              <h5>{this.props.name}</h5>
+              <ul style={{ color: "dimgrey" }}>
+                <li>{this.props.descr}</li>
+              </ul>
+              {this.props.isVeg ? (
+                <Veg style={{ height: "25px", width: "25px" }} />
+              ) : (
+                <NonVeg style={{ height: "25px", width: "25px" }} />
+              )}
+              <div
+                className="text-success"
+                style={{ textAlign: "right", paddingRight: "25px" }}
+              >
+                <i className="fas fa-rupee-sign"></i>&nbsp;{this.props.cost}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 }

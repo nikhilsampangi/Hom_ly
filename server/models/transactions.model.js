@@ -2,14 +2,16 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema({
-  custId: { type: Number, required: true },
-  chefId: { type: Number, required: true },
+  custId: { type: String, required: true },
+  chefId: { type: String, required: true },
+  chefName: { type: String, required: true },
   date: { type: Date, default: Date.now, required: true },
   amount: { type: Number, required: true },
   items: [
     {
       itemName: { type: String, required: true },
-      itemCost: { type: Number },
+      itemQnty: { type: Number, required: true, default: 1 },
+      itemCost: { type: Number, required: true },
     },
   ],
   rating: {
@@ -25,4 +27,4 @@ const TransactionSchema = new Schema({
 
 TransactionSchema.set("toJSON", { virtuals: true });
 
-module.exports = mongoose.model("transaction", TransactionSchema);
+module.exports = mongoose.model("transactions", TransactionSchema);

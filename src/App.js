@@ -20,6 +20,7 @@ import Wlt from "./customer/Wallet";
 import Abt from "./customer/About";
 import Prof from "./customer/Profile";
 import Prof_edit from "./customer/EditProfile";
+import Fdbck from "./customer/Feedback";
 
 export default class App extends Component {
   render() {
@@ -51,6 +52,7 @@ export default class App extends Component {
             <Route exact path="/About" component={Abt} />
             <Route exact path="/Profile" component={Prof} />
             <Route exact path="/Profile/Edit" component={Prof_edit} />
+            <Route exact path="/Feedback" component={Fdbck} />
           </Switch>
         </Fragment>
       </Router>
