@@ -1,10 +1,10 @@
 import React, { Component, Fragment } from "react";
 import { Redirect } from "react-router-dom";
-import "./Cust.css";
 import Navbar from "./Navbar";
 import Cookies from "js-cookie";
 import change_bg from "../index";
 import Axios from "axios";
+import "./Cust.css";
 import { ReactComponent as Veg } from "../assets/Veg.svg";
 import { ReactComponent as NonVeg } from "../assets/Nonveg.svg";
 
@@ -51,19 +51,23 @@ export default class Cust extends Component {
           <br />
           <br />
           <br />
-          <div className="container" style={{ maxWidth: "1230px" }}>
+          <div className="container" style={{ maxWidth: "1280px" }}>
             <div className="row">
               <div className="col">
                 <SearchBar />
               </div>
               <div className="col-1"></div>
               <div className="col-2">
-                <button className="btn btn-outline-secondary btn-block">
+                <button
+                  className="btn btn-outline-secondary btn-block"
+                  style={{ borderRadius: "0" }}
+                >
                   <i className="fas fa-shopping-cart"></i>&nbsp;Cart
                 </button>
               </div>
             </div>
           </div>
+          <br />
           <div className="container-fluid">
             <div className="row">{items}</div>
           </div>
@@ -103,7 +107,37 @@ class SearchBar extends Component {
 }
 
 class Item extends Component {
+  constructor() {
+    super();
+    this.state = {
+      redirectFlag: false,
+      transId: "",
+    };
+    this.purchase = this.purchase.bind(this);
+  }
+
+  purchase(event) {
+    let temp = {
+      chefName: this.props.firstName,
+      name: this.props.name,
+      cost: this.props.cost,
+    };
+    Axios.post("/transaction/buy_item", temp, {
+      headers: { Authorization: Cookies.get("usertoken") },
+    }).then((res) => {
+      this.setState({ transId: res.data, redirectFlag: true });
+    });
+  }
+
   render() {
+    if (this.state.redirectFlag) {
+      return (
+        <Redirect
+          to={{ pathname: "/Feedback", state: { id: this.state.transId } }}
+        />
+      );
+    }
+
     return (
       <Fragment>
         <div className="col-3">
@@ -143,6 +177,8 @@ class Item extends Component {
                   ) : (
                     <NonVeg style={{ height: "15px", width: "15px" }} />
                   )}
+                  <br />
+                  <br />
                   <div className="text-success">
                     <i class="fas fa-rupee-sign"></i>&nbsp;{this.props.cost}
                   </div>
@@ -165,7 +201,7 @@ class Item extends Component {
                   <button
                     className="btn btn-info btn-sm"
                     style={{ borderRadius: "0" }}
-                    onClick={this.handleEdit}
+                    onClick={this.purchase}
                   >
                     <i className="fas fa-cart-plus"></i>&nbsp;Add to Cart
                   </button>
@@ -174,7 +210,10 @@ class Item extends Component {
             </div>
           </div>
         </div>
-        <div className="col-1" />
+        <div
+          className="col-1"
+          style={{ paddingRight: "0", paddingLeft: "0" }}
+        />
       </Fragment>
     );
   }
