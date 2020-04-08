@@ -61,4 +61,16 @@ function chef_rating(req, res) {
   });
 }
 
+router.get("/chef_fbs", auth, chef_fbs);
+
+function chef_fbs(req, res) {
+  Transaction.find(
+    { chefId: req.user._id },
+    { _id: 0, date: 1, items: 1, rating: 1, feedBack: 1 },
+    { multi: true }
+  ).then((fbs) => {
+    res.send(fbs);
+  });
+}
+
 module.exports = router;
