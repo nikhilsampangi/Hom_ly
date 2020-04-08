@@ -27,16 +27,19 @@ export default class ChProfile extends Component {
       level: false,
       status: false,
       rating: 0,
+      numR: 0,
       arr: [],
     };
     this.logOut = this.logOut.bind(this);
     this.handleProfile = this.handleProfile.bind(this);
     this.handleStateCheck = this.handleStateCheck.bind(this);
+    this.getRatings = this.getRatings.bind(this);
   }
 
   componentDidMount(event) {
     change_bg("chf_hm");
     this.handleProfile();
+    this.getRatings();
   }
 
   handleProfile(event) {
@@ -52,7 +55,6 @@ export default class ChProfile extends Component {
           phoneNumber: res.data.phoneNum,
           bio: res.data.bio,
           spec: res.data.specialities,
-          rating: res.data.rating,
           level: res.data.expertiseLevel,
           status: res.data.workingStatus,
           arr: res.data.menu,
@@ -78,6 +80,25 @@ export default class ChProfile extends Component {
     axios
       .post("chef/update_status", status_upd)
       .then(this.setState({ status: !this.state.status }));
+  }
+
+  getRatings(event) {
+    axios
+      .get("/transaction/chef_rating", {
+        headers: { Authorization: Cookies.get("cheftoken") },
+      })
+      .then((res) => {
+        var len = res.data.length;
+        var temp = 0;
+        for (let i = 0; i < len; i++) {
+          temp = temp + res.data[i].rating;
+        }
+        temp = temp / len;
+        this.setState({
+          rating: temp,
+          numR: len,
+        });
+      });
   }
 
   logOut(event) {
@@ -304,8 +325,9 @@ export default class ChProfile extends Component {
                         readonly={true}
                         emptySymbol={<i className="far fa-star"></i>}
                         fullSymbol={<i className="fas fa-star"></i>}
+                        placeholderSymbol={<i className="fas fa-star"></i>}
                       />
-                      &nbsp;{this.state.rating}
+                      &nbsp;{this.state.rating}({this.state.numR})
                       <br />
                       <br />
                       <Link

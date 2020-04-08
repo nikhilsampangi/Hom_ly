@@ -79,14 +79,14 @@ const ChefSchema = new Schema({
     },
   ],
 
-  rating: { type: Number, default: 0 },
+  // rating: { type: Number, default: 0 },
 
-  feedbacks: [
-    {
-      date: { type: Date, default: Date.now, required: true },
-      content: { type: String, default: "No Feedback given", required: true },
-    },
-  ],
+  // feedbacks: [
+  //   {
+  //     date: { type: Date, default: Date.now, required: true },
+  //     content: { type: String, default: "No Feedback given", required: true },
+  //   },
+  // ],
   //   Need to add: Address, Profile photo
 });
 

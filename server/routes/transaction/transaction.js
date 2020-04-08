@@ -49,4 +49,16 @@ function get_orders(req, res) {
   });
 }
 
+router.get("/chef_rating", auth, chef_rating);
+
+function chef_rating(req, res) {
+  Transaction.find(
+    { chefId: req.user._id },
+    { rating: 1, _id: 0 },
+    { multi: true }
+  ).then((ratings) => {
+    res.send(ratings);
+  });
+}
+
 module.exports = router;
