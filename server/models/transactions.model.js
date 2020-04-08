@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const TransactionSchema = new Schema({
   custId: { type: String, required: true },
   chefId: { type: String, required: true },
+  chefName: { type: String, required: true },
   date: { type: Date, default: Date.now, required: true },
   amount: { type: Number, required: true },
   items: [

@@ -22,6 +22,7 @@ export default class Cust extends Component {
       this.setState({
         itemRes: res.data,
       });
+      // console.log(res);
     });
   }
 
@@ -37,6 +38,7 @@ export default class Cust extends Component {
             isVeg={this.state.itemRes[i].menu[j].isVeg}
             firstName={this.state.itemRes[i].firstName}
             lastName={this.state.itemRes[i].lastName}
+            id={this.state.itemRes[i]._id}
           />
         );
       }
@@ -118,6 +120,7 @@ class Item extends Component {
 
   purchase(event) {
     let temp = {
+      id: this.props.id,
       chefName: this.props.firstName,
       name: this.props.name,
       cost: this.props.cost,
