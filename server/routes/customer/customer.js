@@ -12,8 +12,8 @@ const Customer= require("../../joi_models/customer.model");
 const transactions= require('../transactions');
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
 const Order= require('../../models/transactions.model');
-
 const email = require("../send_email");
+
 
 router.use(cors());
 
@@ -501,6 +501,7 @@ function success(req, res){
   })
 
 }
+
 
 /* Google Authentication API. */
 
