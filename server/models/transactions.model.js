@@ -2,9 +2,26 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema({
-  custId: { type: Number, required: true },
-  chefId: { type: Number, required: true },
-  amount: { type: Number, required: true },
+  custId: { type: String, required: true },
+
+  chefId: { type: String, required: true },
+  
+  transactionId: {type:String, default: null},
+  
+  status: {type:String, enum:['initiated','completed','failed'], required:true},
+
+  referenceId: {type: String, default: null},
+
+  modeOfPayment: {type:String, default: null},
+
+  bankName: {type: String, default: null},
+  
+  createdAt: {type:Date, default: Date.now},
+  
+  updatedAt: {type:Date, default: Date.now}, 
+  
+  amount: { type: Number, default:null},
+  
   items: [
     {
       itemName: { type: String, required: true },

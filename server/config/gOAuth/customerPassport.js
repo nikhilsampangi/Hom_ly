@@ -1,6 +1,6 @@
 var passport = require("passport");
 var GoogleStrategy = require("passport-google-oauth").OAuth2Strategy;
-const User= require("../models/customer.model")
+const User= require("../../models/customer.model")
 const jwt = require("jsonwebtoken");
 
 function createToken(userData){
@@ -61,7 +61,7 @@ passport.use(
                             googleOAuth:{
                                 gid: userInfo.sub,
                                 name: userInfo.name,
-                                isVerified: userInfo.email_verified 
+                                isRegistered: userInfo.email_verified 
                             }
                         }
                     }
