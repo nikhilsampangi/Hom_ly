@@ -6,6 +6,7 @@ const CustomerSchema = new Schema({
 
   lastName: { type: String },
 
+
   isVerified: {type: Boolean, default: false},
 
   isValidated: {type: Boolean, default: false},
@@ -41,7 +42,7 @@ googleOAuth: {
   
   name: {type: String, default: null},
 
-  isRegistered: {type: Boolean, default: false},
+  isRegistered: { type: Boolean, default: false },
 
 },
 
@@ -49,18 +50,27 @@ googleOAuth: {
     type: String,
     required: [true, "email cannot be empty"],
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         var re = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
         return re.test(v);
       },
-      message: "Please fill a valid email address"
-    }
+      message: "Please fill a valid email address",
+    },
   },
+
+  Address: [
+    {
+      Localty: { type: String },
+      City: { type: String },
+      State: { type: String },
+      Pincode: { type: String },
+    },
+  ],
 
   favChef: [
     {
-      chefId: { type: Number, required: true }
-    }
+      chefId: { type: Number, required: true },
+    },
   ],
 
   balance: { type: String, default: "0.00" },
@@ -71,13 +81,29 @@ googleOAuth: {
 
   contracts: [
     {
+      date: { type: Date, default: Date.now, required: true },
       contrTitle: { type: String, require: true },
+      contrType: { type: Number, default: 0, required: true }, // work from home, work at hotel, work at customer's house
       contrDescription: { type: String },
-      contrStatus: { type: Number, default: 0 }
-      //   plan to use contrStatus field to store chef id when contract gets taken
-    }
-  ]
-  //   Need to add: Address, Profile photo
+      // contrStatus: { type: Number, default: 0 },
+      chefs: [
+        {
+          chefId: { type: Number, required: true },
+          // chatting schema
+          messages: [
+            {
+              time: { type: Date, default: Date.now, required: true },
+              text: { type: String, required: true },
+              flag: { type: Boolean, required: true }, // to differentiate between sent and recived messages
+            },
+          ],
+          contrStatus: { type: Number, default: 0 }, // in-touch, accepted , rejected
+        },
+      ],
+    },
+  ],
+
+  //   Need to add:  Profile photo
 });
 
 CustomerSchema.set("toJSON", { virtuals: true });

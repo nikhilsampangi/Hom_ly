@@ -18,7 +18,7 @@ export default class Chef_auth extends Component {
       pswdResetFlag: false,
       disableOTPFlag: true,
       resetPasswordFlag: false,
-      otp: ""
+      otp: "",
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -32,91 +32,87 @@ export default class Chef_auth extends Component {
   handleSubmit(event) {
     const chefData = {
       email: this.state.email,
-      hashedPassword: this.state.hashedPassword
+      hashedPassword: this.state.hashedPassword,
     };
 
     axios
       .get("/chef/login", { params: chefData })
-      .then(res => {
+      .then((res) => {
         Cookies.set("cheftoken", res.data);
         this.setState({ authenticated: true });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err.response.data.message);
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
       });
 
     event.preventDefault();
   }
-
   requestOTP() {
     axios
       .post("/chef/send_otp", { email: this.state.email })
-      .then(res => {
+      .then((res) => {
         // load otp component
         this.setState({ disableOTPFlag: false });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
         // console.log(err.response.data.message);
       });
   }
-
   verifyOTP() {
     axios
       .post("/chef/verify_otp", {
         email: this.state.email,
-        OTP: this.state.otp
+        OTP: this.state.otp,
       })
-      .then(res => {
+      .then((res) => {
         this.setState({ resetPasswordFlag: true });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
       });
   }
-
   resetPassword() {
     if (this.state.newPassword === this.state.newPasswordCnf) {
       axios
         .post("/chef/reset_password", {
           email: this.state.email,
-          newPassword: this.state.newPassword
+          newPassword: this.state.newPassword,
         })
-        .then(res => {
+        .then((res) => {
           console.log(res.data);
           this.setState({ resetPswdSuccess: "Password Reset Successful!!" });
         })
-        .catch(err => {
+        .catch((err) => {
           // ask user for resending otp....
           this.setState({
             errorFlag: true,
-            errMsg: String(err.response.data.message)
+            errMsg: String(err.response.data.message),
           });
           console.log(err.response.data.message);
         });
     } else {
       this.setState({
         errorFlag: true,
-        errMsg: "Password and Confirm Password Fields do not Match"
+        errMsg: "Password and Confirm Password Fields do not Match",
       });
     }
   }
-
   render() {
     if (this.state.authenticated) {
-      return <Redirect to="/Chef/Home" />;
+      return <Redirect to="/Chef/Profile" />;
     }
 
     return (
@@ -246,6 +242,7 @@ export default class Chef_auth extends Component {
             </div>
           ) : (
             <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
+              <Link to="/">&lt;&lt;&nbsp;Back to Front Page</Link>
               <h3 className="signin">Sign In</h3>
               <br />
               <form className="text-center" style={{ color: "#757575" }}>

@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import { ReactComponent as NavLg } from "../assets/nav_logo.svg";
 import { ReactComponent as Melon } from "../assets/Melon.svg";
 
-export default class Navbar extends Component {
+export default class ChNavbar extends Component {
   constructor(props) {
     super(props);
-    this.state = { nav_h: false, nav_w: false, nav_a: false, nav_p: false };
+    this.state = { nav_p: false, nav_c: false, nav_m: false, nav_a: false };
   }
   render() {
     return (
@@ -23,75 +23,9 @@ export default class Navbar extends Component {
         >
           <div className="col"></div>
           <div className="col-1">
-            {this.props.homePage || this.state.nav_h ? (
-              <Link
-                to="/Home"
-                style={{ textDecoration: "none", color: "#72be44" }}
-              >
-                <span
-                  onMouseLeave={() => this.setState({ nav_h: false })}
-                  style={{ cursor: "pointer" }}
-                >
-                  home
-                </span>
-              </Link>
-            ) : (
-              <span onMouseEnter={() => this.setState({ nav_h: true })}>
-                HOME
-              </span>
-            )}
-          </div>
-          <div className="col" style={{ textAlign: "center" }}>
-            <Melon style={{ height: "69px" }} />
-          </div>
-          <div className="col-2" style={{ textAlign: "center" }}>
-            {this.props.walletPage || this.state.nav_w ? (
-              <Link
-                to="/Wallet"
-                style={{ textDecoration: "none", color: "#ee3d59" }}
-              >
-                <span
-                  onMouseLeave={() => this.setState({ nav_w: false })}
-                  style={{ cursor: "pointer" }}
-                >
-                  purchase
-                </span>
-              </Link>
-            ) : (
-              <span onMouseEnter={() => this.setState({ nav_w: true })}>
-                PURCHASE
-              </span>
-            )}
-          </div>
-          <div className="col" style={{ textAlign: "center" }}>
-            <NavLg style={{ height: "69px" }} />
-          </div>
-          <div className="col-2" style={{ textAlign: "center" }}>
-            {this.props.aboutPage || this.state.nav_a ? (
-              <Link
-                to="/About"
-                style={{ textDecoration: "none", color: "#ee3d59" }}
-              >
-                <span
-                  onMouseLeave={() => this.setState({ nav_a: false })}
-                  style={{ cursor: "pointer" }}
-                >
-                  about
-                </span>
-              </Link>
-            ) : (
-              <span onMouseEnter={() => this.setState({ nav_a: true })}>
-                ABOUT
-              </span>
-            )}
-          </div>
-          <div className="col" style={{ textAlign: "center" }}>
-            <Melon style={{ height: "69px" }} />
-          </div>
-          <div className="col-1" style={{ textAlign: "right" }}>
             {this.props.profilePage || this.state.nav_p ? (
               <Link
-                to="/Profile"
+                to="/Chef/Profile"
                 style={{ textDecoration: "none", color: "#72be44" }}
               >
                 <span
@@ -104,6 +38,72 @@ export default class Navbar extends Component {
             ) : (
               <span onMouseEnter={() => this.setState({ nav_p: true })}>
                 PROFILE
+              </span>
+            )}
+          </div>
+          <div className="col" style={{ textAlign: "center" }}>
+            <Melon style={{ height: "69px" }} />
+          </div>
+          <div className="col-2" style={{ textAlign: "center" }}>
+            {this.props.contractsPage || this.state.nav_c ? (
+              <Link
+                to="/Chef/Contracts"
+                style={{ textDecoration: "none", color: "#ee3d59" }}
+              >
+                <span
+                  onMouseLeave={() => this.setState({ nav_c: false })}
+                  style={{ cursor: "pointer" }}
+                >
+                  contracts
+                </span>
+              </Link>
+            ) : (
+              <span onMouseEnter={() => this.setState({ nav_c: true })}>
+                CONTRACTS
+              </span>
+            )}
+          </div>
+          <div className="col" style={{ textAlign: "center" }}>
+            <NavLg style={{ height: "69px" }} />
+          </div>
+          <div className="col-2" style={{ textAlign: "center" }}>
+            {this.props.menuPage || this.state.nav_m ? (
+              <Link
+                to="/Chef/Menu"
+                style={{ textDecoration: "none", color: "#ee3d59" }}
+              >
+                <span
+                  onMouseLeave={() => this.setState({ nav_m: false })}
+                  style={{ cursor: "pointer" }}
+                >
+                  update menu
+                </span>
+              </Link>
+            ) : (
+              <span onMouseEnter={() => this.setState({ nav_m: true })}>
+                UPDATE MENU
+              </span>
+            )}
+          </div>
+          <div className="col" style={{ textAlign: "center" }}>
+            <Melon style={{ height: "69px" }} />
+          </div>
+          <div className="col-1" style={{ textAlign: "right" }}>
+            {this.props.analyticsPage || this.state.nav_a ? (
+              <Link
+                to="/Chef/Analytics"
+                style={{ textDecoration: "none", color: "#72be44" }}
+              >
+                <span
+                  onMouseLeave={() => this.setState({ nav_a: false })}
+                  style={{ cursor: "pointer" }}
+                >
+                  analytics
+                </span>
+              </Link>
+            ) : (
+              <span onMouseEnter={() => this.setState({ nav_a: true })}>
+                ANALYTICS
               </span>
             )}
           </div>

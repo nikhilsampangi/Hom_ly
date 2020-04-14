@@ -22,7 +22,7 @@ process.SECRET_KEY = "hackit";
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
     secret: secret_token,
-    encoding: "base32"
+    encoding: "base32",
   });
 
   return token;
@@ -33,7 +33,7 @@ function verify_OTP(secret_token, OTP) {
     secret: secret_token,
     encoding: "base32",
     token: OTP,
-    window: 3
+    window: 3,
   });
 
   return tokenValidates;
@@ -43,9 +43,9 @@ router.post("/register", register);
 
 function register(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(user => {
+    .then((user) => {
       if (user) {
         // In front-end check the status,
         // if status is '1' call send_otp api and load otp component,
@@ -64,6 +64,7 @@ function register(req, res) {
             firstName: req.body.firstname,
             lastName: req.body.lastname,
             email: req.body.email,
+
             internalAuth:{
               hashedPassword: req.body.hashedPassword,
               passwordResetToken: secret.base32,
@@ -98,12 +99,13 @@ function register(req, res) {
           });
           
         }
-
       }
 
     })
-    .catch(err => {
-      res.status(400).send({ message: "Something went wrong, please try again!!!" });
+    .catch((err) => {
+      res
+        .status(400)
+        .send({ message: "Something went wrong, please try again!!!" });
     });
 
 }
@@ -153,9 +155,9 @@ router.post("/verify_registration_otp", verifyRegistrationOtp);
 
 function verifyRegistrationOtp(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(customer => {
+    .then((customer) => {
       if (!customer) {
         res
           .status(400)
@@ -171,13 +173,13 @@ function verifyRegistrationOtp(req, res) {
         } else {
             const newValues = { $set: { isVerified: true } };
 
-            User.updateOne({ _id: customer._id }, newValues, function(
+            User.updateOne({ _id: customer._id }, newValues, function (
               err,
               success
             ) {
               if (err) {
                 res.status(400).send({
-                  message: "Something went wrong, please try again!!!"
+                  message: "Something went wrong, please try again!!!",
                 });
               } else {
                 res.status(200).send("Successfully registered your account!!!");
@@ -217,13 +219,13 @@ function verifyPasswordOtp(req, res) {
 
             const newValues = { $set: {isValidated: true, isVerified: true} };
 
-            User.updateOne({ _id: customer._id }, newValues, function(
+            User.updateOne({ _id: customer._id }, newValues, function (
               err,
               success
             ) {
               if (err) {
                 res.status(400).send({
-                  message: "Something went wrong, please try again!!!"
+                  message: "Something went wrong, please try again!!!",
                 });
               } else {
                 res.status(200).send("Validated!!!");
@@ -232,21 +234,20 @@ function verifyPasswordOtp(req, res) {
         }
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
     });
 }
 
-
 router.post("/reset_password", reset);
 
 function reset(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(user => {
+    .then((user) => {
       if (user.isValidated === true) {
         const {error, value}= passwordCheck.validate({password: req.body.newPassword})
 
@@ -284,16 +285,15 @@ function reset(req, res) {
             }
           });
         }
-
       } else {
         // In frontend check status, call send_otp api and load otp component.
         res.status(400).send({
           message: "Please verify with otp to update passwords",
-          status: "1"
+          status: "1",
         });
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res.status(400).send({ message: "Something went wrong!!!" });
     });
 }
@@ -303,7 +303,7 @@ router.get("/login", login);
 function login(req, res) {
   req.body = req.query;
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
     .then(user => {
       if (!user || user.isVerified === false) {
@@ -314,11 +314,11 @@ function login(req, res) {
           const payload = {
             _id: user._id,
             email: user.email,
-            firstname: user.firstname
+            firstname: user.firstname,
           };
           let token = jwt.sign(payload, process.SECRET_KEY, {
             algorithm: "HS256",
-            expiresIn: 86400
+            expiresIn: 86400,
           });
           res.status(200).send(token);
         }else {
@@ -327,29 +327,7 @@ function login(req, res) {
         }
       }
     })
-    .catch(err => {
-      res
-        .status(400)
-        .send({ messsage: "Something went wrong, please try again!!!" });
-    });
-}
-
-
-router.get("/profile", auth, profile);
-
-function profile(req, res) {
-  const user= req.user;
-  User.findOne({
-    _id: user._id
-  })
-    .then(user => {
-      if(!user){
-        res.status(400).send({message: "User does not exist!!!!"});  
-      }else {
-        res.status(200).send({message: user});
-      }
-    })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(400)
         .send({ messsage: "Something went wrong, please try again!!!" });
@@ -520,5 +498,64 @@ router.get(
       res.redirect("http://localhost:3000/"+`${token}`);
   }
 );
+
+router.get("/profile", auth, get_profile);
+
+function get_profile(req, res) {
+  User.findOne({
+    _id: req.user._id,
+  })
+    .then((user) => {
+      if (user) {
+        res.send(user);
+      } else {
+        res.json({ error: "user does not exist" });
+      }
+    })
+    .catch((err) => {
+      res.json("error:" + err);
+    });
+}
+
+router.post("/edit_profile", edit_profile);
+
+function edit_profile(req, res) {
+  User.findOne({
+    email: req.body.email,
+  })
+    .then((user) => {
+      const userData = {
+        $set: {
+          firstName: req.body.firstname,
+          lastName: req.body.lastname,
+          phoneNum: req.body.phonenumber,
+          isVeg: req.body.veg,
+          Address: {
+            Localty: req.body.localty,
+            City: req.body.city,
+            State: req.body.state,
+            Pincode: req.body.pincode,
+          },
+        },
+      };
+      User.updateOne({ email: req.body.email }, userData, function (
+        err,
+        success
+      ) {
+        if (err) {
+          res.status(400).send({
+            message: "Something went wrong, please try again!!!",
+          });
+        } else {
+          res.status(200).send("Details Updated");
+        }
+      });
+    })
+    .catch((err) => {
+      res
+        .status(400)
+        .send({ message: "Something went wrong, please try again!!!" });
+    });
+}
 
 module.exports = router;
