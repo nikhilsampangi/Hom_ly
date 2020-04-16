@@ -6,16 +6,45 @@ const CustomerSchema = new Schema({
 
   lastName: { type: String },
 
-  hashedPassword: {
-    type: String,
-    required: [true, "Password cannot be empty"],
-  },
 
-  passwordResetToken: { type: String, default: null },
+  isVerified: {type: Boolean, default: false},
+
+  isValidated: {type: Boolean, default: false},
+
+  internalAuth:{
+      
+    hashedPassword: {
+      type: String,
+      default: null
+      // required: [true, "Password cannot be empty"]
+    }, 
+
+    passwordResetToken: { type: String, default: null },
+
+    phoneNum: {
+      type: Number,
+      default: null
+      // required: [true, "Phone number cannot be empty"],
+      // validate: {
+      //   validator: function(v) {
+      //     var re = /^\d{10}$/;
+      //     return re.test(v);
+      //   },
+      //   message: "Phone number must be 10 digit number"
+      // }
+    }
+
+},
+
+googleOAuth: {
+  
+  gid: {type: String, default: null},
+  
+  name: {type: String, default: null},
 
   isRegistered: { type: Boolean, default: false },
 
-  isValidated: { type: Boolean, default: false },
+},
 
   email: {
     type: String,
@@ -26,18 +55,6 @@ const CustomerSchema = new Schema({
         return re.test(v);
       },
       message: "Please fill a valid email address",
-    },
-  },
-
-  phoneNum: {
-    type: Number,
-    required: [true, "Phone number cannot be empty"],
-    validate: {
-      validator: function (v) {
-        var re = /^\d{10}$/;
-        return re.test(v);
-      },
-      message: "Phone number must be 10 digit number",
     },
   },
 
