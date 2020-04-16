@@ -97,7 +97,7 @@ export default class Cust_reg extends Component {
 
   verifyOTP() {
     axios
-      .post("/customer/verify_otp", {
+      .post("/customer/verify_registration_otp", {
         email: this.state.email,
         OTP: this.state.otp,
       })

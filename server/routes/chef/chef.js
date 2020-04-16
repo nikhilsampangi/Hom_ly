@@ -5,10 +5,13 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
-
 const Chef = require("../../models/chef.model");
-
 const email = require("../send_email");
+const googleMapsClient = require('@google/maps').createClient({
+  key: 'AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA',
+  Promise: Promise
+});
+
 
 router.use(cors());
 
@@ -256,6 +259,76 @@ function login(req, res) {
     });
 }
 
+router.post('/getChefs', gmap)
+
+async function gmap(req, res) {
+  
+  const lat = req.body.lat
+  const lng = req.body.lng
+
+  // await  Chef.find({})
+  // .then(u => {
+  //  chefsLocations = u
+  // })
+
+  var chefsLocations = [
+    { 
+      place: 'hyderabad',
+      lat: 17.385044,
+      lng: 78.486671
+    },
+    {
+      place: 'kurnool',
+      lat: 15.828126,
+      lng: 78.037277
+    },
+    {
+      place: 'gadwal',
+      lat: 16.235001,
+      lng: 77.799698
+    },
+    {
+      place: 'warangal',
+      lat: 17.971759,
+      lng: 79.608924
+    },
+    {
+      place: 'vijayawada',
+      lat: 16.499847,
+      lng: 80.656016
+    }
+  ];
+
+
+  list = [];  // list to store all chef's data and distances   
+
+  for(let i = 0; i < chefsLocations.length; i++){
+
+    dest = chefsLocations[i].lat + ',' + chefsLocations[i].lng;      
+    
+    await googleMapsClient.directions({
+      origin: lat + ',' + lng,
+      destination: dest,
+      units: 'metric'
+    })
+    .asPromise()
+    .then(response => { // print response for more clarity
+
+      var value = chefsLocations[i];
+      distance = response.json.routes[0].legs[0].distance.text       // getting dist string in km from response 
+      distArray = distance.split(" ");        // spliting the string like "283 km" by space to get distArray= ["283", "km"]
+      value["distance"] = parseFloat(distArray[0]);     // changing data type to float from string 
+      list.push(value);
+
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+  }
+
+  list.sort((a,b)=>(a.distance > b.distance) ? 1: -1);    // sorting list according to dist
+  res.send(list);
+
 router.get("/profile", auth, get_profile);
 
 function get_profile(req, res) {
@@ -395,6 +468,7 @@ function avail_items(req, res) {
   //   .catch((err) => {
   //     res.json("error: " + err);
   //   });
+
 }
 
 module.exports = router;
