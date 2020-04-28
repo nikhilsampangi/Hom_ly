@@ -41,9 +41,9 @@ export default class About extends Component {
                 </div>
                 <br />
                 <br />
-                <div className="row">
+                <div className="row" style={{ fontFamily: "Sen" }}>
                   <div className="col">
-                    <div className="row">
+                    <div className="row" style={{ textAlign: "center" }}>
                       <i className="fa fa-user-alt"></i>
                     </div>
                     <div className="row">
@@ -52,21 +52,21 @@ export default class About extends Component {
                     <div className="row">S20170010070</div>
                   </div>
                   <div className="col">
-                    <div className="row">
+                    <div className="row" style={{ textAlign: "center" }}>
                       <i className="fa fa-user-alt"></i>
                     </div>
                     <div className="row">Nikhil Sampangi</div>
                     <div className="row">S20170010136</div>
                   </div>
                   <div className="col">
-                    <div className="row">
+                    <div className="row" style={{ textAlign: "center" }}>
                       <i className="fa fa-user-alt"></i>
                     </div>
                     <div className="row">Sandepogu Bharath</div>
                     <div className="row">S20170010137</div>
                   </div>
                   <div className="col">
-                    <div className="row">
+                    <div className="row" style={{ textAlign: "center" }}>
                       <i className="fa fa-user-alt"></i>
                     </div>
                     <div className="row">Shiva Sai Charan</div>

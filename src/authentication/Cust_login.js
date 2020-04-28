@@ -22,7 +22,7 @@ export default class Cust_login extends Component {
       resetPasswordFlag: false,
       newPassword: "",
       newPasswordCnf: "",
-      resetPswdSuccess: ""
+      resetPswdSuccess: "",
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -36,39 +36,40 @@ export default class Cust_login extends Component {
   handleSubmit(event) {
     const userData = {
       email: this.state.email,
-      hashedPassword: this.state.hashedPassword
+      hashedPassword: this.state.hashedPassword,
     };
     console.log(userData);
     axios
       .get("/customer/login", { params: userData })
-      .then(res => {
+      .then((res) => {
         console.log(res.data);
         Cookies.set("usertoken", res.data);
         this.setState({ authenticated: true });
         // this.props.history.push('/')
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err.response.data.message);
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
       });
 
     event.preventDefault();
   }
   requestOTP() {
+    console.log("send otp api called!!!")
     axios
       .post("/customer/send_otp", { email: this.state.email })
-      .then(res => {
+      .then((res) => {
         // load otp component
         this.setState({ disableOTPFlag: false });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
         // console.log(err.response.data.message);
       });
@@ -76,18 +77,18 @@ export default class Cust_login extends Component {
 
   verifyOTP() {
     axios
-      .post("/customer/verify_otp", {
+      .post("/customer/verify_reset_password_otp", {
         email: this.state.email,
-        OTP: this.state.otp
+        OTP: this.state.otp,
       })
-      .then(res => {
+      .then((res) => {
         this.setState({ resetPasswordFlag: true });
         console.log(res.data);
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
           errorFlag: true,
-          errMsg: String(err.response.data.message)
+          errMsg: String(err.response.data.message),
         });
       });
   }
@@ -96,24 +97,24 @@ export default class Cust_login extends Component {
       axios
         .post("/customer/reset_password", {
           email: this.state.email,
-          newPassword: this.state.newPassword
+          newPassword: this.state.newPassword,
         })
-        .then(res => {
+        .then((res) => {
           console.log(res.data);
           this.setState({ resetPswdSuccess: "Password Reset Successful!!" });
         })
-        .catch(err => {
+        .catch((err) => {
           // ask user for resending otp....
           this.setState({
             errorFlag: true,
-            errMsg: String(err.response.data.message)
+            errMsg: String(err.response.data.message),
           });
           console.log(err.response.data.message);
         });
     } else {
       this.setState({
         errorFlag: true,
-        errMsg: "Password and Confirm Password Fields do not Match"
+        errMsg: "Password and Confirm Password Fields do not Match",
       });
     }
   }
@@ -248,6 +249,7 @@ export default class Cust_login extends Component {
             </div>
           ) : (
             <div className="col-6" style={{ padding: "4%", marginTop: "90px" }}>
+              <Link to="/">&lt;&lt;&nbsp;Back to Front Page</Link>
               <h3 className="signin">Sign In</h3>
               <br />
               <form
@@ -303,12 +305,12 @@ export default class Cust_login extends Component {
               </form>
               <hr />
               <center>
-                <button
+                <a href= "http://localhost:8008/customer/auth/google"><button
                   className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0"
                   type="submit"
                 >
                   <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
-                </button>
+                </button></a>
               </center>
             </div>
           )}
