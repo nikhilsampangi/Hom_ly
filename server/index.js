@@ -14,7 +14,7 @@ app.use(passport.initialize());
 app.use(pino);
 app.use(cors());
 
-mongoose.connect("mongodb://localhost:27017/ciodb", { //ciodbTest //mongodb://localhost:27017/ciodbTest
+mongoose.connect("mongodb+srv://CHEF_IT_OUT:chefitout@01@cluster0-ykwse.mongodb.net/test?retryWrites=true&w=majority", { //"mongodb://localhost:27017/ciodb"
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

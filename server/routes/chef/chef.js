@@ -10,7 +10,7 @@ const mongoose = require("mongoose");
 var multer  = require('multer');
 var upload = multer({ dest: 'uploads/' });
 
-const Chef = require("../../models/chef.model");
+const {Chef} = require("../../models/chef.model");
 // const {Menu} = require('../../models/chef.model'); 
 // const {DishReport} = require('../../models/chef.model'); 
 // const {ValidationRequest} = require('../../models/chef.model'); 
@@ -694,6 +694,7 @@ async function gmap(req, res) {
 
   list.sort((a,b)=>(a.distance > b.distance) ? 1: -1);    // sorting list according to dist
   res.send(list);
+}
 
 router.get("/profile", auth, get_profile);
 
@@ -797,14 +798,19 @@ var storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + '.jpg')
+    cb(null, file.name + '-' + Date.now() + '.jpg')
   }
 })
  
 var upload = multer({ storage: storage }).single('dishPic');
-router.post("/add_item", auth, upload, add_item);
+router.post("/add_item", auth, add_item);
 
 function add_item(req, res) {
+  console.log("===========================");
+  console.log("item added");
+  console.log(req.body);
+  console.log("===========================");
+  
   Chef.updateOne(
     { _id: req.user._id },
     {
@@ -822,6 +828,7 @@ function add_item(req, res) {
     .then(res.status(200).send("Item Added"))
     .catch(res.status(400).send("error: Item not added"));
 }
+
 
 router.post("/delete_item", auth, delete_item);
 
@@ -867,6 +874,6 @@ function avail_items(req, res) {
   //   });
 
   }
- }
+  
 
 module.exports = router;
