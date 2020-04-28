@@ -74,8 +74,8 @@ const ChefSchema = new Schema({
       itemName: { type: String, required: true },
       itemDescr: { type: String },
       itemCost: { type: Number, required: true },
-      // Need to add food items photo
       isVeg: { type: Boolean, required: true },
+      dishPic: { type: String,  required: [true, 'dish pic required']},
     },
   ],
 

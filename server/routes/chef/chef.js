@@ -7,6 +7,10 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const Chef = require("../../models/chef.model");
 const email = require("../send_email");
+
+var multer  = require('multer');
+var upload = multer({ dest: 'uploads/' });
+
 const googleMapsClient = require('@google/maps').createClient({
   key: 'AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA',
   Promise: Promise
@@ -406,7 +410,37 @@ function status_update(req, res) {
     });
 }
 
-router.post("/add_item", auth, add_item);
+// router.post("/add_item", auth, add_item);
+
+// function add_item(req, res) {
+//   Chef.updateOne(
+//     { _id: req.user._id },
+//     {
+//       $push: {
+//         menu: {
+//           itemName: req.body.itemName,
+//           itemDescr: req.body.itemDescr,
+//           itemCost: req.body.itemCost,
+//           isVeg: req.body.isVeg,
+//         },
+//       },
+//     }
+//   )
+//     .then(res.status(200).send("Item Added"))
+//     .catch(res.status(400).send("error: Item not added"));
+// }
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + '.jpg')
+  }
+})
+ 
+var upload = multer({ storage: storage }).single('dishPic');
+router.post("/add_item", auth, upload, add_item);
 
 function add_item(req, res) {
   Chef.updateOne(
@@ -418,6 +452,7 @@ function add_item(req, res) {
           itemDescr: req.body.itemDescr,
           itemCost: req.body.itemCost,
           isVeg: req.body.isVeg,
+          dishPic: 'uploads/'+ req.file.filename
         },
       },
     }
@@ -469,6 +504,7 @@ function avail_items(req, res) {
   //     res.json("error: " + err);
   //   });
 
-}
+  }
+ }
 
 module.exports = router;

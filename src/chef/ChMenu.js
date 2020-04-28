@@ -18,6 +18,7 @@ export default class ChMenu extends Component {
       itemName: "",
       itemCost: "",
       itemDescr: "",
+      
     };
 
     this.handleChange = this.handleChange.bind(this);
