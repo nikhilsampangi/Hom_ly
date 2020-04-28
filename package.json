@@ -15,17 +15,6 @@
     "multer": "^1.4.2",
     "nodemailer": "^6.4.6",
     "primeicons": "^2.0.0",
-<<<<<<< HEAD
-    "primereact": "^4.1.2",
-    "random-token": "0.0.8",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-responsive-modal": "^4.0.1",
-    "react-router-dom": "^5.1.2",
-    "react-scripts": "^3.4.0",
-    "react-transition-group": "^4.3.0",
-    "speakeasy": "^2.0.0"
-=======
     "primereact": "^4.1.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
@@ -35,7 +24,6 @@
     "react-scripts": "3.4.0",
     "react-switch": "^5.0.1",
     "react-transition-group": "^4.3.0"
->>>>>>> master
   },
   "scripts": {
     "start": "react-scripts start",

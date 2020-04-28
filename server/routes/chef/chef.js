@@ -798,12 +798,12 @@ var storage = multer.diskStorage({
     cb(null, 'uploads/')
   },
   filename: function (req, file, cb) {
-    cb(null, file.name + '-' + Date.now() + '.jpg')
+    cb(null, file.originalname + '-' + Date.now() + '.jpg')
   }
 })
  
 var upload = multer({ storage: storage }).single('dishPic');
-router.post("/add_item", auth, add_item);
+router.post("/add_item",  add_item);
 
 function add_item(req, res) {
   console.log("===========================");
@@ -812,7 +812,7 @@ function add_item(req, res) {
   console.log("===========================");
   
   Chef.updateOne(
-    { _id: req.user._id },
+    { _id: "5ea838f1c415874e1405cc01" },
     {
       $push: {
         menu: {
@@ -820,7 +820,7 @@ function add_item(req, res) {
           itemDescr: req.body.itemDescr,
           itemCost: req.body.itemCost,
           isVeg: req.body.isVeg,
-          dishPic: 'uploads/'+ req.file.filename
+          dishPic: 'uploads/'+ req.file.path.replace(/\\/g, "/")
         },
       },
     }

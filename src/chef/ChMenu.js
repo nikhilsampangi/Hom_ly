@@ -18,29 +18,46 @@ export default class ChMenu extends Component {
       itemName: "",
       itemCost: "",
       itemDescr: "",
-      
+      dishPic: ""
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSwitchChange = this.handleSwitchChange.bind(this);
+    //this.handlePath = this.handlePath.bind(this);
     this.addItem = this.addItem.bind(this);
   }
 
   addItem(event) {
+    let imageFormObj = new FormData();
+    imageFormObj.append("image", this.state.dishPic);
+
+    console.log(imageFormObj, this.state.dishPic);
+    
+
     const item = {
       itemName: this.state.itemName,
       itemDescr: this.state.itemDescr,
       itemCost: this.state.itemCost,
       isVeg: this.state.itemVegFlag,
+      dishPic: this.state.dishPic,
     };
+
+
+    console.log('====================================');
+    console.log(item);
+    console.log('====================================');
+    
+
     axios
       .post("/chef/add_item", item, {
-        headers: { Authorization: Cookies.get("cheftoken") },
+        headers: { Authorization: Cookies.get("cheftoken"), 'Content-Type': 'multipart/form-data'},
       })
       .then(() => {
+        
         this.setState({ addItemFlag: false, rrFlag: true });
         window.location.reload(false);
-      });
+      })
+      .catch(error => { console.log(error);})
   }
 
   handleChange(event) {
@@ -50,6 +67,14 @@ export default class ChMenu extends Component {
   handleSwitchChange(event) {
     this.setState({ itemVegFlag: !this.state.itemVegFlag });
   }
+
+  handlePath(event) {
+    let file = event.target.files[0]
+    this.setState({ dishPic: file});
+
+  }
+
+
 
   componentDidMount(event) {
     change_bg("chf_hm");
@@ -148,7 +173,7 @@ export default class ChMenu extends Component {
                 </div>
                 <div className="col">
                   <span>Item Image</span>
-                  <input type="file" className="form-control" />
+                  <input type="file" className="form-control"  onChange={(event) => this.handlePath(event)}/>
                 </div>
               </div>
               <br />
@@ -390,7 +415,7 @@ class Item extends Component {
                   onChange={this.handleChange}
                 />
               </div>
-            </div>
+            </div>  
             <br />
             <div className="row">
               <div className="col">
