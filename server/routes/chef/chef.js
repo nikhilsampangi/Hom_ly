@@ -7,9 +7,26 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const mongoose = require("mongoose");
 
+//File Upload
 var multer  = require('multer');
+var path = require('path');
 var upload = multer({ dest: 'uploads/' });
 
+//ElasticSearch
+const {createChefIndex} = require("../../routes/elasticSearchModule");
+const {createMenuIndex} = require("../../routes/elasticSearchModule");
+const {indexing} = require("../../routes/elasticSearchModule");
+const {checkStatus} = require("../../routes/elasticSearchModule");
+const {deleteIndex} = require("../../routes/elasticSearchModule");
+const {checkIndex} = require("../../routes/elasticSearchModule");
+const {findDocs} = require("../../routes/elasticSearchModule");
+const {deleteDocs} = require("../../routes/elasticSearchModule");
+const {search} = require("../../routes/elasticSearchModule");
+const {autoSuggest} = require("../../routes/elasticSearchModule");
+const {mappingDetails} = require("../../routes/elasticSearchModule");
+
+const elastic = require("../../routes/elasticSearchModule");
+//MongoDB models 
 const {Chef} = require("../../models/chef.model");
 // const {Menu} = require('../../models/chef.model'); 
 // const {DishReport} = require('../../models/chef.model'); 
@@ -17,8 +34,7 @@ const {Chef} = require("../../models/chef.model");
 
 const email = require("../send_email");
 
-var multer  = require('multer');
-var upload = multer({ dest: 'uploads/' });
+
 
 const googleMapsClient = require('@google/maps').createClient({
   key: 'AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA',
@@ -29,7 +45,55 @@ const googleMapsClient = require('@google/maps').createClient({
 router.use(cors());
 
 process.SECRET_KEY = "hackit";
+/////
 
+router.post("/elasticsearch", create);
+
+function create(req, res){
+  const indexName = 'restuarents';
+  const Id= '7';
+  const value= "hotel";
+  const resName = "shiva sai charan restarunt";
+  const resPlace = "mogalirajpuram";
+  const resRating = 3.0;
+  const resLat= 16.4776341;
+  const resLon= 80.5874954;  
+
+  const lat= 16.766654;
+  const lng= 78.089845;
+
+  const payload = {
+    id: Id,
+    name: resName,
+    place: resPlace,
+    rating: resRating,
+    suggest: {
+      input: resName.split(" "),
+      contexts: {
+        location: {
+          lat: resLat,
+          lon: resLon
+        }
+      }
+    },
+    pin : {
+      location : {
+          lat : resLat,
+          lon : resLon
+      }
+    }
+  };
+ 
+  elastic.indexing("chefs",Id, payload, (err,response)=>{
+    if(err){
+      res.status(400).send({message: err});
+    }else {
+      res.status(200).send({message: response.body});
+    }
+  });
+}
+ 
+/////
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
     secret: secret_token,
@@ -794,23 +858,16 @@ function status_update(req, res) {
 // }
 
 var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
+  destination: 'uploads/',
   filename: function (req, file, cb) {
-    cb(null, file.originalname + '-' + Date.now() + '.jpg')
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
   }
 })
  
 var upload = multer({ storage: storage }).single('dishPic');
-router.post("/add_item",  add_item);
+router.post("/add_item", upload, add_item);
 
-function add_item(req, res) {
-  console.log("===========================");
-  console.log("item added");
-  console.log(req.body);
-  console.log("===========================");
-  
+function add_item(req, res) {  
   Chef.updateOne(
     { _id: "5ea838f1c415874e1405cc01" },
     {
@@ -820,7 +877,7 @@ function add_item(req, res) {
           itemDescr: req.body.itemDescr,
           itemCost: req.body.itemCost,
           isVeg: req.body.isVeg,
-          dishPic: 'uploads/'+ req.file.path.replace(/\\/g, "/")
+          dishPic: 'uploads/'+ req.file.filename,
         },
       },
     }

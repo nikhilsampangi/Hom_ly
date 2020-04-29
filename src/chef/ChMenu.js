@@ -28,10 +28,15 @@ export default class ChMenu extends Component {
   }
 
   addItem(event) {
-    let imageFormObj = new FormData();
-    imageFormObj.append("image", this.state.dishPic);
+    let fd = new FormData();
+    fd.append("itemName", this.state.itemName);
+    fd.append("itemDescr", this.state.itemDescr);
+    fd.append("itemCost", this.state.itemCost);
+    fd.append("isVeg", this.state.itemVegFlag);
+    fd.append("dishPic", this.state.dishPic, this.state.dishPic.name);
+    
 
-    console.log(imageFormObj, this.state.dishPic);
+    console.log(fd, this.state.dishPic);
     
 
     const item = {
@@ -39,18 +44,18 @@ export default class ChMenu extends Component {
       itemDescr: this.state.itemDescr,
       itemCost: this.state.itemCost,
       isVeg: this.state.itemVegFlag,
-      dishPic: this.state.dishPic,
+      dishPic: fd,
     };
 
 
     console.log('====================================');
-    console.log(item);
+    console.log(fd);
     console.log('====================================');
     
 
     axios
-      .post("/chef/add_item", item, {
-        headers: { Authorization: Cookies.get("cheftoken"), 'Content-Type': 'multipart/form-data'},
+      .post("/chef/add_item", fd, {
+        headers: { Authorization: Cookies.get("cheftoken"),'content-type': 'multipart/form-data'},
       })
       .then(() => {
         
@@ -68,13 +73,12 @@ export default class ChMenu extends Component {
     this.setState({ itemVegFlag: !this.state.itemVegFlag });
   }
 
-  handlePath(event) {
+  handlePath = event => {
+    
     let file = event.target.files[0]
     this.setState({ dishPic: file});
 
   }
-
-
 
   componentDidMount(event) {
     change_bg("chf_hm");
@@ -173,7 +177,7 @@ export default class ChMenu extends Component {
                 </div>
                 <div className="col">
                   <span>Item Image</span>
-                  <input type="file" className="form-control"  onChange={(event) => this.handlePath(event)}/>
+                  <input type="file" className="form-control" name="dishPic" onChange={this.handlePath}/>
                 </div>
               </div>
               <br />
