@@ -50,32 +50,32 @@ process.SECRET_KEY = "hackit";
 router.post("/elasticsearch", create);
 
 function create(req, res){
-  const indexName = 'restuarents';
-  const Id= '7';
-  const value= "hotel";
-  const resName = "shiva sai charan restarunt";
-  const resPlace = "mogalirajpuram";
-  const resRating = 3.0;
-  const resLat= 16.4776341;
-  const resLon= 80.5874954;  
+  const indexName = 'chefs';
+  const Id= '6';
+  var value= "far";
+  const resName = "Near Restuarent 3";
+  const resPlace = "Near Tadepalligudem";
+  const resRating = 3.3;
+  const resLat= 16.4801664;
+  const resLon= 80.6110714;  
 
-  const lat= 16.766654;
-  const lng= 78.089845;
+  const lat= 16.4798428;
+  const lng= 80.620487;
 
   const payload = {
     id: Id,
     name: resName,
     place: resPlace,
     rating: resRating,
-    suggest: {
-      input: resName.split(" "),
-      contexts: {
-        location: {
-          lat: resLat,
-          lon: resLon
-        }
-      }
-    },
+    // suggest: {
+    //   input: resName.split(" "),
+    //   contexts: {
+    //     location: {
+    //       lat: resLat,
+    //       lon: resLon
+    //     }
+    //   }
+    // },
     pin : {
       location : {
           lat : resLat,
@@ -83,8 +83,11 @@ function create(req, res){
       }
     }
   };
+
+  value= value.toLowerCase();
+  console.log(value);
  
-  elastic.indexing("chefs",Id, payload, (err,response)=>{
+  elastic.search(indexName, value, lat, lng, (err,response)=>{
     if(err){
       res.status(400).send({message: err});
     }else {
@@ -316,7 +319,7 @@ function login(req, res) {
           const payload = {
             _id: user._id,
             email: user.email,
-            firstname: user.firstname,
+            fullname: user.firstname+" "+user.lastName,
           };
           let token = jwt.sign(payload, process.SECRET_KEY, {
             algorithm: "HS256",

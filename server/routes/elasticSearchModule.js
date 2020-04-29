@@ -35,16 +35,16 @@ function createChefIndex(indexName, callback){
                     name: { type: "text" },
                     place: { type: "text" },
                     rating: { type: "float" },
-                    suggest: {
-                        type: "completion",
-                        analyzer: "simple",
-                        search_analyzer: "simple",
-                        contexts: { 
-                            name: "location",
-                            type: "geo",
-                            precision: "3km"
-                        }
-                    },
+                    // suggest: {
+                    //     type: "completion",
+                    //     analyzer: "simple",
+                    //     search_analyzer: "simple",
+                    //     contexts: { 
+                    //         name: "location",
+                    //         type: "geo",
+                    //         precision: 3
+                    //     }
+                    // },
                     pin: {
                         properties: {
                             location: {
@@ -71,7 +71,7 @@ function createMenuIndex(indexName, callback){
             settings: {
                 index: {
                     blocks: {
-                    read_only_allow_delete: "false"
+                        read_only_allow_delete: "false"
                     }
                 },
                 number_of_shards : 1
@@ -83,16 +83,16 @@ function createMenuIndex(indexName, callback){
                     dishId: { type: "text" },
                     dishName: { type: "text" },
                     dishPic: {type: "text"},
-                    suggest: {
-                        type: "completion",
-                        analyzer: "simple",
-                        search_analyzer: "simple",
-                        contexts: { 
-                            name: "location",
-                            type: "geo",
-                            precision: "3km"
-                        }
-                    },
+                    // suggest: {
+                    //     type: "completion",
+                    //     analyzer: "simple",
+                    //     search_analyzer: "simple",
+                    //     contexts: { 
+                    //         name: "location",
+                    //         type: "geo",
+                    //         precision: "3km"
+                    //     }
+                    // },
                     pin: {
                         properties: {
                             location: {
@@ -117,7 +117,7 @@ function checkIndex(indexName, callback){
    
     esClient.indices.exists({
         index: indexName
-    }, (err, resp, status)=>{
+    }, (err, resp)=>{
         if(err){
             callback(err, null);
         }else {
@@ -189,11 +189,10 @@ function findDocs(indexName, Id, callback){
 
 // delete doc in index type
 
-function deleteDocs(indexName, Id, docType, callback){
+function deleteDocs(indexName, Id, callback){
     esClient.count({
         index: indexName,
-        id: Id,
-        type: docType
+        id: Id
     }, (err, resp)=>{
         if(err){
             callback(err, null);
@@ -205,32 +204,30 @@ function deleteDocs(indexName, Id, docType, callback){
 
 // searching
 
-function search(indexName, latitude, longitude, callback){
+function search(indexName, value, latitude, longitude, callback){
     esClient.search({
         index: indexName,
         body: {
             query: {
-                // regexp: {"name": "[a-z]"+value+"[a-z]*"}
-                match_all : {}
-            },
-            filter : {
-                geo_distance : {
-                    distance : "3km",
-                    pin : {
-                        location: {
-                            lat : latitude,
-                            lon : longitude
+                bool : {
+                    must : {
+                        // match_all: {},
+                        regexp: {"name": "[a-z]*"+value+"[a-z]*"}
+                    },
+                    filter : {
+                        geo_distance : {
+                            distance : "30km",
+                            "pin.location" : {
+                                lat : latitude,
+                                lon : longitude
+                            }
                         }
                     }
                 }
             }    
         }
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });
 }
 
@@ -240,7 +237,7 @@ function autoSuggest(indexName, value, latitude, longitude, callback){
         body: {
             suggest: {
                 restuarents: {
-                    regex : "[a-z]"+value+"[a-z]*", 
+                    regex : "[a-z]*"+value+"[a-z]*", 
                     completion : { 
                         field : "suggest",
                         size : 10,
@@ -249,9 +246,6 @@ function autoSuggest(indexName, value, latitude, longitude, callback){
                                 lat: latitude,
                                 lon: longitude
                             }
-                        },
-                        fuzzy: {
-                            fuzziness: 3
                         }
                     }
                 }
