@@ -35,24 +35,13 @@ export default class ChMenu extends Component {
     fd.append("isVeg", this.state.itemVegFlag);
     fd.append("dishPic", this.state.dishPic, this.state.dishPic.name);
     
-
-    console.log(fd, this.state.dishPic);
-    
-
-    const item = {
-      itemName: this.state.itemName,
-      itemDescr: this.state.itemDescr,
-      itemCost: this.state.itemCost,
-      isVeg: this.state.itemVegFlag,
-      dishPic: fd,
-    };
-
-
-    console.log('====================================');
-    console.log(fd);
-    console.log('====================================');
-    
-
+    // const item = {
+    //   itemName: this.state.itemName,
+    //   itemDescr: this.state.itemDescr,
+    //   itemCost: this.state.itemCost,
+    //   isVeg: this.state.itemVegFlag,
+    //   dishPic: fd,
+    // };
     axios
       .post("/chef/add_item", fd, {
         headers: { Authorization: Cookies.get("cheftoken"),'content-type': 'multipart/form-data'},

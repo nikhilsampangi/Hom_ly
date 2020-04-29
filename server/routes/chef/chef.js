@@ -57,7 +57,7 @@ function create(req, res){
   const resPlace = "mogalirajpuram";
   const resRating = 3.0;
   const resLat= 16.4776341;
-  const resLon= 80.5874954;  
+  const resLon= 80.5874954;  //16.4738179,80.6235742    //16.5050303,80.635495
 
   const lat= 16.766654;
   const lng= 78.089845;
@@ -84,7 +84,7 @@ function create(req, res){
     }
   };
  
-  elastic.indexing("chefs",Id, payload, (err,response)=>{
+  elastic.indexing("chefs", Id,payload,(err,response)=>{
     if(err){
       res.status(400).send({message: err});
     }else {

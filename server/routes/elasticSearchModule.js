@@ -26,6 +26,11 @@ function createChefIndex(indexName, callback){
         index: indexName,
         body: {
             settings: {
+                index: {
+                    blocks: {
+                        read_only_allow_delete: null
+                    }
+                },
                 number_of_shards : 1,
 
             },
