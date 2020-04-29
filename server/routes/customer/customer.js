@@ -558,4 +558,49 @@ function edit_profile(req, res) {
     });
 }
 
+router.post("/elasticsearch", create);
+
+function create(req, res){
+  const indexName = 'restuarents';
+  const Id= '7';
+  const value= "hotel";
+  const resName = "Unknown Hotel";
+  const resPlace = "Ouskirts of MBNR";
+  const resRating = "3.0";
+  const resLat= 16.721104;
+  const resLon= 77.979330;
+
+  const lat= 16.766654;
+  const lng= 78.089845;
+
+  const payload = {
+    name: resName,
+    place: resPlace,
+    rating: resRating,
+    suggest: {
+      input: resName.split(" "),
+      contexts: {
+        location: {
+          lat: resLat,
+          lon: resLon
+        }
+      }
+    },
+    pin : {
+      location : {
+          lat : resLat,
+          lon : resLon
+      }
+    }
+  };
+
+  elastic.createTitle((err,response)=>{
+    if(err){
+      res.status(400).send({message: err});
+    }else {
+      res.status(200).send({message: response.body});
+    }
+  });
+}
+
 module.exports = router;

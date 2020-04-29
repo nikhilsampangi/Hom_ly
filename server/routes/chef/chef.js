@@ -329,6 +329,8 @@ async function gmap(req, res) {
   list.sort((a,b)=>(a.distance > b.distance) ? 1: -1);    // sorting list according to dist
   res.send(list);
 
+}  
+
 router.get("/profile", auth, get_profile);
 
 function get_profile(req, res) {

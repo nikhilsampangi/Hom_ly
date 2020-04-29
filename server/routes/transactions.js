@@ -16,7 +16,7 @@ function payment(paymentData, callback){
     params['ORDER_ID'] = paymentData.orderId,
     params['CUST_ID'] = paymentData.customerId,
     params['TXN_AMOUNT'] = paymentData.amount,
-    params['CALLBACK_URL'] = 'http://localhost:8008/customer/success',
+    params['CALLBACK_URL'] = 'http://localhost:8008/transaction/success',
     params['EMAIL'] = paymentData.email,
     params['MOBILE_NO'] = paymentData.phoneNumber
 

@@ -19,9 +19,13 @@ const TransactionSchema = new Schema({
   updatedAt: {type:Date, default: Date.now},  
 
   chefId: { type: String, required: true },
+
   chefName: { type: String, required: true },
+  
   date: { type: Date, default: Date.now, required: true },
-  amount: { type: Number, required: true },
+  
+  amount: { type: Number },
+  
   items: [
     {
       itemName: { type: String, required: true },
