@@ -74,9 +74,8 @@ function create(req, res){
   };
 
   value= value.toLowerCase();
-  console.log(value);
  
-  elastic.search(indexName, value, lat, lng, (err,response)=>{
+  elastic.findDocs(indexName, "5eaaa97ea9425d5534803bd5", (err,response)=>{
     if(err){
       res.status(400).send({message: err});
     }else {
@@ -199,7 +198,7 @@ function verify(req, res) {
                 //indexing the user
                 const payload = {
                     id: chef._id,
-                    name: chef.firstName+" "+chef.lastname,
+                    name: chef.firstName+" "+chef.lastName,
                     place: chef.Address.Localty,
                     rating: chef.rating,
                     pin : {
@@ -209,15 +208,16 @@ function verify(req, res) {
                       }
                     }
                 }
-                elastic.indexing("cehfs", chef._id, payload, (err,response) => {
+                elastic.indexing("chefs", chef._id, payload, (err,response) => {
                   if(err){
-                    res.status(400).send("error: not indexed")
+                    // res.status(400).send("error: not indexed")
+                    console.log("\nerror: not indexed\n");
                   }else{
-                    res.status(200).send("Successfully registered your account!!!");
+                    // res.status(200).send("Successfully registered your account!!!");
+                    console.log("\nSuccessfully registered your account!!!\n");
                   }
                 })
-
-                //res.status(200).send("Successfully registered your account!!!");
+                res.status(200).send("Successfully registered your account!!!");
               }
             });
           } else {
@@ -329,7 +329,7 @@ function login(req, res) {
           const payload = {
             _id: user._id,
             email: user.email,
-            fullname: user.firstname+" "+user.lastName,
+            fullname: user.firstName+" "+user.lastName,
           };
           let token = jwt.sign(payload, process.SECRET_KEY, {
             algorithm: "HS256",
@@ -825,9 +825,9 @@ function edit_profile(req, res) {
           //update address index
           // elastic.updateAdress("cehfs", resp[0]._id, req.body.localty, (err,response) => {
           //   if(err){
-          //     res.status(400).send("error: not indexed")
+          //     console.log("error: not indexed")
           //   }else{
-          //     res.status(200).send("Details Updated");
+          //     console.log("Details Updated in doc of index");
           //   }
           // })
 
@@ -851,7 +851,7 @@ function status_update(req, res) {
     },
   };
   Chef.updateOne({ email: req.body.email }, status)
-    .then(
+    .then((resp)=>{
       // update index
       Chef.aggregate([
         { $match: {email: req.body.email} },
@@ -865,17 +865,17 @@ function status_update(req, res) {
           res.status(400).send({ message: "Something went wrong, please try again!!!" })
         }else{
           // update indexed docs
-          elastic.updateStatus("cehfs", resp[0]._id, resp[0].workingStatus, (err,response) => {
+          elastic.updateStatus("chefs", resp[0]._id, resp[0].workingStatus, (err,response) => {
             if(err){
-              res.status(400).send("error: not indexed")
+              console.log("\nnot indexed\n");
             }else{
-              res.status(200).send("Status Updated");
+              console.log("\nUpdated doc in index\n");
             }
           })
         }
       }),
-      //res.status(200).send("Status Updated")
-    )
+      res.status(200).send({message:"Status Updated"});
+    })
     .catch((err) => {
       res
         .status(400)
@@ -937,11 +937,11 @@ function add_item(req, res) {
               
               // indexing
               const payload ={
-                chefId: { type: "text" },
-                    chefName: req.user._id,
-                    dishId: req.user.fullname,
-                    dishName: dish._id,
-                    dishPic: dishPic,
+                    chefId: req.user._id,
+                    chefName: req.user.fullname,
+                    dishId: dish._id,
+                    dishName: dish.itemName,
+                    dishPic: dish.dishPic,
                     pin : {
                       location : {
                           lat : 16.47749,//chef.location.coordinates
@@ -951,12 +951,14 @@ function add_item(req, res) {
               }
               elastic.indexing("menu", dish._id, payload, (err, resp) => {
                 if(err){
-                  res.status(400).send("error: not indexed")
+                  // res.status(400).send("error: not indexed")
+                  console.log("\nerror: not indexed\n")
                 }else{
-                  res.status(200).send("Item added");
+                  // res.status(200).send("Item added");
+                  console.log("\nItem indexed\n")
                 }
               })
-              //res.status(200).send({message: "Item added"})
+              res.status(200).send({message: "Item added"})
               
             }
           })
@@ -972,7 +974,7 @@ function add_item(req, res) {
 router.post("/delete_item", auth, delete_item);
 
 function delete_item(req, res) {
-  elastic.deleteDocs("menu", req.body.dishId, (err,response) => {
+  elastic.deleteDocs("menu", "5eaab9a0c00181206c1e7c4e", (err,response) => {
     if(err){
       res.status(400).send("error: Item not removed")
     }else{
@@ -985,9 +987,11 @@ function delete_item(req, res) {
             },
           },
         }
-      )
-        .then(res.status(200).send("Item Removed"))
-        .catch(res.status(400).send("error: Item not removed"));
+      ).then(resp=>{
+        res.status(200).send({message: "Item Removed"}) 
+      }).catch(err=>{
+          res.status(400).send({message: "Item not removed"})
+        });
     }
   })
 }
