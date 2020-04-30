@@ -73,14 +73,15 @@ const ChefSchema = new Schema({
     },
   },
 
-  Address: [
-    {
+  Address: {
       Localty: { type: String },
       City: { type: String },
       State: { type: String },
       Pincode: { type: String },
     },
-  ],
+
+  
+  
 
   bio: {
     type: String,
@@ -103,7 +104,7 @@ const ChefSchema = new Schema({
 
   menu: [
     {
-      itemName: { type: String, required: true },
+      itemName: { type: String, required: [true, 'dish pic required'], unique: [true, 'This dish name already exsists.'] },
       itemDescr: { type: String },
       itemCost: { type: Number, required: true },
       isVeg: { type: Boolean, required: true },
@@ -111,7 +112,7 @@ const ChefSchema = new Schema({
     },
   ],
 
-  // rating: { type: Number, default: 0 },
+  rating: { type: Number, default: 0 },
 
   // feedbacks: [
   //   {

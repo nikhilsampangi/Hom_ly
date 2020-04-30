@@ -40,6 +40,7 @@ function createChefIndex(indexName, callback){
                     name: { type: "text" },
                     place: { type: "text" },
                     rating: { type: "float" },
+                    workingStatus: {type: "boolean"},
                     // suggest: {
                     //     type: "completion",
                     //     analyzer: "simple",
@@ -88,6 +89,7 @@ function createMenuIndex(indexName, callback){
                     dishId: { type: "text" },
                     dishName: { type: "text" },
                     dishPic: {type: "text"},
+                    
                     // suggest: {
                     //     type: "completion",
                     //     analyzer: "simple",
@@ -131,6 +133,45 @@ function checkIndex(indexName, callback){
     });     
 }
 
+// update status Index
+function updateStatus(indexName, Id, status, callback) {
+    esClient.update({
+        index: indexName,
+        id: Id,
+        
+        body: {
+            doc: {
+                workingStatus: status
+            }
+        }
+        }, (err, resp)=>{
+            if(err){
+                callback(err,null);
+            }else {
+                callback(null, resp);
+            }
+        });
+}
+
+// update address index
+function updateAdress(indexName, Id, locality, callback) {
+    esClient.update({
+        index: indexName,
+        id: Id,
+        
+        body: {
+            doc: {
+                place: locality
+            }
+        }
+        }, (err, resp)=>{
+            if(err){
+                callback(err,null);
+            }else {
+                callback(null, resp);
+            }
+        });
+}
 // deleting index
 
 function deleteIndex(indexName, callback){
@@ -277,5 +318,7 @@ module.exports= {
     deleteDocs, 
     search, 
     autoSuggest, 
-    mappingDetails
+    mappingDetails,
+    updateStatus,
+    updateAdress
 }

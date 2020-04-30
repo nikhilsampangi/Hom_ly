@@ -13,19 +13,8 @@ var path = require('path');
 var upload = multer({ dest: 'uploads/' });
 
 //ElasticSearch
-const {createChefIndex} = require("../../routes/elasticSearchModule");
-const {createMenuIndex} = require("../../routes/elasticSearchModule");
-const {indexing} = require("../../routes/elasticSearchModule");
-const {checkStatus} = require("../../routes/elasticSearchModule");
-const {deleteIndex} = require("../../routes/elasticSearchModule");
-const {checkIndex} = require("../../routes/elasticSearchModule");
-const {findDocs} = require("../../routes/elasticSearchModule");
-const {deleteDocs} = require("../../routes/elasticSearchModule");
-const {search} = require("../../routes/elasticSearchModule");
-const {autoSuggest} = require("../../routes/elasticSearchModule");
-const {mappingDetails} = require("../../routes/elasticSearchModule");
-
 const elastic = require("../../routes/elasticSearchModule");
+
 //MongoDB models 
 const {Chef} = require("../../models/chef.model");
 // const {Menu} = require('../../models/chef.model'); 
@@ -207,7 +196,28 @@ function verify(req, res) {
                   message: "Something went wrong, please try again!!!",
                 });
               } else {
-                res.status(200).send("Successfully registered your account!!!");
+                //indexing the user
+                const payload = {
+                    id: chef._id,
+                    name: chef.firstName+" "+chef.lastname,
+                    place: chef.Address.Localty,
+                    rating: chef.rating,
+                    pin : {
+                      location : {
+                          lat : 16.47749,//chef.location.coordinates
+                          lon : 80.6055627,// chef.location.coordinates
+                      }
+                    }
+                }
+                elastic.indexing("cehfs", chef._id, payload, (err,response) => {
+                  if(err){
+                    res.status(400).send("error: not indexed")
+                  }else{
+                    res.status(200).send("Successfully registered your account!!!");
+                  }
+                })
+
+                //res.status(200).send("Successfully registered your account!!!");
               }
             });
           } else {
@@ -812,6 +822,15 @@ function edit_profile(req, res) {
             message: "Something went wrong, please try again!!!",
           });
         } else {
+          //update address index
+          // elastic.updateAdress("cehfs", resp[0]._id, req.body.localty, (err,response) => {
+          //   if(err){
+          //     res.status(400).send("error: not indexed")
+          //   }else{
+          //     res.status(200).send("Details Updated");
+          //   }
+          // })
+
           res.status(200).send("Details Updated");
         }
       });
@@ -832,7 +851,31 @@ function status_update(req, res) {
     },
   };
   Chef.updateOne({ email: req.body.email }, status)
-    .then(res.status(200).send("Status Updated"))
+    .then(
+      // update index
+      Chef.aggregate([
+        { $match: {email: req.body.email} },
+        {
+          $project: {
+            workingStatus: 1
+          }
+        }
+      ], (err1, resp) => {
+        if(err1){
+          res.status(400).send({ message: "Something went wrong, please try again!!!" })
+        }else{
+          // update indexed docs
+          elastic.updateStatus("cehfs", resp[0]._id, resp[0].workingStatus, (err,response) => {
+            if(err){
+              res.status(400).send("error: not indexed")
+            }else{
+              res.status(200).send("Status Updated");
+            }
+          })
+        }
+      }),
+      //res.status(200).send("Status Updated")
+    )
     .catch((err) => {
       res
         .status(400)
@@ -868,43 +911,85 @@ var storage = multer.diskStorage({
 })
  
 var upload = multer({ storage: storage }).single('dishPic');
-router.post("/add_item", upload, add_item);
+router.post("/add_item",auth, upload, add_item); // add auth, upload
 
-function add_item(req, res) {  
-  Chef.updateOne(
-    { _id: "5ea838f1c415874e1405cc01" },
-    {
-      $push: {
-        menu: {
-          itemName: req.body.itemName,
-          itemDescr: req.body.itemDescr,
-          itemCost: req.body.itemCost,
-          isVeg: req.body.isVeg,
-          dishPic: 'uploads/'+ req.file.filename,
+function add_item(req, res) {
+    Chef.findByIdAndUpdate(
+      { _id: req.user._id },
+      {
+        $push: {
+          menu: {
+            itemName: req.body.itemName,
+            itemDescr: req.body.itemDescr,
+            itemCost: req.body.itemCost,
+            isVeg: req.body.isVeg,
+            dishPic: 'uploads/'+ req.file.filename
+          },
         },
       },
-    }
-  )
-    .then(res.status(200).send("Item Added"))
-    .catch(res.status(400).send("error: Item not added"));
+      {new: true },(err, chefDocs) =>{
+        if(err){
+          res.status(400).send({message: "Item not added"})
+        }else{
+          chefDocs.menu.forEach((dish) => {
+            if(dish.itemName === req.body.itemName){
+              console.log("-----: ", dish)
+              
+              // indexing
+              const payload ={
+                chefId: { type: "text" },
+                    chefName: req.user._id,
+                    dishId: req.user.fullname,
+                    dishName: dish._id,
+                    dishPic: dishPic,
+                    pin : {
+                      location : {
+                          lat : 16.47749,//chef.location.coordinates
+                          lon : 80.6055627,// chef.location.coordinates
+                      }
+                    }
+              }
+              elastic.indexing("menu", dish._id, payload, (err, resp) => {
+                if(err){
+                  res.status(400).send("error: not indexed")
+                }else{
+                  res.status(200).send("Item added");
+                }
+              })
+              //res.status(200).send({message: "Item added"})
+              
+            }
+          })
+          
+        }
+      }
+    )
+
+    
 }
 
 
 router.post("/delete_item", auth, delete_item);
 
 function delete_item(req, res) {
-  Chef.updateOne(
-    { _id: req.user._id },
-    {
-      $pull: {
-        menu: {
-          itemName: req.body.itemName,
-        },
-      },
+  elastic.deleteDocs("menu", req.body.dishId, (err,response) => {
+    if(err){
+      res.status(400).send("error: Item not removed")
+    }else{
+      Chef.updateOne(
+        { _id: req.user._id },
+        {
+          $pull: {
+            menu: {
+              itemName: req.body.itemName,
+            },
+          },
+        }
+      )
+        .then(res.status(200).send("Item Removed"))
+        .catch(res.status(400).send("error: Item not removed"));
     }
-  )
-    .then(res.status(200).send("Item Removed"))
-    .catch(res.status(400).send("error: Item not removed"));
+  })
 }
 
 router.get("/avail_items", avail_items);
