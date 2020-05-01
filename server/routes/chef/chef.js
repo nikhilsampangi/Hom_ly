@@ -199,7 +199,7 @@ function verify(req, res) {
                 //indexing the user
                 const payload = {
                     id: chef._id,
-                    name: chef.firstName+" "+chef.lastname,
+                    name: chef.firstName+" "+chef.lastName,
                     place: chef.Address.Localty,
                     rating: chef.rating,
                     pin : {
