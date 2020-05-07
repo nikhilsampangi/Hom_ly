@@ -9,6 +9,8 @@ const  User= require("../../models/customer.model");
 const transactions= require("../transactions");
 // router.use(cors());
 
+const cron= require("../time_schedule/schedule_order");
+
 router.post("/buy_item", auth, buy_item);
 
 function buy_item(req, res) {
@@ -295,6 +297,48 @@ function success(req, res){
     }
   })
 
+}
+
+router.post('/refund', initiateRefund)
+
+function initiateRefund(req, res){
+    refundData= {
+      orderId: "5eb3f6d9be16a93090f04c28",
+      txnId: "20200507111212800110168391101503320",
+      amount:  "100",
+    }
+    transactions.refund(refundData, (err, response)=>{
+      if(err){
+        res.satus(400).send({message: err});
+      }else {
+        const resData= JSON.parse(response);
+        res.status(400).send({message: resData.body});
+      }
+    })
+}
+
+router.post('/refundStatus', refundStatus)
+
+function refundStatus(req, res){
+    refundData= {
+      orderId: "5eb3f6d9be16a93090f04c28",
+      refundId: "20200507111212800110168391101503320",
+    }
+    transactions.refundStatus(refundData, (err, response)=>{
+      if(err){
+        res.satus(400).send({message: err});
+      }else {
+        const resData= JSON.parse(response);
+        res.status(400).send({message: resData.body});
+      }
+    });
+}
+
+router.post('/cron', runCron)
+
+function runCron(req, res){
+  cron.scheduleOrder();
+  res.status(200).send({message: "running cron"});
 }
 
 module.exports = router;

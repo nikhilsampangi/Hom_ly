@@ -7,6 +7,11 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const Chef = require("../../models/chef.model");
 const email = require("../send_email");
+const passport = require('passport');
+const passportSetup= require("../../config/gOAuth/chefPassport");
+const chefValidate= require("../../joi_models/authValidation.model"); 
+const passwordCheck= require('../../joi_models/passwordCheck.model'); 
+
 const googleMapsClient = require('@google/maps').createClient({
   key: 'AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA',
   Promise: Promise
@@ -43,12 +48,12 @@ function register(req, res) {
   Chef.findOne({
     email: req.body.email,
   })
-    .then((chef) => {
-      if (chef) {
+    .then((user) => {
+      if (user) {
         // In front-end check the status,
         // if status is '1' call send_otp api and load otp component,
 
-        if (chef.isRegistered === false) {
+        if (user.isVerified === false) {
           res
             .status(200)
             .send({ message: "Please verify your account!!!", status: "1" });
@@ -56,69 +61,122 @@ function register(req, res) {
           res.status(400).send({ message: "Account already exist" });
         }
       } else {
-        bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
-          var secret = speakeasy.generateSecret({ length: 20 });
-
-          const chefData = {
-            firstName: req.body.firstName,
-            lastName: req.body.lastName,
+        var secret = speakeasy.generateSecret({ length: 20 });
+        
+        const chefData = {
+            firstName: req.body.firstname,
+            lastName: req.body.lastname,
             email: req.body.email,
-            phoneNum: req.body.phoneNumber,
-            hashedPassword: hash,
-            passwordResetToken: secret.base32,
-            bio: req.body.bio,
-            specialities: req.body.specialities,
+
+            internalAuth:{
+              hashedPassword: req.body.hashedPassword,
+              passwordResetToken: secret.base32,
+              phoneNum: req.body.phonenumber,
+            }
           };
 
-          Chef.create(chefData)
-            .then((user) => {
-              var token = gen_OTP(user.passwordResetToken);
+        const {error, value} = chefValidate.validate(chefData);
 
-              email.send_verification_token(token, user.email);
+        if(error) {
+        
+          res.status(400).send({message: error.message});
+        
+        }else {
 
-              res
-                .status(200)
-                .send({ message: "Please enter OTP!!!", status: "1" });
+          bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
+            
+            chefData.internalAuth.hashedPassword= hash;
+            chefData.bio= req.body.bio;
+            chefData.specialities= req.body.specialities;
+
+            Chef.create(chefData)
+            .then(chefCreated => {
+              var token = gen_OTP(chefCreated.internalAuth.passwordResetToken);
+
+              email.send_verification_token(token, chefCreated.email);
+
+              res.status(200).send({ message: "Please enter OTP!!!", status: "1" });
             })
-            .catch((err) => {
-              var arr = Object.keys(err["errors"]);
-              var errors = [];
-              for (i in arr) {
-                errors.push(err["errors"][arr[i]].message);
-              }
-              res.status(400).send({ message: errors[0] });
-            });
-        });
+            .catch(err => {
+              res.status(400).send({ message: "Something went wrong, please try again!!!" });
+            }); 
+        
+          });
+          
+        }
       }
+
     })
     .catch((err) => {
       res
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
     });
+
 }
 
-router.post("/verify_otp", verify);
+router.post("/send_otp", resend);
 
-function verify(req, res) {
+function resend(req, res) {
+  console.log("\n"+"send_otp called"+"\n");
+  Chef.findOne({
+    email: req.body.email
+  })
+  .then(chefExist=>{
+    if(!chefExist){
+      res.status(400).send({
+        message: "account does not exist, please register!!!",
+        status: "1"
+      });
+    }else {
+
+      var secret = speakeasy.generateSecret({ length: 20 });
+
+      const newValues = { $set: { "internalAuth.passwordResetToken": secret.base32 } };
+    
+      Chef.updateOne({ 
+        email: chefExist.email,
+      }, newValues, function(err, success) {
+          if (err) {
+            res
+              .status(400)
+              .send({ message: "Something went wrong, please try again!!!" });
+          } else {
+            var token = gen_OTP(secret.base32);
+
+            email.send_verification_token(token, req.body.email);
+      
+            res.status(200).send("OTP sent!!!");
+          }
+      });
+    }
+  })
+
+}
+
+router.post("/verify_registration_otp", verifyRegistrationOtp);
+
+function verifyRegistrationOtp(req, res) {
   Chef.findOne({
     email: req.body.email,
   })
-    .then((chef) => {
-      if (!chef) {
+    .then((chefExist) => {
+      if (!chefExist) {
         res
           .status(400)
           .send({ message: "account does not exist, please register!!!" });
       } else {
-        var tokenValidates = verify_OTP(chef.passwordResetToken, req.body.OTP);
+        var tokenValidates = verify_OTP(
+          chefExist.internalAuth.passwordResetToken,
+          req.body.OTP
+        );
 
         if (!tokenValidates) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
-          if (chef.isRegistered === false) {
-            const newValues = { $set: { isRegistered: true } };
+            const newValues = { $set: { isVerified: true } };
 
-            Chef.updateOne({ _id: chef._id }, newValues, function (
+            Chef.updateOne({ _id: chefExist._id }, newValues, function (
               err,
               success
             ) {
@@ -130,10 +188,40 @@ function verify(req, res) {
                 res.status(200).send("Successfully registered your account!!!");
               }
             });
-          } else {
-            const newValues = { $set: { isValidated: true } };
+        }
+      }
+    })
+    .catch(err => {
+      res
+        .status(400)
+        .send({ message: "Something went wrong, please try again!!!" });
+    });
+}
 
-            Chef.updateOne({ _id: chef._id }, newValues, function (
+router.post("/verify_reset_password_otp", verifyPasswordOtp);
+
+function verifyPasswordOtp(req, res) {
+  Chef.findOne({
+    email: req.body.email
+  })
+    .then(chefExist => {
+      if (!chefExist) {
+        res
+          .status(400)
+          .send({ message: "account does not exist, please register!!!" });
+      } else {
+        var tokenValidates = verify_OTP(
+          chefExist.internalAuth.passwordResetToken,
+          req.body.OTP
+        );
+
+        if (!tokenValidates) {
+          res.status(400).send({ message: "INVALID OTP!!!" });
+        } else {
+
+            const newValues = { $set: {isValidated: true, isVerified: true} };
+
+            Chef.updateOne({ _id: chefExist._id }, newValues, function (
               err,
               success
             ) {
@@ -145,7 +233,6 @@ function verify(req, res) {
                 res.status(200).send("Validated!!!");
               }
             });
-          }
         }
       }
     })
@@ -156,28 +243,6 @@ function verify(req, res) {
     });
 }
 
-router.post("/send_otp", resend);
-
-function resend(req, res) {
-  var secret = speakeasy.generateSecret({ length: 20 });
-
-  const newValues = { $set: { passwordResetToken: secret.base32 } };
-
-  Chef.updateOne({ email: req.body.email }, newValues, function (err, success) {
-    if (err) {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
-    } else {
-      var token = gen_OTP(secret.base32);
-
-      email.send_verification_token(token, req.body.email);
-
-      res.status(200).send("OTP sent!!!");
-    }
-  });
-}
-
 router.post("/reset_password", reset);
 
 function reset(req, res) {
@@ -186,30 +251,42 @@ function reset(req, res) {
   })
     .then((user) => {
       if (user.isValidated === true) {
-        bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
-          if (err) {
-            res
-              .status(400)
-              .send({ message: "Something went wrong, please try again!!!" });
-          } else {
-            const newValues = {
-              $set: { hashedPassword: hash, isValidated: false },
-            };
+        const {error, value}= passwordCheck.validate({password: req.body.newPassword})
 
-            Chef.updateOne({ email: req.body.email }, newValues, function (
-              err,
-              success
-            ) {
-              if (err) {
-                res.status(400).send({
-                  message: "Something went wrong, please try again!!!",
-                });
-              } else {
-                res.status(200).send("Password updated!!!");
-              }
-            });
-          }
-        });
+        if(error) {
+          
+          res.status(400).send({message:error.message});
+
+        }else {
+          
+          bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
+            if (err) {
+              res
+                .status(400)
+                .send({ message: "Something went wrong, please try again!!!" });
+            } else {
+              const newValues = {
+                $set: { "internalAuth.hashedPassword": hash, isValidated: false }
+              };
+  
+              Chef.updateOne({ 
+                email: user.email, 
+              }, newValues, function(
+                err,
+                success
+              ) {
+                if (err) {
+                  console.log("\n"+err+"\n");
+                  res.status(400).send({
+                    message: "Something went wrong, please try again!!!"
+                  });
+                } else {
+                  res.status(200).send("Password updated!!!");
+                }
+              });
+            }
+          });
+        }
       } else {
         // In frontend check status, call send_otp api and load otp component.
         res.status(400).send({
@@ -227,14 +304,15 @@ router.get("/login", login);
 
 function login(req, res) {
   req.body = req.query;
+  console.log(req.body)
   Chef.findOne({
     email: req.body.email,
   })
     .then((user) => {
-      if (!user || user.isRegistered === false) {
-        res.status(400).send({ message: "Account does not exist" });
+      if (!user || user.isVerified === false) {
+        res.status(400).send({ message: "Invalid credentials" });
       } else {
-        if (bcrypt.compareSync(req.body.hashedPassword, user.hashedPassword)) {
+        if (bcrypt.compareSync(req.body.hashedPassword, user.internalAuth.hashedPassword)) {
           // Passwords match
           const payload = {
             _id: user._id,
@@ -255,9 +333,27 @@ function login(req, res) {
     .catch((err) => {
       res
         .status(400)
-        .send({ messsage: "Something went wrong, please try again!!!" });
+        .send({ messsage: "Something went wrong, please try again!!! "+err });
     });
 }
+
+/* Google Authentication API. */
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { 
+      scope: ["profile", "email"] 
+  })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/chef/auth/google", session: false }), (req, res) => {
+      const token= req.user;
+      console.log("\n"+token+"\n");
+      res.redirect("http://localhost:3000/"+`${token}`);
+  }
+);
 
 router.post('/getChefs', gmap)
 

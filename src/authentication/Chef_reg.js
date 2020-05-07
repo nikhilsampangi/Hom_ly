@@ -91,7 +91,7 @@ export default class Chef_reg extends Component {
 
   verifyOTP() {
     axios
-      .post("/chef/verify_otp", {
+      .post("/chef/verify_registration_otp", {
         email: this.state.email,
         OTP: this.state.otp,
       })

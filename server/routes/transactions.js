@@ -118,4 +118,124 @@ function success(resData, callback){
 
 }
 
-module.exports= {payment, success, verifyCheckSum};
+function refund(refundData, callback){
+
+    var paytmParams = {};
+
+    paytmParams.body = {
+        "mid" : MID,
+        "txnType" : "REFUND",
+        "orderId" : refundData.orderId,
+        "txnId" : refundData.txnId,
+        "refId" : refundData.txnId,
+        "refundAmount" : refundData.amount,
+    };
+
+    checksum_lib.genchecksumbystring(JSON.stringify(paytmParams.body), MK, function(err, checksum){
+        if(err){
+            callback(err, null);
+        }else {
+            paytmParams.head = {
+                "clientId"	: "C11",
+                "signature"	: checksum
+            };
+    
+            var post_data = JSON.stringify(paytmParams);
+    
+            var options = {
+    
+                hostname: 'securegw-stage.paytm.in',
+                port: 443,
+                path: '/refund/apply',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': post_data.length
+                }
+            };
+    
+            // Set up the request
+            var successData = "";
+            var reqPaytm = https.request(options);
+            reqPaytm.write(post_data);
+            reqPaytm.end();
+    
+            
+            reqPaytm.on('error', (err)=>{
+                callback(err, null);
+            }) 
+    
+            reqPaytm.on('response', (response)=>{
+                response.on('error', (err)=>{
+                    callback(err, null);
+                });
+                response.on('data', (chunk)=>{
+                    successData += chunk;
+                });
+                response.on('end', ()=>{
+                    callback(null, successData);
+                })
+            });
+        }
+    });
+}
+
+function refundStatus(refundData, callback){
+
+    var paytmParams = {};
+
+    paytmParams.body = {
+        "mid" : MID,
+        "orderId" : refundData.orderId,
+        "refId" : refundData.refundId,
+    };
+
+    checksum_lib.genchecksumbystring(JSON.stringify(paytmParams.body), MK, function(err, checksum){
+        if(err){
+            callback(err, null);
+        }else {
+            paytmParams.head = {
+                "clientId"	: "C11",
+                "signature"	: checksum
+            };
+    
+            var post_data = JSON.stringify(paytmParams);
+    
+            var options = {
+                hostname: 'securegw-stage.paytm.in',
+                port: 443,
+                path: '/v2/refund/status',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': post_data.length
+                }    
+            };
+
+             // Set up the request
+             var successData = "";
+             var reqPaytm = https.request(options);
+             reqPaytm.write(post_data);
+             reqPaytm.end();
+     
+             
+             reqPaytm.on('error', (err)=>{
+                 callback(err, null);
+             }) 
+     
+             reqPaytm.on('response', (response)=>{
+                 response.on('error', (err)=>{
+                     callback(err, null);
+                 });
+                 response.on('data', (chunk)=>{
+                     successData += chunk;
+                 });
+                 response.on('end', ()=>{
+                     callback(null, successData);
+                 })
+             });
+        }
+    });
+}
+
+module.exports= {payment, success, refund, refundStatus};
