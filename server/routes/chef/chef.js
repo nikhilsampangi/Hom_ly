@@ -5,7 +5,16 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
-const Chef = require("../../models/chef.model");
+const mongoose = require("mongoose");
+
+//File Upload
+var multer  = require('multer');
+var path = require('path');
+var upload = multer({ dest: 'uploads/' });
+
+//MongoDB models 
+const {Chef} = require("../../models/chef.model");
+
 const email = require("../send_email");
 const passport = require('passport');
 const passportSetup= require("../../config/gOAuth/chefPassport");
@@ -23,6 +32,56 @@ const elastic = require("../elasticSearch");
 router.use(cors());
 
 process.SECRET_KEY = "hackit";
+
+
+router.post("/elasticsearch", create);
+
+function create(req, res){
+  const indexName = 'menu';
+  const Id= '6';
+  var value= "far";
+  const resName = "Near Restuarent 3";
+  const resPlace = "Near Tadepalligudem";
+  const resRating = 3.3;
+  const resLat= 16.4801664;
+  const resLon= 80.6110714;  
+
+  const lat= 16.4798428;
+  const lng= 80.620487;
+
+  const payload = {
+    id: Id,
+    name: resName,
+    place: resPlace,
+    rating: resRating,
+    // suggest: {
+    //   input: resName.split(" "),
+    //   contexts: {
+    //     location: {
+    //       lat: resLat,
+    //       lon: resLon
+    //     }
+    //   }
+    // },
+    pin : {
+      location : {
+          lat : resLat,
+          lon : resLon
+      }
+    }
+  };
+
+  value= value.toLowerCase();
+ 
+  elastic.checkIndex(indexName,(err,response)=>{
+    if(err){
+      res.status(400).send({message: err});
+    }else {
+      res.status(200).send({message: response.body});
+    }
+  });
+}
+ 
 
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
@@ -343,7 +402,7 @@ function login(req, res) {
           const payload = {
             _id: user._id,
             email: user.email,
-            firstname: user.firstname,
+            fullname: user.firstName+" "+user.lastName,
           };
           let token = jwt.sign(payload, process.SECRET_KEY, {
             algorithm: "HS256",
@@ -431,6 +490,15 @@ function edit_profile(req, res) {
             message: "Something went wrong, please try again!!!",
           });
         } else {
+          //update address index
+          // elastic.updateAdress("cehfs", resp[0]._id, req.body.localty, (err,response) => {
+          //   if(err){
+          //     console.log("error: not indexed")
+          //   }else{
+          //     console.log("Details Updated in doc of index");
+          //   }
+          // })
+
           res.status(200).send("Details Updated");
         }
       });
@@ -451,7 +519,31 @@ function status_update(req, res) {
     },
   };
   Chef.updateOne({ email: req.body.email }, status)
-    .then(res.status(200).send("Status Updated"))
+    .then((resp)=>{
+      // update index
+      Chef.aggregate([
+        { $match: {email: req.body.email} },
+        {
+          $project: {
+            workingStatus: 1
+          }
+        }
+      ], (err1, resp) => {
+        if(err1){
+          res.status(400).send({ message: "Something went wrong, please try again!!!" })
+        }else{
+          // update indexed docs
+          elastic.updateStatus("chefs", resp[0]._id, resp[0].workingStatus, (err,response) => {
+            if(err){
+              console.log("\nnot indexed\n");
+            }else{
+              console.log("\nUpdated doc in index\n");
+            }
+          })
+        }
+      }),
+      res.status(200).send({message:"Status Updated"});
+    })
     .catch((err) => {
       res
         .status(400)
@@ -530,9 +622,9 @@ function add_item(req, res) {
 router.post("/delete_item", auth, delete_item);
 
 function delete_item(req, res) {
-  elastic.deleteDocs("menu", "5eaab9a0c00181206c1e7c4e", (err,response) => {
+  elastic.deleteDocs("menu", req.body.itemId, (err,response) => {
     if(err){
-      res.status(400).send("error: Item not removed")
+      res.status(400).send({message: "Item not removed!!!"});
     }else{
       Chef.updateOne(
         { _id: req.user._id },
@@ -544,9 +636,9 @@ function delete_item(req, res) {
           },
         }
       ).then(resp=>{
-        res.status(200).send({message: "Item Removed"}) 
+        res.status(200).send({message: "Item Removed"}); 
       }).catch(err=>{
-          res.status(400).send({message: "Item not removed"})
+          res.status(400).send({message: "Item not removed"});
         });
     }
   })
@@ -579,5 +671,6 @@ function avail_items(req, res) {
   //   });
 
 }
+  
 
 module.exports = router;
