@@ -28,8 +28,6 @@ const MenuSchema = new Schema({
     validated: {type: Number, default: 0, required: true},
     dishReport: [DishReport],
 
-    categorey: {type: Number, default: 4, required: true}, // to sort
-
     forToday: {type: Number, default: 0}, 
 });
 
@@ -113,6 +111,19 @@ const ChefSchema = new Schema({
   ],
 
   rating: { type: Number, default: 0 },
+
+  certifiedStatus: { type: Number, default: 0 }, //0-not certified  1-initiated 2-approved 3-notApproved
+
+  chefValidationRequest: [
+    {
+      chefId: { type: String },
+      dishName: { type: String },
+      recipie: { type: String },
+      requestStatus: { type: Number },
+      remarks: { type: String },
+      Date: { type: Date }
+    }
+  ]
 
   // feedbacks: [
   //   {

@@ -883,25 +883,6 @@ function status_update(req, res) {
     });
 }
 
-// router.post("/add_item", auth, add_item);
-
-// function add_item(req, res) {
-//   Chef.updateOne(
-//     { _id: req.user._id },
-//     {
-//       $push: {
-//         menu: {
-//           itemName: req.body.itemName,
-//           itemDescr: req.body.itemDescr,
-//           itemCost: req.body.itemCost,
-//           isVeg: req.body.isVeg,
-//         },
-//       },
-//     }
-//   )
-//     .then(res.status(200).send("Item Added"))
-//     .catch(res.status(400).send("error: Item not added"));
-// }
 
 var storage = multer.diskStorage({
   destination: 'uploads/',
