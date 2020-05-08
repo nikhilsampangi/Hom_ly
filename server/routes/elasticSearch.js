@@ -8,41 +8,72 @@ const esClient = new elasticsearch.Client({
 // checking status of esClient
   
 function checkStatus(callback){
-    esClient.cluster.health({},function(err,resp,status) {  
-        if(err){
-            callback(err, null);
-        }else {
-            console.log("\nstatus\t:-"+status);
-            callback(null, resp);
-        };
+    esClient.cluster.health({},function(err,resp) {  
+        callback(err, resp);
       });  
 };
 
 
 // creating index
 
-function createIndex(indexName, callback){
+function createChefIndex(indexName, callback){
     esClient.indices.create({
         index: indexName,
         body: {
-            settings: {
-                number_of_shards : 1
-            },
             mappings: {
                 properties: {
+                    id: { type: "text" },
                     name: { type: "text" },
                     place: { type: "text" },
-                    rating: { type: "text" },
-                    suggest: {
-                        type: "completion",
-                        analyzer: "simple",
-                        search_analyzer: "simple",
-                        contexts: { 
-                            name: "location",
-                            type: "geo",
-                            precision: "3km"
+                    rating: { type: "float" },
+                    workingStatus: {type: "boolean"},
+                    // suggest: {
+                    //     type: "completion",
+                    //     analyzer: "simple",
+                    //     search_analyzer: "simple",
+                    //     contexts: { 
+                    //         name: "location",
+                    //         type: "geo",
+                    //         precision: 3
+                    //     }
+                    // },
+                    pin: {
+                        properties: {
+                            location: {
+                                type: "geo_point"
+                            }
                         }
-                    },
+                    }
+                }
+            }
+        }
+    }, (err, resp)=>{
+        callback(err, resp);
+    });    
+} 
+
+function createMenuIndex(indexName, callback){
+    esClient.indices.create({
+        index: indexName,
+        body: {
+            mappings: {
+                properties: {
+                    chefId: { type: "text" },
+                    chefName: { type: "text" },
+                    dishId: { type: "text" },
+                    dishName: { type: "text" },
+                    dishPic: {type: "text"},
+                    
+                    // suggest: {
+                    //     type: "completion",
+                    //     analyzer: "simple",
+                    //     search_analyzer: "simple",
+                    //     contexts: { 
+                    //         name: "location",
+                    //         type: "geo",
+                    //         precision: "3km"
+                    //     }
+                    // },
                     pin: {
                         properties: {
                             location: {
@@ -54,40 +85,58 @@ function createIndex(indexName, callback){
             }
         }
     }, (err, resp, status)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });    
 } 
-
 // checking index existing
 
 function checkIndex(indexName, callback){
    
     esClient.indices.exists({
         index: indexName
-    }, (err, resp, status)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+    }, (err, resp)=>{
+        callback(err, resp);
     });     
 }
 
+// update status Index
+function updateStatus(indexName, Id, status, callback) {
+    esClient.update({
+        index: indexName,
+        id: Id,
+        
+        body: {
+            doc: {
+                workingStatus: status
+            }
+        }
+        }, (err, resp)=>{
+            callback(err, resp);
+        });
+}
+
+// update address index
+function updateAdress(indexName, Id, locality, callback) {
+    esClient.update({
+        index: indexName,
+        id: Id,
+        
+        body: {
+            doc: {
+                place: locality
+            }
+        }
+        }, (err, resp)=>{
+            callback(err, resp);
+        });
+}
 // deleting index
 
 function deleteIndex(indexName, callback){
     esClient.indices.delete({
         index: indexName
     }, (err, resp)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });    
 }
 
@@ -98,11 +147,7 @@ function mappingDetails(indexName, callback){
     esClient.indices.getMapping({
         index: indexName
     }, (err, resp)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     })
 }
 
@@ -114,73 +159,59 @@ function indexing(indexName, Id, payload, callback){
         id: Id,
         body: payload
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     })
 }
 
 // find docs in index type
 
-function findDocs(indexName, docType, callback){
-    esClient.count({
+function findDocs(indexName, Id, callback){
+    esClient.get({
         index: indexName,
-        type: docType
+        id: Id
+        //type: docType
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });
 }
 
 // delete doc in index type
 
-function deleteDocs(indexName, Id, docType, callback){
-    esClient.count({
+function deleteDocs(indexName, Id, callback){
+    esClient.delete({
         index: indexName,
-        id: Id,
-        type: docType
+        id: Id
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });
 }
 
 // searching
 
-function search(indexName, latitude, longitude, callback){
+function search(indexName, value, latitude, longitude, callback){
     esClient.search({
         index: indexName,
         body: {
             query: {
-                // regexp: {"name": "[a-z]"+value+"[a-z]*"}
-                match_all : {}
-            },
-            filter : {
-                geo_distance : {
-                    distance : "3km",
-                    pin : {
-                        location: {
-                            lat : latitude,
-                            lon : longitude
+                bool : {
+                    must : {
+                        // match_all: {},
+                        regexp: {"name": "[a-z]*"+value+"[a-z]*"}
+                    },
+                    filter : {
+                        geo_distance : {
+                            distance : "30km",
+                            "pin.location" : {
+                                lat : latitude,
+                                lon : longitude
+                            }
                         }
                     }
                 }
             }    
         }
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });
 }
 
@@ -190,7 +221,7 @@ function autoSuggest(indexName, value, latitude, longitude, callback){
         body: {
             suggest: {
                 restuarents: {
-                    regex : "[a-z]"+value+"[a-z]*", 
+                    regex : "[a-z]*"+value+"[a-z]*", 
                     completion : { 
                         field : "suggest",
                         size : 10,
@@ -199,27 +230,21 @@ function autoSuggest(indexName, value, latitude, longitude, callback){
                                 lat: latitude,
                                 lon: longitude
                             }
-                        },
-                        fuzzy: {
-                            fuzziness: 3
                         }
                     }
                 }
             }
         }
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     })
 }
 
 
 module.exports= {
     checkStatus, 
-    createIndex, 
+    createChefIndex,
+    createMenuIndex, 
     deleteIndex, 
     checkIndex, 
     indexing, 
@@ -227,5 +252,7 @@ module.exports= {
     deleteDocs, 
     search, 
     autoSuggest, 
-    mappingDetails
+    mappingDetails,
+    updateStatus,
+    updateAdress
 }

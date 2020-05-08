@@ -15,7 +15,7 @@ const multer  = require('multer');
 
 const store = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './Images/agentLicense')
+    cb(null, 'uploads/license')
   },
   filename: function (req, file, cb) {
     cb(null, new Date().toDateString() + '-' + file.originalname)

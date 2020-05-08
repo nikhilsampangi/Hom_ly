@@ -12,11 +12,13 @@ const passportSetup= require("../../config/gOAuth/chefPassport");
 const chefValidate= require("../../joi_models/authValidation.model"); 
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
 
-const googleMapsClient = require('@google/maps').createClient({
-  key: 'AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA',
-  Promise: Promise
-});
+//File Upload
+var multer  = require('multer');
+var path = require('path');
+var upload = multer({ dest: 'uploads/chefMenuItems' });
 
+//ElasticSearch
+const elastic = require("../elasticSearch");
 
 router.use(cors());
 
@@ -185,8 +187,32 @@ function verifyRegistrationOtp(req, res) {
                   message: "Something went wrong, please try again!!!",
                 });
               } else {
+
+                // indexing chef in elastic search
+                const payload = {
+                  id: chefExist._id,
+                  name: chefExist.firstName+" "+chefExist.lastName,
+                  place: chefExist.Address.Localty,
+                  rating: chefExist.rating,
+                  pin : {
+                    location : {
+                        lat : 16.47749,//chef.currentPosition.latitude
+                        lon : 80.6055627,// chef.currentPosition.longitude
+                    }
+                  }
+                }
+
+                elastic.indexing("chefs", chefExist._id, payload, (err,response) => {
+                  if(err){
+                    console.log("\nNot Indexed:-\n"+ err+"\n");
+                  }else{
+                    console.log("Chef Indexed");
+                  }
+                })
+
                 res.status(200).send("Successfully registered your account!!!");
               }
+
             });
         }
       }
@@ -355,77 +381,6 @@ router.get(
   }
 );
 
-router.post('/getChefs', gmap)
-
-async function gmap(req, res) {
-  
-  const lat = req.body.lat
-  const lng = req.body.lng
-
-  // await  Chef.find({})
-  // .then(u => {
-  //  chefsLocations = u
-  // })
-
-  var chefsLocations = [
-    { 
-      place: 'hyderabad',
-      lat: 17.385044,
-      lng: 78.486671
-    },
-    {
-      place: 'kurnool',
-      lat: 15.828126,
-      lng: 78.037277
-    },
-    {
-      place: 'gadwal',
-      lat: 16.235001,
-      lng: 77.799698
-    },
-    {
-      place: 'warangal',
-      lat: 17.971759,
-      lng: 79.608924
-    },
-    {
-      place: 'vijayawada',
-      lat: 16.499847,
-      lng: 80.656016
-    }
-  ];
-
-
-  list = [];  // list to store all chef's data and distances   
-
-  for(let i = 0; i < chefsLocations.length; i++){
-
-    dest = chefsLocations[i].lat + ',' + chefsLocations[i].lng;      
-    
-    await googleMapsClient.directions({
-      origin: lat + ',' + lng,
-      destination: dest,
-      units: 'metric'
-    })
-    .asPromise()
-    .then(response => { // print response for more clarity
-
-      var value = chefsLocations[i];
-      distance = response.json.routes[0].legs[0].distance.text       // getting dist string in km from response 
-      distArray = distance.split(" ");        // spliting the string like "283 km" by space to get distArray= ["283", "km"]
-      value["distance"] = parseFloat(distArray[0]);     // changing data type to float from string 
-      list.push(value);
-
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-  }
-
-  list.sort((a,b)=>(a.distance > b.distance) ? 1: -1);    // sorting list according to dist
-  res.send(list);
-
-}  
 
 router.get("/profile", auth, get_profile);
 
@@ -504,41 +459,97 @@ function status_update(req, res) {
     });
 }
 
-router.post("/add_item", auth, add_item);
+var storage = multer.diskStorage({
+  destination: 'uploads/chefMenuItems',
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+  }
+})
+ 
+var upload = multer({ storage: storage }).single('dishPic');
+router.post("/add_item",auth, upload, add_item); // add auth, upload
 
 function add_item(req, res) {
-  Chef.updateOne(
-    { _id: req.user._id },
-    {
-      $push: {
-        menu: {
-          itemName: req.body.itemName,
-          itemDescr: req.body.itemDescr,
-          itemCost: req.body.itemCost,
-          isVeg: req.body.isVeg,
+    Chef.findByIdAndUpdate(
+      { _id: req.user._id },
+      {
+        $push: {
+          menu: {
+            itemName: req.body.itemName,
+            itemDescr: req.body.itemDescr,
+            itemCost: req.body.itemCost,
+            isVeg: req.body.isVeg,
+            dishPic: 'uploads/'+ req.file.filename
+          },
         },
       },
-    }
-  )
-    .then(res.status(200).send("Item Added"))
-    .catch(res.status(400).send("error: Item not added"));
+      {new: true },(err, chefDocs) =>{
+        if(err){
+          res.status(400).send({message: "Item not added"})
+        }else{
+          chefDocs.menu.forEach((dish) => {
+            if(dish.itemName === req.body.itemName){
+              console.log("-----: ", dish)
+              
+              // indexing
+              const payload ={
+                    chefId: req.user._id,
+                    chefName: req.user.fullname,
+                    dishId: dish._id,
+                    dishName: dish.itemName,
+                    dishPic: dish.dishPic,
+                    pin : {
+                      location : {
+                          lat : 16.47749,//chef.location.coordinates
+                          lon : 80.6055627,// chef.location.coordinates
+                      }
+                    }
+              }
+              elastic.indexing("menu", dish._id, payload, (err, resp) => {
+                if(err){
+                  // res.status(400).send("error: not indexed")
+                  console.log("\nerror: not indexed\n")
+                }else{
+                  // res.status(200).send("Item added");
+                  console.log("\nItem indexed\n")
+                }
+              })
+              res.status(200).send({message: "Item added"})
+              
+            }
+          })
+          
+        }
+      }
+    )
+
+    
 }
+
 
 router.post("/delete_item", auth, delete_item);
 
 function delete_item(req, res) {
-  Chef.updateOne(
-    { _id: req.user._id },
-    {
-      $pull: {
-        menu: {
-          itemName: req.body.itemName,
-        },
-      },
+  elastic.deleteDocs("menu", "5eaab9a0c00181206c1e7c4e", (err,response) => {
+    if(err){
+      res.status(400).send("error: Item not removed")
+    }else{
+      Chef.updateOne(
+        { _id: req.user._id },
+        {
+          $pull: {
+            menu: {
+              itemName: req.body.itemName,
+            },
+          },
+        }
+      ).then(resp=>{
+        res.status(200).send({message: "Item Removed"}) 
+      }).catch(err=>{
+          res.status(400).send({message: "Item not removed"})
+        });
     }
-  )
-    .then(res.status(200).send("Item Removed"))
-    .catch(res.status(400).send("error: Item not removed"));
+  })
 }
 
 router.get("/avail_items", avail_items);

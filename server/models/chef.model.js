@@ -58,6 +58,11 @@ googleOAuth: {
     },
   },
 
+  currentPosition: {
+    latitude: {type: Number},
+    longitude: {type: Number}
+  },
+
   Address: [
     {
       Localty: { type: String },

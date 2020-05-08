@@ -7,7 +7,7 @@ function scheduleOrder(){
 
     var task = cron.schedule('* * * * *', () => {
         if(new Date().getTime() > taskTime){
-            console.log("assign dekivery to particular order details");
+            console.log("assign delivery to particular order details");
             task.stop();
         }
         else{
