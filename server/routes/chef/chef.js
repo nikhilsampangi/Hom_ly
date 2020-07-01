@@ -7,11 +7,10 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const Chef = require("../../models/chef.model");
 const email = require("../send_email");
-const googleMapsClient = require('@google/maps').createClient({
-  key: 'AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA',
-  Promise: Promise
+const googleMapsClient = require("@google/maps").createClient({
+  key: "AIzaSyA7nx22ZmINYk9TGiXDEXGVxghC43Ox6qA",
+  Promise: Promise,
 });
-
 
 router.use(cors());
 
@@ -259,12 +258,11 @@ function login(req, res) {
     });
 }
 
-router.post('/getChefs', gmap)
+router.post("/getChefs", gmap);
 
 async function gmap(req, res) {
-  
-  const lat = req.body.lat
-  const lng = req.body.lng
+  const lat = req.body.lat;
+  const lng = req.body.lng;
 
   // await  Chef.find({})
   // .then(u => {
@@ -272,203 +270,202 @@ async function gmap(req, res) {
   // })
 
   var chefsLocations = [
-    { 
-      place: 'hyderabad',
+    {
+      place: "hyderabad",
       lat: 17.385044,
-      lng: 78.486671
+      lng: 78.486671,
     },
     {
-      place: 'kurnool',
+      place: "kurnool",
       lat: 15.828126,
-      lng: 78.037277
+      lng: 78.037277,
     },
     {
-      place: 'gadwal',
+      place: "gadwal",
       lat: 16.235001,
-      lng: 77.799698
+      lng: 77.799698,
     },
     {
-      place: 'warangal',
+      place: "warangal",
       lat: 17.971759,
-      lng: 79.608924
+      lng: 79.608924,
     },
     {
-      place: 'vijayawada',
+      place: "vijayawada",
       lat: 16.499847,
-      lng: 80.656016
-    }
+      lng: 80.656016,
+    },
   ];
 
+  list = []; // list to store all chef's data and distances
 
-  list = [];  // list to store all chef's data and distances   
+  for (let i = 0; i < chefsLocations.length; i++) {
+    dest = chefsLocations[i].lat + "," + chefsLocations[i].lng;
 
-  for(let i = 0; i < chefsLocations.length; i++){
+    await googleMapsClient
+      .directions({
+        origin: lat + "," + lng,
+        destination: dest,
+        units: "metric",
+      })
+      .asPromise()
+      .then((response) => {
+        // print response for more clarity
 
-    dest = chefsLocations[i].lat + ',' + chefsLocations[i].lng;      
-    
-    await googleMapsClient.directions({
-      origin: lat + ',' + lng,
-      destination: dest,
-      units: 'metric'
-    })
-    .asPromise()
-    .then(response => { // print response for more clarity
-
-      var value = chefsLocations[i];
-      distance = response.json.routes[0].legs[0].distance.text       // getting dist string in km from response 
-      distArray = distance.split(" ");        // spliting the string like "283 km" by space to get distArray= ["283", "km"]
-      value["distance"] = parseFloat(distArray[0]);     // changing data type to float from string 
-      list.push(value);
-
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+        var value = chefsLocations[i];
+        distance = response.json.routes[0].legs[0].distance.text; // getting dist string in km from response
+        distArray = distance.split(" "); // spliting the string like "283 km" by space to get distArray= ["283", "km"]
+        value["distance"] = parseFloat(distArray[0]); // changing data type to float from string
+        list.push(value);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
-  list.sort((a,b)=>(a.distance > b.distance) ? 1: -1);    // sorting list according to dist
+  list.sort((a, b) => (a.distance > b.distance ? 1 : -1)); // sorting list according to dist
   res.send(list);
 
-router.get("/profile", auth, get_profile);
+  router.get("/profile", auth, get_profile);
 
-function get_profile(req, res) {
-  Chef.findOne({
-    _id: req.user._id,
-  })
-    .then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        res.json({ error: "chef does not exsist " });
-      }
+  function get_profile(req, res) {
+    Chef.findOne({
+      _id: req.user._id,
     })
-    .catch((err) => {
-      res.json("error: " + err);
-    });
-}
+      .then((user) => {
+        if (user) {
+          res.send(user);
+        } else {
+          res.json({ error: "chef does not exsist " });
+        }
+      })
+      .catch((err) => {
+        res.json("error: " + err);
+      });
+  }
 
-router.post("/edit_profile", edit_profile);
+  router.post("/edit_profile", edit_profile);
 
-function edit_profile(req, res) {
-  Chef.findOne({
-    email: req.body.email,
-  })
-    .then((user) => {
-      const userData = {
-        $set: {
-          firstName: req.body.firstname,
-          lastName: req.body.lastname,
-          phoneNum: req.body.phonenumber,
-          bio: req.body.bio,
-          specialities: req.body.specialities,
-          Address: {
-            Localty: req.body.localty,
-            City: req.body.city,
-            State: req.body.state,
-            Pincode: req.body.pincode,
+  function edit_profile(req, res) {
+    Chef.findOne({
+      email: req.body.email,
+    })
+      .then((user) => {
+        const userData = {
+          $set: {
+            firstName: req.body.firstname,
+            lastName: req.body.lastname,
+            phoneNum: req.body.phonenumber,
+            bio: req.body.bio,
+            specialities: req.body.specialities,
+            Address: {
+              Localty: req.body.localty,
+              City: req.body.city,
+              State: req.body.state,
+              Pincode: req.body.pincode,
+            },
+          },
+        };
+        Chef.updateOne({ email: req.body.email }, userData, function (
+          err,
+          success
+        ) {
+          if (err) {
+            res.status(400).send({
+              message: "Something went wrong, please try again!!!",
+            });
+          } else {
+            res.status(200).send("Details Updated");
+          }
+        });
+      })
+      .catch((err) => {
+        res
+          .status(400)
+          .send({ message: "Something went wrong, please try again!!!" });
+      });
+  }
+
+  router.post("/update_status", status_update);
+
+  function status_update(req, res) {
+    const status = {
+      $set: {
+        workingStatus: req.body.status,
+      },
+    };
+    Chef.updateOne({ email: req.body.email }, status)
+      .then(res.status(200).send("Status Updated"))
+      .catch((err) => {
+        res
+          .status(400)
+          .send({ message: "Something went wrong, please try again!!!" });
+      });
+  }
+
+  router.post("/add_item", auth, add_item);
+
+  function add_item(req, res) {
+    Chef.updateOne(
+      { _id: req.user._id },
+      {
+        $push: {
+          menu: {
+            itemName: req.body.itemName,
+            itemDescr: req.body.itemDescr,
+            itemCost: req.body.itemCost,
+            isVeg: req.body.isVeg,
           },
         },
-      };
-      Chef.updateOne({ email: req.body.email }, userData, function (
-        err,
-        success
-      ) {
-        if (err) {
-          res.status(400).send({
-            message: "Something went wrong, please try again!!!",
-          });
-        } else {
-          res.status(200).send("Details Updated");
-        }
-      });
-    })
-    .catch((err) => {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
-    });
-}
+      }
+    )
+      .then(res.status(200).send("Item Added"))
+      .catch(res.status(400).send("error: Item not added"));
+  }
 
-router.post("/update_status", status_update);
+  router.post("/delete_item", auth, delete_item);
 
-function status_update(req, res) {
-  const status = {
-    $set: {
-      workingStatus: req.body.status,
-    },
-  };
-  Chef.updateOne({ email: req.body.email }, status)
-    .then(res.status(200).send("Status Updated"))
-    .catch((err) => {
-      res
-        .status(400)
-        .send({ message: "Something went wrong, please try again!!!" });
-    });
-}
-
-router.post("/add_item", auth, add_item);
-
-function add_item(req, res) {
-  Chef.updateOne(
-    { _id: req.user._id },
-    {
-      $push: {
-        menu: {
-          itemName: req.body.itemName,
-          itemDescr: req.body.itemDescr,
-          itemCost: req.body.itemCost,
-          isVeg: req.body.isVeg,
+  function delete_item(req, res) {
+    Chef.updateOne(
+      { _id: req.user._id },
+      {
+        $pull: {
+          menu: {
+            itemName: req.body.itemName,
+          },
         },
-      },
-    }
-  )
-    .then(res.status(200).send("Item Added"))
-    .catch(res.status(400).send("error: Item not added"));
-}
+      }
+    )
+      .then(res.status(200).send("Item Removed"))
+      .catch(res.status(400).send("error: Item not removed"));
+  }
 
-router.post("/delete_item", auth, delete_item);
+  router.get("/avail_items", avail_items);
 
-function delete_item(req, res) {
-  Chef.updateOne(
-    { _id: req.user._id },
-    {
-      $pull: {
-        menu: {
-          itemName: req.body.itemName,
-        },
-      },
-    }
-  )
-    .then(res.status(200).send("Item Removed"))
-    .catch(res.status(400).send("error: Item not removed"));
-}
+  function avail_items(req, res) {
+    Chef.find(
+      { workingStatus: true },
+      { firstName: 1, lastName: 1, menu: 1 }
+    ).then((items) => {
+      if (items) {
+        res.send(items);
+      } else {
+        res.json({ error: "no chefs are cooking right now" });
+      }
+    });
 
-router.get("/avail_items", avail_items);
-
-function avail_items(req, res) {
-  Chef.find(
-    { workingStatus: true },
-    { firstName: 1, lastName: 1, menu: 1 }
-  ).then((items) => {
-    if (items) {
-      res.send(items);
-    } else {
-      res.json({ error: "no chefs are cooking right now" });
-    }
-  });
-
-  // Chef.find({ workingStatus: { $eq: true } })
-  //   .then((chefs) => {
-  //     if (chefs) {
-  //       res.send(chefs);
-  //     } else {
-  //       res.json({ error: "no chefs are cooking right now" });
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     res.json("error: " + err);
-  //   });
-
+    // Chef.find({ workingStatus: { $eq: true } })
+    //   .then((chefs) => {
+    //     if (chefs) {
+    //       res.send(chefs);
+    //     } else {
+    //       res.json({ error: "no chefs are cooking right now" });
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     res.json("error: " + err);
+    //   });
+  }
 }
 
 module.exports = router;
