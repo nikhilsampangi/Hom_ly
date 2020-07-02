@@ -17,9 +17,8 @@ const elastic = require("../../routes/elasticSearchModule");
 
 //MongoDB models 
 const {Chef} = require("../../models/chef.model");
-// const {Menu} = require('../../models/chef.model'); 
-// const {DishReport} = require('../../models/chef.model'); 
-// const {ValidationRequest} = require('../../models/chef.model'); 
+const {User} = require("../../models/customer.model");
+const {chefRequest} = require("../../models/customer.model");
 
 const email = require("../send_email");
 
@@ -1001,5 +1000,108 @@ function avail_items(req, res) {
 
   }
   
+//  contracts   //
+//get active contracts and which are not rejected by chefs  //check
+router.get('/contracts', (req, res) => {
+  var d = new Date();
+  var n = d.getFullYear() + '-' + d.getMonth() + '-' +d.getDate();
+
+  User.aggregate([
+    {
+      $project: { 
+        contracts:{
+          $filter: {
+              input: "$contracts",
+              as: "contract",
+              cond: { $and: [{ $gte: [ "$$contract.deliveryDate", new Date(String(n))] }, { $eq: [ "$$contract.contrStatus", 0] }] } 
+          }
+        }
+        
+      }
+    }
+  ], (err, activeContracts) => {
+    if(err){
+      res.send({msg: err})
+    }else{
+      res.send({msg: activeContracts})
+    }
+  })
+})
+
+//chefs accept an active contracts
+router.post('/contract/accept', (req,res) => {
+  User.findById(req.body.userId, (err, profile) => { //req.body.userId
+      if(err){
+        res.send({msg: err})
+      }else{
+        var getContract = profile.contracts.id(req.body.contractId) 
+        var chefResponse = new chefRequest({
+          chefId: req.body.chefId,
+          roomId: req.body.contractId + req.body.chefId,
+        })
+        getContract.chefs.push(chefResponse)
+        profile.save()
+        .then(() => { 
+
+          res.send({ msg: profile }) 
+        })
+        .catch((err) => res.send({msg: err}))
+      }
+  })
+})
+
+//chefs reject an active contracts
+router.post('/contract/reject', (req,res) => {
+  User.findById(req.body.userId, (err, profile) => { 
+      if(err){
+        res.send({msg: err})
+      }else{
+        var getContract = profile.contracts.id(req.body.contractId) 
+        var chefResponse = new chefRequest({
+          chefId: req.body.chefId,
+          chefStatus: 2
+        })
+        getContract.chefs.push(chefResponse)
+        profile.save()
+        .then(() => { res.send({ msg: profile }) })
+        .catch((err) => res.send({msg: err}))
+      }
+  })
+})
+
+//upcomming approved contracts
+router.post('/upcomingContracts', (req, res)=> {
+  var d = new Date();
+  var n = d.getFullYear() + '-' + d.getMonth() + '-' +d.getDate();
+  User.aggregate([
+    { $unwind: "$contracts"},
+    { $unwind: "$contracts.chefs" }, 
+    { $match: { $and: [ {"contracts.deliveryDate": {$gte: new Date(String(n))}}, {"contracts.contrStatus": {$eq: 1}}, {"contracts.chefs.chefId": {$eq: req.body.chefId}}, {"contracts.chefs.chefStatus": {$eq: 1}} ] } }
+  
+  ], (err, upcommingAcceptedContracts) => {
+    if(err){
+      res.send({msg: err})
+    }else{
+      res.send({msg: upcommingAcceptedContracts})
+    }
+  })
+})
+
+//get his prev contracts
+router.post('/prevContracts', (req, res)=> {
+  var d = new Date();
+  var n = d.getFullYear() + '-' + d.getMonth() + '-' +d.getDate();
+  User.aggregate([
+    { $unwind: "$contracts"},
+    { $unwind: "$contracts.chefs" }, 
+    { $match: { $and: [ {"contracts.deliveryDate": {$lt: new Date(String(n))}}, {"contracts.contrStatus": {$eq: 1}}, {"contracts.chefs.chefId": {$eq: req.body.chefId}}, {"contracts.chefs.chefStatus": {$eq: 1}} ] } }
+  ], (err, prevContracts) => {
+    if(err){
+      res.send({msg: err})
+    }else{
+      res.send({msg: prevContracts})
+    }
+  })
+})
 
 module.exports = router;
