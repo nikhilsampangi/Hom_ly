@@ -8,13 +8,8 @@ const esClient = new elasticsearch.Client({
 // checking status of esClient
   
 function checkStatus(callback){
-    esClient.cluster.health({},function(err,resp,status) {  
-        if(err){
-            callback(err, null);
-        }else {
-            console.log("\nstatus\t:-"+status);
-            callback(null, resp);
-        };
+    esClient.cluster.health({},function(err,resp) {  
+        callback(err, resp);
       });  
 };
 
@@ -25,15 +20,6 @@ function createChefIndex(indexName, callback){
     esClient.indices.create({
         index: indexName,
         body: {
-            settings: {
-                index: {
-                    blocks: {
-                        read_only_allow_delete: null
-                    }
-                },
-                number_of_shards : 1,
-
-            },
             mappings: {
                 properties: {
                     id: { type: "text" },
@@ -61,12 +47,8 @@ function createChefIndex(indexName, callback){
                 }
             }
         }
-    }, (err, resp, status)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+    }, (err, resp)=>{
+        callback(err, resp);
     });    
 } 
 
@@ -74,14 +56,6 @@ function createMenuIndex(indexName, callback){
     esClient.indices.create({
         index: indexName,
         body: {
-            settings: {
-                index: {
-                    blocks: {
-                        read_only_allow_delete: "false"
-                    }
-                },
-                number_of_shards : 1
-            },
             mappings: {
                 properties: {
                     chefId: { type: "text" },
@@ -111,11 +85,7 @@ function createMenuIndex(indexName, callback){
             }
         }
     }, (err, resp, status)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });    
 } 
 // checking index existing
@@ -178,11 +148,7 @@ function deleteIndex(indexName, callback){
     esClient.indices.delete({
         index: indexName
     }, (err, resp)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });    
 }
 
@@ -193,11 +159,7 @@ function mappingDetails(indexName, callback){
     esClient.indices.getMapping({
         index: indexName
     }, (err, resp)=>{
-        if(err){
-            callback(err,null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     })
 }
 
@@ -209,11 +171,7 @@ function indexing(indexName, Id, payload, callback){
         id: Id,
         body: payload
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     })
 }
 
@@ -225,26 +183,18 @@ function findDocs(indexName, Id, callback){
         id: Id
         //type: docType
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });
 }
 
 // delete doc in index type
 
 function deleteDocs(indexName, Id, callback){
-    esClient.count({
+    esClient.delete({
         index: indexName,
         id: Id
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     });
 }
 
@@ -298,11 +248,7 @@ function autoSuggest(indexName, value, latitude, longitude, callback){
             }
         }
     }, (err, resp)=>{
-        if(err){
-            callback(err, null);
-        }else {
-            callback(null, resp);
-        }
+        callback(err, resp);
     })
 }
 
