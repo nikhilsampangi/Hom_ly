@@ -7,13 +7,18 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const passport = require('passport');
 const passportSetup= require("../../config/gOAuth/customerPassport");
-const User = require("../../models/customer.model");
+//const User = require("../../models/customer.model");
 const Customer= require("../../joi_models/customer.model"); 
 const transactions= require('../transactions');
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
 const Order= require('../../models/transactions.model');
 const email = require("../send_email");
 
+//
+const mongoose = require("mongoose");
+const {User} = require("../../models/customer.model");
+const {contract} = require("../../models/customer.model");
+//
 
 router.use(cors());
 
@@ -557,5 +562,92 @@ function edit_profile(req, res) {
         .send({ message: "Something went wrong, please try again!!!" });
     });
 }
+
+
+//  contracts  //
+
+router.post("/contract", (req, res) =>{
+  var userContract = new contract({
+    deliveryDate: req.body.deliveryDate, //req.body.deliveryDate
+    contrTitle: req.body.contrTitle,  //req.body.contrTitle
+    contrType: req.body.contrType,               //req.body.contrType
+    contrDescription: req.body.contrDescription, //req.body.contrDescription
+    contrStatus: 0
+  })
+  User.findById(req.body.userId, (err, userProfile) => {// req.body.userId
+    if(err){
+      console.log("no id")
+    }else{
+      userProfile.contracts.push(userContract)
+      userProfile.save()
+      .then((contractProfile) => {
+        res.send({msg: "added"})  //change
+      })
+      .catch(err => {
+        console.log(err);
+      })
+    }
+
+  })
+
+});
+
+//customer accept chefs intrest
+router.post('/acceptChef', (req, res)=> {
+  User.updateOne(
+    { _id: mongoose.Types.ObjectId(req.body.userId) },
+    {
+      $set: { "contracts.$[outter].chefs.$[inner].chefStatus": 1, "contracts.$[outter].contrStatus": 1 }
+    },
+    {
+      arrayFilters: [{ "outter._id": mongoose.Types.ObjectId(req.body.contractId) }, { "inner.chefId": mongoose.Types.ObjectId(req.body.chefId) }]
+    },(err, acceptChef) => {
+      if(err){
+        res.send({msg: err})
+      }else{
+        res.send({msg: acceptChef})
+        //make all chefstatus to 2
+      }
+    }
+    
+  )
+});
+
+//custermer reject chefs intrest
+router.post('/rejectChef', (req, res)=> {
+  User.updateOne(
+    { _id: mongoose.Types.ObjectId(req.body.userId) },
+    {
+      $set: { "contracts.$[outter].chefs.$[inner].chefStatus": 2,  "contracts.$[outter].contrStatus": 0 }
+    },
+    {
+      arrayFilters: [{ "outter._id": mongoose.Types.ObjectId(req.body.contractId) }, { "inner.chefId": mongoose.Types.ObjectId(req.body.chefId) }]
+    },(err, acceptChef) => {
+      if(err){
+        res.send({msg: err})
+      }else{
+        res.send({msg: acceptChef})
+      }
+    }
+    
+  )
+});
+
+
+//customer see his upcoming accepted contracts
+router.get('/getApprovedContracts', (req, res)=> {
+  User.aggregate([
+    { $match: { _id: mongoose.Types.ObjectId(req.body.userId) } },
+    { $unwind: "$contracts"},
+    { $unwind: "$contracts.chefs" }, 
+    { $match: { $and: [ {"contracts.deliveryDate": {$gte: new Date.now}}, {"contracts.contrStatus": {$eq: 1}}, {"contracts.chefs.chefStatus": {$eq: 1}} ] } }
+  ], (err, getApprovedContracts) => {
+    if(err){
+      res.send({msg: err})
+    }else{
+      res.send({msg: getApprovedContracts})
+    }
+  })
+})
 
 module.exports = router;
