@@ -11,7 +11,7 @@ const email = require("../send_email");
 const mongoose = require("mongoose");
 
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
-const Customer= require("../../joi_models/customer.model");
+const deliveryAgent= require("../../joi_models/deliveryAgent.model");
 
 
 router.use(cors());
@@ -63,15 +63,13 @@ function register(req, res) {
             firstName: req.body.firstname,
             lastName: req.body.lastname,
             email: req.body.email,
-
-            
             hashedPassword: req.body.hashedPassword,
             passwordResetToken: secret.base32,
             phoneNum: req.body.phonenumber,
             
           };
         
-        const {error, value} = Customer.validate(userData);
+        const {error, value} = deliveryAgent.validate(userData);
         
 
         if(error) {
