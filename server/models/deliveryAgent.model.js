@@ -6,6 +6,8 @@ const DeliveryManSchema = new Schema({
 
   lastName: { type: String },
 
+  isVerified: {type: Boolean, default: false},
+
   hashedPassword: {
     type: String,
     required: [true, "Password cannot be empty"]
@@ -17,7 +19,7 @@ const DeliveryManSchema = new Schema({
 
   isValidated: {type: Boolean, default: false},
   
-  drivingLicense: {type: String, required: [true, "Driving License is mandatory!!!"]},
+  drivingLicense: {type: String, required: [false, "Driving License is mandatory!!!"]},
 
   email: {
     type: String,
@@ -45,7 +47,18 @@ const DeliveryManSchema = new Schema({
 
   earnings: {
     type: Number
-  }
+  },
+
+  // maxOrders: {type: Number, default: 0},
+  // orders: [
+  //   {
+  //     customerId: {},
+  //     dishId: {},
+  //     status: {type: Number, default: 0},//0- not pickedup, 1-picked up, 2-delivered
+  //     orderTime: {},
+  //     estimatedTime: {type: Number} //in mins
+  //   },
+  // ]
 });
 
 DeliveryManSchema.set("toJSON", { virtuals: true });

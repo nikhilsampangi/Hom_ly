@@ -1,7 +1,7 @@
 const elasticsearch = require('@elastic/elasticsearch');
 
 const esClient = new elasticsearch.Client({
-    node: 'http://localhost:9200/',
+    node: 'http://192.168.99.101:9200/',
     log: 'error'
   });
 
@@ -212,7 +212,7 @@ function search(indexName, value, latitude, longitude, callback){
                     },
                     filter : {
                         geo_distance : {
-                            distance : "30km",
+                            distance : "3km",
                             "pin.location" : {
                                 lat : latitude,
                                 lon : longitude
