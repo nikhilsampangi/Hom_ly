@@ -71,14 +71,14 @@ function register(req, res) {
             
           };
         
-        //const {error, value} = Customer.validate(userData);
+        const {error, value} = Customer.validate(userData);
         
 
-        // if(error) {
-        //   console.log("--------");
-        //   res.status(400).send({message: error.message});
+        if(error) {
+          //console.log("--------");
+          res.status(400).send({message: error.message});
         
-        // }else {
+        }else {
 
           bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
             console.log("got it");
@@ -98,7 +98,7 @@ function register(req, res) {
         
           });
           
-        //}
+        }
       }
 
     })
