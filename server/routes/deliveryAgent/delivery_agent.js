@@ -276,8 +276,3 @@ function login(req, res) {
 
 
 module.exports = router;
-
-
-
-
-
