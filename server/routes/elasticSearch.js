@@ -88,6 +88,32 @@ function createMenuIndex(indexName, callback){
         callback(err, resp);
     });    
 } 
+
+
+function createDeliveryAgentIndex(indexName, callback){
+    esClient.indices.create({
+        index: indexName,
+        body: {
+            mappings: {
+                properties: {
+                    deiveryAgentId: { type: "text" },
+                    deliveryAgentName: { type: "text" },
+                    pin: {
+                        properties: {
+                            location: {
+                                type: "geo_point"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }, (err, resp, status)=>{
+        callback(err, resp);
+    });    
+}
+
+
 // checking index existing
 
 function checkIndex(indexName, callback){
@@ -130,6 +156,28 @@ function updateAdress(indexName, Id, locality, callback) {
             callback(err, resp);
         });
 }
+
+// update address index
+function updateDeliverAgentLocation(indexName, Id, latitude, longitude, callback) {
+    esClient.update({
+        index: indexName,
+        id: Id,
+        
+        body: {
+            doc: {
+                pin: {
+                    location: {
+                        lat: latitude,
+                        lon: longitude
+                    }
+                }
+            }
+        }
+        }, (err, resp)=>{
+            callback(err, resp);
+        });
+}
+
 // deleting index
 
 function deleteIndex(indexName, callback){
@@ -215,6 +263,33 @@ function search(indexName, value, latitude, longitude, callback){
     });
 }
 
+function getNearestDeliveryAgents(indexName, latitude, longitude, callback){
+    esClient.search({
+        index: indexName,
+        body: {
+            query: {
+                bool : {
+                    must : {
+                        match_all: {},
+                        // regexp: {"name": "[a-z]*"+value+"[a-z]*"}
+                    },
+                    filter : {
+                        geo_distance : {
+                            distance : "500m",
+                            "pin.location" : {
+                                lat : latitude,
+                                lon : longitude
+                            }
+                        }
+                    }
+                }
+            }    
+        }
+    }, (err, resp)=>{
+        callback(err, resp);
+    });
+}
+
 function autoSuggest(indexName, value, latitude, longitude, callback){
     esClient.search({
         index: indexName,
@@ -244,7 +319,10 @@ function autoSuggest(indexName, value, latitude, longitude, callback){
 module.exports= {
     checkStatus, 
     createChefIndex,
-    createMenuIndex, 
+    createMenuIndex,
+    createDeliveryAgentIndex, 
+    updateDeliverAgentLocation,
+    getNearestDeliveryAgents,
     deleteIndex, 
     checkIndex, 
     indexing, 

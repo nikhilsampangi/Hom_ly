@@ -13,7 +13,7 @@ const transactions= require('../transactions');
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
 const Order= require('../../models/transactions.model');
 const email = require("../send_email");
-
+const elastic = require("../elasticSearch")
 
 router.use(cors());
 
@@ -567,25 +567,26 @@ function create(req, res){
   const resName = "Unknown Hotel";
   const resPlace = "Ouskirts of MBNR";
   const resRating = "3.0";
-  const resLat= 16.721104;
-  const resLon= 77.979330;
+  const resLat= 16.754188;
+  const resLon= 78.033957;
 
-  const lat= 16.766654;
-  const lng= 78.089845;
+  const lat= 16.750880;
+  const lng= 78.036206;
 
   const payload = {
-    name: resName,
-    place: resPlace,
-    rating: resRating,
-    suggest: {
-      input: resName.split(" "),
-      contexts: {
-        location: {
-          lat: resLat,
-          lon: resLon
-        }
-      }
-    },
+    deliveryAgentId: '7',
+    deliveryAgentName: 'yenugonda',
+    // place: resPlace,
+    // rating: resRating,
+    // suggest: {
+    //   input: resName.split(" "),
+    //   contexts: {
+    //     location: {
+    //       lat: resLat,
+    //       lon: resLon
+    //     }
+    //   }
+    // },
     pin : {
       location : {
           lat : resLat,
@@ -594,7 +595,7 @@ function create(req, res){
     }
   };
 
-  elastic.createTitle((err,response)=>{
+  elastic.getNearestDeliveryAgents('deliveryagents', lat, lng, (err,response)=>{
     if(err){
       res.status(400).send({message: err});
     }else {
