@@ -854,11 +854,13 @@ function get_profile(req, res) {
     });
 }
 
-router.get("/get_details", get_details);
+// get chef's  details for contract status page on user's side
+router.post("/get_details", get_details);
 
 function get_details(req, res) {
+  console.log("sdsadsa, ", req.body);
   Chef.findOne({
-    _id: req.data.id,
+    _id: req.body.id,
   })
     .then((user) => {
       if (user) {
@@ -869,6 +871,24 @@ function get_details(req, res) {
     })
     .catch((err) => {
       res.json("error: " + err);
+    });
+}
+
+// validate chef function
+router.get("/validate", auth, validate_chef);
+
+function validate_chef(req, res) {
+  // needs working
+  Chef.findByIdAndUpdate(
+    { _id: req.user._id },
+    { $set: { expertiseLevel: true } }
+  )
+    .then(() => {
+      res.status(200).send({ info: "chef validated" });
+    })
+    .catch((err) => {
+      console.log("chef validation error: ", err);
+      res.status(400).send(err);
     });
 }
 
@@ -1082,14 +1102,14 @@ router.get("/contracts", (req, res) => {
       if (err) {
         res.send({ msg: err });
       } else {
-        res.send({ msg: activeContracts });
+        res.send({ list: activeContracts });
       }
     }
   );
 });
 
 //chefs accept an active contracts
-router.post("/contract/accept", (req, res) => {
+router.post("/contract/accept", auth, (req, res) => {
   User.findById(req.body.userId, (err, profile) => {
     //req.body.userId
     if (err) {
@@ -1097,16 +1117,16 @@ router.post("/contract/accept", (req, res) => {
     } else {
       var getContract = profile.contracts.id(req.body.contractId);
       var chefResponse = new chefRequest({
-        chefId: req.body.chefId,
-        roomId: req.body.contractId + req.body.chefId,
+        chefId: req.user._id,
+        roomId: req.body.contractId + req.user._id,
       });
       getContract.chefs.push(chefResponse);
       profile
         .save()
         .then(() => {
-          res.send({ msg: profile });
+          res.status(200).send({ msg: profile });
         })
-        .catch((err) => res.send({ msg: err }));
+        .catch((err) => res.status(400).send({ msg: err }));
     }
   });
 });
@@ -1134,7 +1154,7 @@ router.post("/contract/reject", (req, res) => {
 });
 
 //upcomming approved contracts
-router.post("/upcomingContracts", (req, res) => {
+router.post("/upcomingContracts", auth, (req, res) => {
   var d = new Date();
   var n = d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
   User.aggregate(
@@ -1146,7 +1166,7 @@ router.post("/upcomingContracts", (req, res) => {
           $and: [
             { "contracts.deliveryDate": { $gte: new Date(String(n)) } },
             { "contracts.contrStatus": { $eq: 1 } },
-            { "contracts.chefs.chefId": { $eq: req.body.chefId } },
+            { "contracts.chefs.chefId": { $eq: req.user._id } },
             { "contracts.chefs.chefStatus": { $eq: 1 } },
           ],
         },
@@ -1163,7 +1183,7 @@ router.post("/upcomingContracts", (req, res) => {
 });
 
 //get his prev contracts
-router.post("/prevContracts", (req, res) => {
+router.post("/prevContracts", auth, (req, res) => {
   var d = new Date();
   var n = d.getFullYear() + "-" + d.getMonth() + "-" + d.getDate();
   User.aggregate(

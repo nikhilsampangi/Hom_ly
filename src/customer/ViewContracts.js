@@ -122,7 +122,7 @@ class ContractTable extends Component {
       data.push(
         <tr>
           <td>{this.props.data[i].contrTitle}</td>
-          <td>{this.props.data[i].date}</td>
+          <td>{this.props.data[i].date.split("T")[0]}</td>
 
           {this.props.data[i].contrStatus === 0 ? (
             <td className="row">

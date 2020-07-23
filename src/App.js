@@ -24,6 +24,7 @@ import Fdbck from "./customer/Feedback";
 import AddContract from "./customer/AddContract";
 import ViewContracts from "./customer/ViewContracts";
 import ContractStatus from "./customer/ContractStatus";
+import ApplyContract from "./chef/ApplyContract";
 
 export default class App extends Component {
   render() {
@@ -42,6 +43,11 @@ export default class App extends Component {
             <Route exact path="/Chef/Profile/Edit" component={ChProf_edit} />
             <Route exact path="/Chef/Validate" component={Validate} />
             <Route exact path="/Chef/Contracts" component={ChContracts} />
+            <Route
+              exact
+              path="/Chef/Contract/Apply"
+              component={ApplyContract}
+            />
             <Route exact path="/Chef/Menu" component={ChMenu} />
             <Route exact path="/Chef/Analytics" component={ChAnalytics} />
             <Route
