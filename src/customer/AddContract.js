@@ -61,7 +61,7 @@ export default class AddContract extends Component {
   render() {
     return (
       <Fragment>
-        <Navbar />
+        <Navbar walletPage={true} />
         <br />
         <br />
         <br />

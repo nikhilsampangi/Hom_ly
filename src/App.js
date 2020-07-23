@@ -23,6 +23,7 @@ import Prof_edit from "./customer/EditProfile";
 import Fdbck from "./customer/Feedback";
 import AddContract from "./customer/AddContract";
 import ViewContracts from "./customer/ViewContracts";
+import ContractStatus from "./customer/ContractStatus";
 
 export default class App extends Component {
   render() {
@@ -57,6 +58,7 @@ export default class App extends Component {
             <Route exact path="/Feedback" component={Fdbck} />
             <Route exact path="/Contracts/add" component={AddContract} />
             <Route exact path="/Contracts" component={ViewContracts} />
+            <Route exact path="/Contracts/Review" component={ContractStatus} />
           </Switch>
         </Fragment>
       </Router>
