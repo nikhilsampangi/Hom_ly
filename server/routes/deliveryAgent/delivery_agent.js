@@ -7,6 +7,7 @@ const auth = require("../middleware_jwt");
 const randomToken = require("random-token");
 const speakeasy = require('speakeasy');
 const Agent = require("../../models/deliveryAgent.model");
+const Order= require('../../models/transactions.model');
 const email = require("../send_email");
 const mongoose = require("mongoose");
 
@@ -15,9 +16,9 @@ const deliveryAgent= require("../../joi_models/deliveryAgent.model");
 
 const elastic = require("../elasticSearch")
 
-var multer  = require('multer');
+
 var path = require('path');
-//var upload = multer({ dest: 'uploads/' });
+
 
 router.use(cors());
 
@@ -508,4 +509,71 @@ function updateLocation(req, res) {
     });  
 }
 
+// router.post("/updateDeliveryAgentLocation"updateLocation);
+router.get("/users", async (req, res) => {
+  
+  Agent.find({}, (err, profile)=> {
+    res.send({res: profile});
+  });
+  // let doc = await Agent.updateOne(
+  //   { _id: mongoose.Types.ObjectId("5f1335aefffad6246885f2db") },
+  //   { $set: { phoneNum: 9121587453 } }
+  // );
+  // res.send({res: doc});
+})
+
+router.get("/findAgent", findAgent);
+
+async function assignAgent(agents, no_of_agents){
+  var randomSelect = Math.floor(Math.random() * no_of_agents);
+  if(agents[randomSelect].maxOrders <3){
+    return agents[randomSelect].id;
+  }else{
+    assignAgent(agents, no_of_agents);
+  }
+}
+
+async function findAgent(req, res) {
+  agents = [{
+    "maxOrders": 0,
+    "firstName": "shiva",
+    "email": "bharathjohn57@gmail.com",
+    "phoneNum": 9121587454,
+    "id": "1001"
+  },
+  {
+    "maxOrders": 2,
+    "firstName": "sai",
+    "email": "bharathjohn58@gmail.com",
+    "phoneNum": 7337306815,
+    "id": "1002"
+  }, 
+  {
+    "maxOrders": 3,
+    "firstName": "charan",
+    "email": "bharathjohn59@gmail.com",
+    "phoneNum": 9100642961,
+    "id": "1003"
+  }];
+  var no_of_agents = agents.length;
+
+  var assignedAgentId = await assignAgent(agents, no_of_agents);
+
+  let orderUpdate = await Order.updateOne(
+    { transactionId: "5f1343042c64f72c84cbe004" },
+    { $set: { deliveryAgent: String(assignedAgentId), deliveryStatus: 1 } }
+  );
+  
+  let agentUpdate = await Agent.updateOne(
+    { _id: mongoose.Types.ObjectId("5f1343042c64f72c84cbe004") },
+    { $inc: { maxOrders: 1 } }
+  );
+  res.send({agents: assignedAgentId});
+}
+// when order is delevered then reduce maxOrders by 1 for that delivery  agent
+
+// router.get("/getOrders", getOrders);
+// function getOrders(req, res) {
+
+// }
 module.exports = router;

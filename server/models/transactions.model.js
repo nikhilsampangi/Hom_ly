@@ -25,6 +25,9 @@ const TransactionSchema = new Schema({
   date: { type: Date, default: Date.now, required: true },
   
   amount: { type: Number },
+
+  deliveryAgent: { type: Number, required: false },
+  deliveryStatus: { type: Number }, //1-assigned 2-picked up  3-delivered
   
   items: [
     {

@@ -24,14 +24,9 @@ const deliveryAgentSchema = Joi.object({
         .error(new Error('phone number should be 10 digits')),
     
     passwordResetToken: Joi.string(),
-<<<<<<< HEAD
-    drivingLicense: Joi.string(),
+    //drivingLicense: Joi.string(),
 
     email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } })
-=======
-
-    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'in'] } })
->>>>>>> 58b5619f686d2b1cb631d2923bfbad8b46fcb438
     
 });
 

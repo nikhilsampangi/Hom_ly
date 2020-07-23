@@ -17,11 +17,7 @@ app.use(passport.initialize());
 app.use(pino);
 app.use(cors());
 
-<<<<<<< HEAD
-mongoose.connect("mongodb://localhost:27017/ciodb", { //"mongodb://localhost:27017/ciodb"
-=======
 mongoose.connect("mongodb://localhost:27017/ciodb", {
->>>>>>> 58b5619f686d2b1cb631d2923bfbad8b46fcb438
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });

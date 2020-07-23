@@ -15,7 +15,6 @@ const DeliveryManSchema = new Schema({
   isValidated: {type: Boolean, default: false},
   
   drivingLicense: {type: String, required: [false, "Driving License is mandatory!!!"]},
-<<<<<<< HEAD
 
   email: {
     type: String,
@@ -28,10 +27,6 @@ const DeliveryManSchema = new Schema({
       message: "Please fill a valid email address"
     }
   },
-=======
->>>>>>> 58b5619f686d2b1cb631d2923bfbad8b46fcb438
-
-  email: {type: String, required: [true, "email cannot be empty"]},
 
   phoneNum: {type: Number, required: [true, "Phone number cannot be empty"]},
 
@@ -39,7 +34,7 @@ const DeliveryManSchema = new Schema({
     type: Number
   },
 
-  // maxOrders: {type: Number, default: 0},
+  maxOrders: {type: Number, default: 0},
   // orders: [
   //   {
   //     customerId: {},
