@@ -4,6 +4,8 @@ import DatePicker from "react-date-picker";
 import change_bg from "../index";
 import Axios from "axios";
 import Cookies from "js-cookie";
+import Modal from "react-responsive-modal";
+import { Link } from "react-router-dom";
 
 export default class AddContract extends Component {
   constructor() {
@@ -13,6 +15,9 @@ export default class AddContract extends Component {
       descr: "",
       type: 0,
       date: new Date(),
+      responseFlag: false,
+      errFlag: false,
+      resMsg: "",
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -33,7 +38,20 @@ export default class AddContract extends Component {
     };
     Axios.post("/customer/add_contract", contract, {
       headers: { Authorization: Cookies.get("usertoken") },
-    });
+    })
+      .then((res) => {
+        this.setState({
+          responseFlag: true,
+          resMsg: res.data.msg,
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          responseFlag: true,
+          errFlag: true,
+          resMsg: err.data.err,
+        });
+      });
   }
 
   componentDidMount() {
@@ -125,6 +143,33 @@ export default class AddContract extends Component {
           </div>
           <div className="col-1"></div>
         </div>
+        <Modal
+          open={this.state.responseFlag}
+          onClose={() => this.setState({ responseFlag: false })}
+          closeOnOverlayClick={true}
+        >
+          <div className="container" style={{ width: "35vw", padding: "5%" }}>
+            <div className="card text-center">
+              <div
+                className="card-header"
+                style={{
+                  fontSize: "x-large",
+                }}
+              >
+                {this.state.errFlag ? (
+                  <span className="text-danger">Error</span>
+                ) : (
+                  <span className="text-info">Info</span>
+                )}
+              </div>
+              <div className="card-body" style={{ padding: "10%" }}>
+                {this.state.resMsg}
+                <br />
+                <Link to="/Profile">Back to Profile &gt;</Link>
+              </div>
+            </div>
+          </div>
+        </Modal>
       </Fragment>
     );
   }

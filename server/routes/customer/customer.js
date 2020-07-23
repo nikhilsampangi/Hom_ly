@@ -613,7 +613,8 @@ router.post("/add_contract", auth, (req, res) => {
   });
   User.findById(req.user._id, (err, userProfile) => {
     if (err) {
-      console.log("Add Contract Error: user doesn't exsist", err);
+      console.log("Add Contract Error: user not found", err);
+      res.status(400).send({ err: "User not found" });
     } else {
       userProfile.contracts.push(userContract);
       userProfile
@@ -627,6 +628,45 @@ router.post("/add_contract", auth, (req, res) => {
         });
     }
   });
+});
+
+// get All Customer Contracts
+router.get("/get_contracts", auth, (req, res) => {
+  User.findById(req.user._id, (err, user) => {
+    if (err) {
+      console.log("Add Contract Error: user not found", err);
+      res.status(400).send({ err: "User not found" });
+    } else {
+      res.status(200).send({ data: user.contracts });
+    }
+  });
+});
+
+// customer see his upcoming accepted contracts
+router.get("/getApprovedContracts", (req, res) => {
+  User.aggregate(
+    [
+      { $match: { _id: mongoose.Types.ObjectId(req.body.userId) } },
+      { $unwind: "$contracts" },
+      { $unwind: "$contracts.chefs" },
+      {
+        $match: {
+          $and: [
+            { "contracts.deliveryDate": { $gte: new Date.now() } },
+            { "contracts.contrStatus": { $eq: 1 } },
+            { "contracts.chefs.chefStatus": { $eq: 1 } },
+          ],
+        },
+      },
+    ],
+    (err, getApprovedContracts) => {
+      if (err) {
+        res.send({ msg: err });
+      } else {
+        res.send({ msg: getApprovedContracts });
+      }
+    }
+  );
 });
 
 //customer accept chefs intrest
@@ -677,33 +717,6 @@ router.post("/rejectChef", (req, res) => {
         res.send({ msg: err });
       } else {
         res.send({ msg: acceptChef });
-      }
-    }
-  );
-});
-
-//customer see his upcoming accepted contracts
-router.get("/getApprovedContracts", (req, res) => {
-  User.aggregate(
-    [
-      { $match: { _id: mongoose.Types.ObjectId(req.body.userId) } },
-      { $unwind: "$contracts" },
-      { $unwind: "$contracts.chefs" },
-      {
-        $match: {
-          $and: [
-            { "contracts.deliveryDate": { $gte: new Date.now() } },
-            { "contracts.contrStatus": { $eq: 1 } },
-            { "contracts.chefs.chefStatus": { $eq: 1 } },
-          ],
-        },
-      },
-    ],
-    (err, getApprovedContracts) => {
-      if (err) {
-        res.send({ msg: err });
-      } else {
-        res.send({ msg: getApprovedContracts });
       }
     }
   );
