@@ -14,9 +14,24 @@ const passwordCheck= require('../../joi_models/passwordCheck.model');
 const deliveryAgent= require("../../joi_models/deliveryAgent.model");
 
 
+var multer  = require('multer');
+var path = require('path');
+//var upload = multer({ dest: 'uploads/' });
+
 router.use(cors());
 
 process.SECRET_KEY = "hackit";
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/license')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.fieldname + '-' + Date.now() + '.jpg')
+  }
+})
+ 
+var upload = multer({ storage: storage }).single('license');
 
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
@@ -38,7 +53,7 @@ function verify_OTP(secret_token, OTP) {
   return tokenValidates;
 }
 
-router.post("/register", register);
+router.post("/register", upload, register);
 
 function register(req, res) {
   Agent.findOne({
@@ -49,7 +64,7 @@ function register(req, res) {
         // In front-end check the status,
         // if status is '1' call send_otp api and load otp component,
 
-        if (user.isVerified === false) {
+        if (user.isRegistered === false) {
           res
             .status(200)
             .send({ message: "Please verify your account!!!", status: "1" });
@@ -66,6 +81,7 @@ function register(req, res) {
             hashedPassword: req.body.hashedPassword,
             passwordResetToken: secret.base32,
             phoneNum: req.body.phonenumber,
+            drivingLicense: 'uploads/license'+ req.file.filename,
             
           };
         
@@ -169,7 +185,7 @@ function verifyRegistrationOtp(req, res) {
         if (!tokenValidates) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
-            const newValues = { $set: { isVerified: true } };
+            const newValues = { $set: { isRegistered: true } };
 
             Agent.updateOne({ _id: customer._id }, newValues, function (
               err,
@@ -215,7 +231,7 @@ function verifyPasswordOtp(req, res) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
 
-            const newValues = { $set: {isValidated: true, isVerified: true} };
+            const newValues = { $set: {isValidated: true, isRegistered: true} };
 
             Agent.updateOne({ _id: customer._id }, newValues, function (
               err,
@@ -304,7 +320,7 @@ function login(req, res) {
     email: req.body.email,
   })
     .then(user => {
-      if (!user || user.isVerified === false) {
+      if (!user || user.isRegistered === false) {
         res.status(400).send({ message: "Invalid credentials" });
       } else {
         if (bcrypt.compareSync(req.body.hashedPassword, user.hashedPassword)) {
