@@ -52,7 +52,7 @@ export default class EditProfile extends Component {
           firstname: res.data.firstName,
           lastname: res.data.lastName,
           email: res.data.email,
-          phone: res.data.phoneNum,
+          phone: res.data.internalAuth.phoneNum,
           veg: res.data.isVeg,
         });
 
@@ -122,7 +122,7 @@ export default class EditProfile extends Component {
                   {this.state.response}
                   <br />
                   {this.state.redFlag ? (
-                    <Link to="/Profile">Back to Profile ></Link>
+                    <Link to="/Profile">Back to Profile &gt;</Link>
                   ) : (
                     <div></div>
                   )}

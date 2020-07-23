@@ -32,9 +32,10 @@ export default class Profile extends Component {
     this.handleOrders();
   }
 
+  // Get customer profile info
   handleProfile(event) {
     axios
-      .get("customer/profile", {
+      .get("/customer/profile", {
         headers: { Authorization: Cookies.get("usertoken") },
       })
       .then((res) => {
@@ -42,7 +43,7 @@ export default class Profile extends Component {
           firstName: res.data.firstName,
           lastName: res.data.lastName,
           email: res.data.email,
-          phoneNumber: res.data.phoneNum,
+          phoneNumber: res.data.internalAuth.phoneNum,
           veg: res.data.isVeg,
         });
 

@@ -854,7 +854,9 @@ function get_profile(req, res) {
     });
 }
 
-router.post("/edit_profile", edit_profile);
+// router.post("/edit_profile", edit_profile);
+
+router.post("/update_status", status_update);
 
 function status_update(req, res) {
   const status = {
@@ -906,7 +908,7 @@ function status_update(req, res) {
 }
 
 var storage = multer.diskStorage({
-  destination: "uploads/",
+  destination: "public/img/",
   filename: function (req, file, cb) {
     cb(
       null,
@@ -916,7 +918,8 @@ var storage = multer.diskStorage({
 });
 
 var upload = multer({ storage: storage }).single("dishPic");
-router.post("/add_item", auth, upload, add_item); // add auth, upload
+// Adds new item to menu
+router.post("/add_item", auth, upload, add_item);
 
 function add_item(req, res) {
   Chef.findByIdAndUpdate(
@@ -928,7 +931,7 @@ function add_item(req, res) {
           itemDescr: req.body.itemDescr,
           itemCost: req.body.itemCost,
           isVeg: req.body.isVeg,
-          dishPic: "uploads/" + req.file.filename,
+          dishPic: req.file.filename,
         },
       },
     },
@@ -936,6 +939,7 @@ function add_item(req, res) {
     (err, chefDocs) => {
       if (err) {
         res.status(400).send({ message: "Item not added" });
+        console.log("Item not added: ", err);
       } else {
         chefDocs.menu.forEach((dish) => {
           if (dish.itemName === req.body.itemName) {
@@ -1029,18 +1033,6 @@ function avail_items(req, res) {
       res.json({ error: "no chefs are cooking right now" });
     }
   });
-
-  // Chef.find({ workingStatus: { $eq: true } })
-  //   .then((chefs) => {
-  //     if (chefs) {
-  //       res.send(chefs);
-  //     } else {
-  //       res.json({ error: "no chefs are cooking right now" });
-  //     }
-  //   })
-  //   .catch((err) => {
-  //     res.json("error: " + err);
-  //   });
 }
 
 //  contracts   //

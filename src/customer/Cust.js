@@ -39,6 +39,7 @@ export default class Cust extends Component {
             firstName={this.state.itemRes[i].firstName}
             lastName={this.state.itemRes[i].lastName}
             id={this.state.itemRes[i]._id}
+            pic={this.state.itemRes[i].menu[j].dishPic}
           />
         );
       }
@@ -116,9 +117,10 @@ class Item extends Component {
       transId: "",
     };
     this.purchase = this.purchase.bind(this);
+    this.likeItem = this.likeItem.bind(this);
   }
 
-  purchase(event) {
+  purchase() {
     let temp = {
       id: this.props.id,
       chefName: this.props.firstName,
@@ -132,6 +134,10 @@ class Item extends Component {
     });
   }
 
+  likeItem() {
+    Axios.post("/customer/itemLiked", { chef_id: this.props.id });
+  }
+
   render() {
     if (this.state.redirectFlag) {
       return (
@@ -143,7 +149,7 @@ class Item extends Component {
 
     return (
       <Fragment>
-        <div className="col-3">
+        <div className="col-4">
           <div
             className="card"
             style={{ fontFamily: "Sen", marginBottom: "20px" }}
@@ -160,26 +166,40 @@ class Item extends Component {
               >
                 <div
                   className="col-3"
-                  style={{ padding: "3%", textAlign: "center" }}
+                  style={{ padding: "1%", textAlign: "center" }}
                 >
-                  <i
+                  {/* <i
                     className="fas fa-pizza-slice"
                     style={{ fontSize: "3em" }}
-                  ></i>
+                  ></i> */}
+                  <img
+                    src={process.env.PUBLIC_URL + "/img/" + this.props.pic}
+                    alt="item_image"
+                    width="115px"
+                  />
                 </div>
                 <div className="col-6">
-                  <span>{this.props.name}</span>
+                  <span>
+                    {this.props.name}
+                    &nbsp;
+                    {this.props.isVeg ? (
+                      <Veg style={{ height: "15px", width: "15px" }} />
+                    ) : (
+                      <NonVeg style={{ height: "15px", width: "15px" }} />
+                    )}
+                  </span>
                   <br />
                   <span style={{ color: "dimgrey", fontSize: "0.9em" }}>
                     - {this.props.descr}
                   </span>
                 </div>
                 <div className="col-3" style={{ textAlign: "right" }}>
-                  {this.props.isVeg ? (
-                    <Veg style={{ height: "15px", width: "15px" }} />
-                  ) : (
-                    <NonVeg style={{ height: "15px", width: "15px" }} />
-                  )}
+                  <button onClick={this.likeItem}>
+                    <i
+                      className="far fa-heart"
+                      style={{ color: "rgb(220, 53, 69)" }}
+                    ></i>
+                  </button>
                   <br />
                   <br />
                   <div className="text-success">
@@ -213,10 +233,6 @@ class Item extends Component {
             </div>
           </div>
         </div>
-        <div
-          className="col-1"
-          style={{ paddingRight: "0", paddingLeft: "0" }}
-        />
       </Fragment>
     );
   }
