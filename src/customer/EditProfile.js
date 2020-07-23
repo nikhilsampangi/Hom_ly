@@ -52,7 +52,7 @@ export default class EditProfile extends Component {
           firstname: res.data.firstName,
           lastname: res.data.lastName,
           email: res.data.email,
-          phone: res.data.internalAuth.phoneNum,
+          phone: res.data.phoneNum,
           veg: res.data.isVeg,
         });
 

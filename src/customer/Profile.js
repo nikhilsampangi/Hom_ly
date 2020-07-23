@@ -43,11 +43,11 @@ export default class Profile extends Component {
           firstName: res.data.firstName,
           lastName: res.data.lastName,
           email: res.data.email,
-          phoneNumber: res.data.internalAuth.phoneNum,
+          phoneNumber: res.data.phoneNum,
           veg: res.data.isVeg,
         });
 
-        if (res.data.Address[0]) {
+        if (res.data.Address.length !== 0) {
           this.setState({
             localty: res.data.Address[0].Localty,
             city: res.data.Address[0].City,
@@ -392,9 +392,6 @@ export default class Profile extends Component {
                 </div>
               </div>
             </div>
-            {/* <button className="btn" onClick={this.logOut}>
-              Log out
-            </button> */}
           </div>
         </Fragment>
       );

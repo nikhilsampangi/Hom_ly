@@ -7,14 +7,11 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const passport = require("passport");
 const passportSetup = require("../../config/gOAuth/customerPassport");
-//const User = require("../../models/customer.model");
 const Customer = require("../../joi_models/customer.model");
 const transactions = require("../transactions");
 const passwordCheck = require("../../joi_models/passwordCheck.model");
 const Order = require("../../models/transactions.model");
 const email = require("../send_email");
-
-//
 const mongoose = require("mongoose");
 const { User } = require("../../models/customer.model");
 const { Chef } = require("../../models/chef.model");
@@ -55,9 +52,6 @@ function register(req, res) {
   })
     .then((user) => {
       if (user) {
-        // In front-end check the status,
-        // if status is '1' call send_otp api and load otp component,
-
         if (user.isVerified === false) {
           res
             .status(200)
@@ -67,19 +61,16 @@ function register(req, res) {
         }
       } else {
         var secret = speakeasy.generateSecret({ length: 20 });
-
         const userData = {
           firstName: req.body.firstname,
           lastName: req.body.lastname,
           email: req.body.email,
-
+          phoneNum: req.body.phonenumber,
           internalAuth: {
             hashedPassword: req.body.hashedPassword,
             passwordResetToken: secret.base32,
-            phoneNum: req.body.phonenumber,
           },
         };
-
         const { error, value } = Customer.validate(userData);
 
         if (error) {
@@ -315,7 +306,7 @@ function login(req, res) {
       if (!user || user.isVerified === false) {
         res.status(400).send({ message: "Invalid credentials" });
       } else {
-        // console.log(user.internalAuth.hashedPassword);
+        console.log("Error: ", user.internalAuth);
         if (
           bcrypt.compareSync(
             req.body.hashedPassword,
@@ -409,7 +400,7 @@ function payment(req, res) {
                   customerId: new String(user._id),
                   amount: new String(costData[0].totalCost),
                   email: user.email,
-                  phoneNumber: new String(user.internalAuth.phoneNum),
+                  phoneNumber: new String(user.phoneNum),
                 };
 
                 console.log(paymentData);
@@ -563,7 +554,7 @@ function edit_profile(req, res) {
         $set: {
           firstName: req.body.firstname,
           lastName: req.body.lastname,
-          internalAuth: { phoneNum: req.body.phonenumber },
+          phoneNum: req.body.phonenumber,
           isVeg: req.body.veg,
           Address: {
             Localty: req.body.localty,
