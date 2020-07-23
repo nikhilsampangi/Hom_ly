@@ -6,8 +6,6 @@ const DeliveryManSchema = new Schema({
 
   lastName: { type: String, },
 
-  isVerified: {type: Boolean, default: false},
-
   hashedPassword: {type: String, },
 
   passwordResetToken: { type: String, default: null },

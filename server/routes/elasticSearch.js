@@ -52,6 +52,7 @@ function createChefIndex(indexName, callback){
     });    
 } 
 
+
 function createMenuIndex(indexName, callback){
     esClient.indices.create({
         index: indexName,
