@@ -670,9 +670,9 @@ router.get("/getApprovedContracts", (req, res) => {
 });
 
 //customer accept chefs intrest
-router.post("/acceptChef", (req, res) => {
+router.post("/acceptChef", auth, (req, res) => {
   User.updateOne(
-    { _id: mongoose.Types.ObjectId(req.body.userId) },
+    { _id: mongoose.Types.ObjectId(req.user._id) },
     {
       $set: {
         "contracts.$[outter].chefs.$[inner].chefStatus": 1,

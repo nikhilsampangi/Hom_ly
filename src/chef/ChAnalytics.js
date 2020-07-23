@@ -5,10 +5,6 @@ import Cookies from "js-cookie";
 import change_bg from "../index";
 
 export default class ChAnalytics extends Component {
-  constructor() {
-    super();
-  }
-
   componentDidMount(event) {
     change_bg("chf_hm");
   }
