@@ -21,6 +21,8 @@ import Abt from "./customer/About";
 import Prof from "./customer/Profile";
 import Prof_edit from "./customer/EditProfile";
 import Fdbck from "./customer/Feedback";
+import AddContract from "./customer/AddContract";
+import ViewContracts from "./customer/ViewContracts";
 
 export default class App extends Component {
   render() {
@@ -53,6 +55,8 @@ export default class App extends Component {
             <Route exact path="/Profile" component={Prof} />
             <Route exact path="/Profile/Edit" component={Prof_edit} />
             <Route exact path="/Feedback" component={Fdbck} />
+            <Route exact path="/Contracts/add" component={AddContract} />
+            <Route exact path="/Contracts" component={ViewContracts} />
           </Switch>
         </Fragment>
       </Router>

@@ -26,7 +26,7 @@ export default class Profile extends Component {
     this.handleOrders = this.handleOrders.bind(this);
   }
 
-  componentDidMount(event) {
+  componentDidMount() {
     change_bg("cust_hm");
     this.handleProfile();
     this.handleOrders();
@@ -58,7 +58,7 @@ export default class Profile extends Component {
       });
   }
 
-  handleOrders(event) {
+  handleOrders() {
     axios
       .get("/transaction/get_orders", {
         headers: { Authorization: Cookies.get("usertoken") },
@@ -245,21 +245,23 @@ export default class Profile extends Component {
                         textAlign: "center",
                       }}
                     >
-                      <button
+                      <Link
                         className="btn btn-outline-info"
                         style={{ borderRadius: "0" }}
+                        to="/Contracts/add"
                       >
                         <i className="far fa-plus-square"></i>&nbsp;Post
                         Contracts
-                      </button>
+                      </Link>
                       <br />
                       <br />
-                      <button
-                        className="btn btn-outline-warning"
+                      <Link
+                        className="btn btn-outline-danger"
                         style={{ borderRadius: "0" }}
+                        to="/Contracts"
                       >
                         View Contract Status
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>

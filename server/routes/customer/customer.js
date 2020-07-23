@@ -24,6 +24,28 @@ router.use(cors());
 
 process.SECRET_KEY = "hackit";
 
+/* Google Authentication API. */
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/customer/auth/google",
+    session: false,
+  }),
+  (req, res) => {
+    const token = req.user;
+    console.log("\n" + token + "\n");
+    res.redirect("http://localhost:3000/" + `${token}`);
+  }
+);
+
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
     secret: secret_token,
@@ -500,28 +522,6 @@ function success(req, res) {
   });
 }
 
-/* Google Authentication API. */
-
-router.get(
-  "/auth/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
-
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/customer/auth/google",
-    session: false,
-  }),
-  (req, res) => {
-    const token = req.user;
-    console.log("\n" + token + "\n");
-    res.redirect("http://localhost:3000/" + `${token}`);
-  }
-);
-
 // send customer profile details
 router.get("/profile", auth, get_profile);
 
@@ -602,27 +602,28 @@ function like_item(req, res) {
 
 //  contracts  //
 
-router.post("/contract", (req, res) => {
+// Add new contract
+router.post("/add_contract", auth, (req, res) => {
   var userContract = new contract({
-    deliveryDate: req.body.deliveryDate, //req.body.deliveryDate
-    contrTitle: req.body.contrTitle, //req.body.contrTitle
-    contrType: req.body.contrType, //req.body.contrType
-    contrDescription: req.body.contrDescription, //req.body.contrDescription
+    deliveryDate: req.body.deliveryDate,
+    contrTitle: req.body.contrTitle,
+    contrType: req.body.contrType,
+    contrDescription: req.body.contrDescription,
     contrStatus: 0,
   });
-  User.findById(req.body.userId, (err, userProfile) => {
-    // req.body.userId
+  User.findById(req.user._id, (err, userProfile) => {
     if (err) {
-      console.log("no id");
+      console.log("Add Contract Error: user doesn't exsist", err);
     } else {
       userProfile.contracts.push(userContract);
       userProfile
         .save()
         .then((contractProfile) => {
-          res.send({ msg: "added" }); //change
+          res.status(200).send({ msg: "Contract Added" });
         })
         .catch((err) => {
-          console.log(err);
+          res.status(400).send({ err: err });
+          console.log("Add Contract Error: ", err);
         });
     }
   });
