@@ -1,6 +1,6 @@
 const Joi = require('@hapi/joi');
 
-const customerSchema = Joi.object({
+const validationSchema = Joi.object({
 
     firstName: Joi.string()
         .min(3)
@@ -33,4 +33,4 @@ const customerSchema = Joi.object({
     
 });
 
-module.exports = customerSchema;
+module.exports = validationSchema;

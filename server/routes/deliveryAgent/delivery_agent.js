@@ -13,6 +13,7 @@ const mongoose = require("mongoose");
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
 const deliveryAgent= require("../../joi_models/deliveryAgent.model");
 
+const elastic = require("../elasticSearch")
 
 var multer  = require('multer');
 var path = require('path');
@@ -22,16 +23,37 @@ router.use(cors());
 
 process.SECRET_KEY = "hackit";
 
-var storage = multer.diskStorage({
+const multer  = require('multer');
+
+const store = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/license')
+    cb(null, 'uploads/')
   },
   filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now() + '.jpg')
+    cb(null, new Date().toDateString() + '-' + file.originalname)
   }
 })
+
+const fileFilter= (req, file, cb) => {
  
-var upload = multer({ storage: storage }).single('license');
+  if(file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+    cb(null, true);
+  }
+  else{
+    cb(new Error('invalid filetype!!!'), false)
+  }
+}
+
+const upload = multer({ 
+  storage: store,
+  limits: {fileSize: 1024 * 1024 * 5},
+  fileFilter: fileFilter
+});
+
+
+router.use(cors());
+
+process.SECRET_KEY = "hackit";
 
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
@@ -53,7 +75,40 @@ function verify_OTP(secret_token, OTP) {
   return tokenValidates;
 }
 
-router.post("/register", upload, register);
+// router.post("/register", upload, register);
+
+router.post("/elasticSearch", createIndex)
+
+function createIndex(req, res) {
+  
+  indexName = "deliveryagents"
+  
+  // elastic.checkStatus((err, resp) => {
+  //   if(err) {
+  //     res.status(400).send({message: err.name})
+  //   }else {
+  //     elastic.createDeliveryAgentIndex(indexName, (error, response) => {
+  //       if(error) {
+  //         res.status(400).send({message : error.name})
+  //       }else {
+  //         res.status(200).send({message : "created Index for Delivery Agents"}) 
+  //       }
+  //     })
+  //   }
+  // })
+
+
+  elastic.findDocs(indexName, '5f18a3886df2161b60fd04f7', (err, resp) => {
+    if(err) {
+      res.status(400).send({message: err.name})
+    }else {
+        res.status(200).send({message : resp.body._source}) 
+      }
+  })
+}
+
+
+router.post("/register", upload.single('licenseImage'), register);
 
 function register(req, res) {
   Agent.findOne({
@@ -81,8 +136,6 @@ function register(req, res) {
             hashedPassword: req.body.hashedPassword,
             passwordResetToken: secret.base32,
             phoneNum: req.body.phonenumber,
-            drivingLicense: 'uploads/license'+ req.file.filename,
-            
           };
         
         const {error, value} = deliveryAgent.validate(userData);
@@ -95,13 +148,15 @@ function register(req, res) {
         }else {
 
           bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
-            console.log("got it");
+
+            var imagePath= req.file.path.replace(/\\/g, "/");
+
+            userData.drivingLicense= imagePath;
             userData.hashedPassword= hash;
 
             Agent.create(userData)
             .then(customer => {
               var token = gen_OTP(customer.passwordResetToken);
-              console.log("-------------");
               email.send_verification_token(token, customer.email);
 
               res.status(200).send({ message: "Please enter OTP!!!", status: "1" });
@@ -128,7 +183,6 @@ function register(req, res) {
 router.post("/send_otp", resend);
 
 function resend(req, res) {
-  console.log("\n"+"send_otp called"+"\n");
   Agent.findOne({
     email: req.body.email
   })
@@ -156,7 +210,7 @@ function resend(req, res) {
 
             email.send_verification_token(token, req.body.email);
       
-            res.status(200).send("OTP sent!!!");
+            res.status(200).send({message : "OTP sent!!!"});
           }
       });
     }
@@ -170,8 +224,7 @@ router.post("/verify_registration_otp", verifyRegistrationOtp);
 function verifyRegistrationOtp(req, res) {
   Agent.findOne({
     email: req.body.email,
-  })
-    .then((customer) => {
+  }).then((customer) => {
       if (!customer) {
         res
           .status(400)
@@ -183,22 +236,43 @@ function verifyRegistrationOtp(req, res) {
         );
 
         if (!tokenValidates) {
-          res.status(400).send({ message: "INVALID OTP!!!" });
-        } else {
-            const newValues = { $set: { isRegistered: true } };
 
-            Agent.updateOne({ _id: customer._id }, newValues, function (
-              err,
-              success
-            ) {
-              if (err) {
-                res.status(400).send({
-                  message: "Something went wrong, please try again!!!",
-                });
-              } else {
-                res.status(200).send("Successfully registered your account!!!");
-              }
-            });
+          res.status(400).send({ message: "INVALID OTP!!!" });
+        
+        }else {
+            
+          const newValues = { $set: { isRegistered: true } };
+
+          Agent.updateOne({ _id: customer._id }, newValues, function (err,success) {
+
+            if (err) {
+              res.status(400).send({
+                message: "Something went wrong, please try again!!!",
+              });
+            }else {
+
+              const payload = {
+                deiveryAgentId: customer._id,
+                deliveryAgentName : customer.firstName+' '+customer.lastName,
+                pin : {
+                  location : {
+                      lat : req.body.lat,
+                      lon : req.body.lng
+                  }
+                }
+              };
+
+              elastic.indexing('deliveryagents', customer._id, payload, (error, response) => {
+                if(error) {
+                  res.status(400).send({message: error})
+                }else {
+                  res.status(200).send({message: "Successfully registered your account!!!"});
+                }
+              });
+
+            }
+
+          });
         }
       }
     })
@@ -405,6 +479,33 @@ function edit_profile(req, res) {
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
     });
+}
+
+router.post("/updateDeliveryAgentLocation", auth, updateLocation); //patch
+
+function updateLocation(req, res) {
+  
+  Agent.findOne({
+    _id: req.user._id,
+  })
+    .then((user) => {
+      if(user) {
+        
+        elastic.updateDeliverAgentLocation('deliveryagents', req.user._id, req.body.lat, req.body.lng, (err, resp) => {
+          if(err) {
+            res.status(400).send({message: "location not updated"})
+          }else {
+            res.status(200).send({message: resp.body.result})
+          }
+        });
+
+      }else {
+        res.status(400).send({ message: "user does not exist" });
+      }
+    })
+    .catch((err) => {
+      res.status(400).send({message: err});
+    });  
 }
 
 module.exports = router;

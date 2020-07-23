@@ -69,7 +69,7 @@ export default class Chef_auth extends Component {
   }
   verifyOTP() {
     axios
-      .post("/chef/verify_otp", {
+      .post("/chef/verify_reset_password_otp", {
         email: this.state.email,
         OTP: this.state.otp,
       })
@@ -293,12 +293,12 @@ export default class Chef_auth extends Component {
               </form>
               <hr />
               <center>
-                <button
-                  className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0"
-                  type="submit"
-                >
+                <a href= "http://localhost:8008/chef/auth/google"><button
+                    className="btn btn-outline-dark btn-rounded my-4 waves-effect z-depth-0"
+                    type="submit"
+                  >
                   <i className="fab fa-google"></i>&nbsp;&nbsp;Sign in
-                </button>
+                </button></a>
               </center>
             </div>
           )}

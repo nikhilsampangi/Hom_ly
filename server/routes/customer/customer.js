@@ -7,8 +7,8 @@ const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
 const passport = require('passport');
 const passportSetup= require("../../config/gOAuth/customerPassport");
-//const User = require("../../models/customer.model");
-const Customer= require("../../joi_models/customer.model"); 
+const User = require("../../models/customer.model");
+const Customer= require("../../joi_models/authValidation.model"); 
 const transactions= require('../transactions');
 const passwordCheck= require('../../joi_models/passwordCheck.model'); 
 const Order= require('../../models/transactions.model');
@@ -19,6 +19,7 @@ const mongoose = require("mongoose");
 const {User} = require("../../models/customer.model");
 const {contract} = require("../../models/customer.model");
 //
+const elastic = require("../elasticSearch")
 
 router.use(cors());
 
@@ -649,5 +650,50 @@ router.get('/getApprovedContracts', (req, res)=> {
     }
   })
 })
+router.post("/elasticsearch", create);
+
+function create(req, res){
+  const indexName = 'restuarents';
+  const Id= '7';
+  const value= "hotel";
+  const resName = "Unknown Hotel";
+  const resPlace = "Ouskirts of MBNR";
+  const resRating = "3.0";
+  const resLat= 16.754188;
+  const resLon= 78.033957;
+
+  const lat= 16.750880;
+  const lng= 78.036206;
+
+  const payload = {
+    deliveryAgentId: '7',
+    deliveryAgentName: 'yenugonda',
+    // place: resPlace,
+    // rating: resRating,
+    // suggest: {
+    //   input: resName.split(" "),
+    //   contexts: {
+    //     location: {
+    //       lat: resLat,
+    //       lon: resLon
+    //     }
+    //   }
+    // },
+    pin : {
+      location : {
+          lat : resLat,
+          lon : resLon
+      }
+    }
+  };
+
+  elastic.getNearestDeliveryAgents('deliveryagents', lat, lng, (err,response)=>{
+    if(err){
+      res.status(400).send({message: err});
+    }else {
+      res.status(200).send({message: response.body});
+    }
+  });
+}
 
 module.exports = router;

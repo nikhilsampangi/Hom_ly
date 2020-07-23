@@ -26,10 +26,10 @@ const contractSchema = new Schema({
 })
 
 const CustomerSchema = new Schema({
+  
   firstName: { type: String, required: [true, "firstname cannot be empty"] },
 
   lastName: { type: String },
-
 
   isVerified: {type: Boolean, default: false},
 

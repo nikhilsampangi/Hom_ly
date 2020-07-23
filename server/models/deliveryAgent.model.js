@@ -2,14 +2,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const DeliveryManSchema = new Schema({
-  firstName: { type: String, required: [true, "firstname cannot be empty"] },
+  firstName: { type: String, },
 
-  lastName: { type: String },
+  lastName: { type: String, },
 
-  hashedPassword: {
-    type: String,
-    required: [true, "Password cannot be empty"]
-  },
+  hashedPassword: {type: String, },
 
   passwordResetToken: { type: String, default: null },
 
@@ -18,6 +15,7 @@ const DeliveryManSchema = new Schema({
   isValidated: {type: Boolean, default: false},
   
   drivingLicense: {type: String, required: [false, "Driving License is mandatory!!!"]},
+<<<<<<< HEAD
 
   email: {
     type: String,
@@ -30,18 +28,12 @@ const DeliveryManSchema = new Schema({
       message: "Please fill a valid email address"
     }
   },
+=======
+>>>>>>> 58b5619f686d2b1cb631d2923bfbad8b46fcb438
 
-  phoneNum: {
-    type: Number,
-    required: [true, "Phone number cannot be empty"],
-    validate: {
-      validator: function(v) {
-        var re = /^\d{10}$/;
-        return re.test(v);
-      },
-      message: "Phone number must be 10 digit number"
-    }
-  },
+  email: {type: String, required: [true, "email cannot be empty"]},
+
+  phoneNum: {type: Number, required: [true, "Phone number cannot be empty"]},
 
   earnings: {
     type: Number
