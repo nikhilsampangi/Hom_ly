@@ -854,6 +854,24 @@ function get_profile(req, res) {
     });
 }
 
+router.get("/get_details", get_details);
+
+function get_details(req, res) {
+  Chef.findOne({
+    _id: req.data.id,
+  })
+    .then((user) => {
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        res.json({ error: "chef does not exsist " });
+      }
+    })
+    .catch((err) => {
+      res.json("error: " + err);
+    });
+}
+
 // router.post("/edit_profile", edit_profile);
 
 router.post("/update_status", status_update);

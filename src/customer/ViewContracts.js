@@ -130,7 +130,10 @@ class ContractTable extends Component {
                 <Link
                   className="btn btn-info btn-block"
                   style={{ borderRadius: "0" }}
-                  to="/Contracts/Review"
+                  to={{
+                    pathname: "/Contracts/Review",
+                    state: { contract: this.props.data[i] },
+                  }}
                 >
                   Review Applications
                 </Link>
