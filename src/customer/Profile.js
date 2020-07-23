@@ -290,7 +290,7 @@ export default class Profile extends Component {
                       }}
                     >
                       <ul>
-                        <li>Dish name</li>
+                        <li>You havent liked any dishes yet</li>
                       </ul>
                     </div>
                   </div>
@@ -319,7 +319,7 @@ export default class Profile extends Component {
                       }}
                     >
                       <ul>
-                        <li>Chef name</li>
+                        <li>You haven't liked any chefs yet</li>
                       </ul>
                     </div>
                   </div>

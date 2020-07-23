@@ -135,7 +135,7 @@ class Item extends Component {
   }
 
   likeItem() {
-    Axios.post("/customer/itemLiked", { chef_id: this.props.id });
+    Axios.post("/customer/item_liked", { chef_id: this.props.id });
   }
 
   render() {
@@ -194,7 +194,7 @@ class Item extends Component {
                   </span>
                 </div>
                 <div className="col-3" style={{ textAlign: "right" }}>
-                  <button onClick={this.likeItem}>
+                  <button className="btn" onClick={this.likeItem}>
                     <i
                       className="far fa-heart"
                       style={{ color: "rgb(220, 53, 69)" }}
