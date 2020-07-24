@@ -1,0 +1,10 @@
+.chf_rg {
+  background: rgb(253, 253, 253);
+  background-image: url("../assets/logo.png");
+  background-repeat: no-repeat;
+  background-size: 20%;
+  overflow: hidden;
+  background-position-x: left;
+  background-position-y: top;
+
+}

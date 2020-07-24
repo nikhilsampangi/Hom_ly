@@ -1,0 +1,11 @@
+.fp {
+  background: #F1F1F1;
+  /* background: -webkit-linear-gradient(to right, #FFFFFF, #ECE9E6);
+  background: linear-gradient(to right, #FFFFFF, #ECE9E6); */
+  background-image: url("../assets/fp_bg.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  overflow: hidden;
+  background-position-x: center;
+  background-position-y: bottom;
+}

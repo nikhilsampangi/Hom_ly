@@ -1,65 +1,30 @@
 import React, { Component, Fragment } from "react";
-import "./App.css";
 import { HashRouter as Router, Route, Switch } from "react-router-dom";
 
 import FrontPage from "./front_page/FrontPage";
+
+import Chef_login from "./authentication/Chef_login";
+import Chef_reg from "./authentication/Chef_reg";
+import ChProfile from "./chef/ChProfile";
+import ChProf_edit from "./chef/ChProf_edit";
+import Validate from "./chef/Validation";
+import ChContracts from "./chef/ChContracts";
+import ChMenu from "./chef/ChMenu";
+import ChAnalytics from "./chef/ChAnalytics";
+import Feedbacks from "./chef/Feedbacks";
+
+import Cust_login from "./authentication/Cust_login";
+import Cust_reg from "./authentication/Cust_reg";
 import Cust from "./customer/Cust";
-import Chef from "./chef/Chef";
-import Staff from "./transport/Staff";
-
-// class App extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       name: "",
-//       greeting: ""
-//     };
-//     this.handleChange = this.handleChange.bind(this);
-//     this.handleSubmit = this.handleSubmit.bind(this);
-//   }
-
-//   handleChange(event) {
-//     this.setState({ name: event.target.value });
-//   }
-
-//   handleSubmit(event) {
-//     event.preventDefault();
-//     fetch(`/api/greeting?name=${encodeURIComponent(this.state.name)}`)
-//       .then(response => response.json())
-//       .then(state => this.setState(state));
-//   }
-//   render() {
-//     return (
-//       <div className="App">
-//         <header className="App-header">
-//           <img src={logo} className="App-logo" alt="logo" />
-//           <p>
-//             Edit <code>src/App.js</code> and save to reload.
-//           </p>
-//           <form onSubmit={this.handleSubmit}>
-//             <label htmlFor="name">Enter your name: </label>
-//             <input
-//               id="name"
-//               type="text"
-//               value={this.state.name}
-//               onChange={this.handleChange}
-//             />
-//             <button type="submit">Submit</button>
-//           </form>
-//           <p>{this.state.greeting}</p>
-//           <a
-//             className="App-link"
-//             href="https://reactjs.org"
-//             target="_blank"
-//             rel="noopener noreferrer"
-//           >
-//             Learn React
-//           </a>
-//         </header>
-//       </div>
-//     );
-//   }
-// }
+import Purchase from "./customer/Purchase";
+import Abt from "./customer/About";
+import Prof from "./customer/Profile";
+import Prof_edit from "./customer/EditProfile";
+import Fdbck from "./customer/Feedback";
+import AddContract from "./customer/AddContract";
+import ViewContracts from "./customer/ViewContracts";
+import ContractStatus from "./customer/ContractStatus";
+import ApplyContract from "./chef/ApplyContract";
 
 export default class App extends Component {
   render() {
@@ -68,9 +33,38 @@ export default class App extends Component {
         <Fragment>
           <Switch>
             <Route exact path="/" component={FrontPage} />
+            {/* Authentication */}
+            <Route exact path="/Login" component={Cust_login} />
+            <Route exact path="/Register" component={Cust_reg} />
+            <Route exact path="/Chef/Login" component={Chef_login} />
+            <Route exact path="/Chef/Register" component={Chef_reg} />
+            {/* Chef url's */}
+            <Route exact path="/Chef/Profile" component={ChProfile} />
+            <Route exact path="/Chef/Profile/Edit" component={ChProf_edit} />
+            <Route exact path="/Chef/Validate" component={Validate} />
+            <Route exact path="/Chef/Contracts" component={ChContracts} />
+            <Route
+              exact
+              path="/Chef/Contract/Apply"
+              component={ApplyContract}
+            />
+            <Route exact path="/Chef/Menu" component={ChMenu} />
+            <Route exact path="/Chef/Analytics" component={ChAnalytics} />
+            <Route
+              exact
+              path="/Chef/Analytics/Feedbacks"
+              component={Feedbacks}
+            />
+            {/* Customer url's */}
             <Route exact path="/Home" component={Cust} />
-            <Route exact path="/Chef" component={Chef} />
-            <Route exact path="/Transport" component={Staff} />
+            <Route exact path="/Purchase" component={Purchase} />
+            <Route exact path="/About" component={Abt} />
+            <Route exact path="/Profile" component={Prof} />
+            <Route exact path="/Profile/Edit" component={Prof_edit} />
+            <Route exact path="/Feedback" component={Fdbck} />
+            <Route exact path="/Contracts/add" component={AddContract} />
+            <Route exact path="/Contracts" component={ViewContracts} />
+            <Route exact path="/Contracts/Review" component={ContractStatus} />
           </Switch>
         </Fragment>
       </Router>
