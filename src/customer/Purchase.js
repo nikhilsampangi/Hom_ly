@@ -8,22 +8,77 @@ import Axios from "axios";
 export default class Purchase extends Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      html: [],
+    };
     this.OrderItems = this.OrderItems.bind(this);
   }
 
+  isDate(val) {
+    // Cross realm comptatible
+    return Object.prototype.toString.call(val) === "[object Date]";
+  }
+
+  isObj(val) {
+    return typeof val === "object";
+  }
+
+  stringifyValue(val) {
+    if (this.isObj(val) && !this.isDate(val)) {
+      return JSON.stringify(val);
+    } else {
+      return val;
+    }
+  }
+
+  buildForm({ action, params }) {
+    const form = document.createElement("form");
+    form.setAttribute("method", "post");
+    form.setAttribute("action", action);
+    // form.setAttribute('target', target)
+
+    Object.keys(params).forEach((key) => {
+      const input = document.createElement("input");
+      input.setAttribute("type", "hidden");
+      input.setAttribute("name", key);
+      input.setAttribute("value", this.stringifyValue(params[key]));
+      form.appendChild(input);
+    });
+
+    return form;
+  }
+
+  post(details) {
+    const form = this.buildForm(details);
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
+  }
+
   OrderItems() {
-    Axios.post(
-      "/transaction/order",
-      {
+    Axios.get("/transaction/order", {
+      params: {
         chefid: Cookies.get("cartChefId"),
         chefname: Cookies.get("cartChefName"),
-        cart: JSON.parse(Cookies.get("cart")),
+        cart: Cookies.get("cart"),
       },
-      { headers: { Authorization: Cookies.get("usertoken") } }
-    ).then((res) => {
-      console.log(res.data);
-    });
+      headers: { Authorization: Cookies.get("usertoken") },
+    })
+      .then((resp) => {
+        var details = {
+          action: "https://securegw-stage.paytm.in/order/process",
+          params: resp.data.message,
+        };
+        this.post(details);
+        // remove cookies
+        Cookies.remove("cart");
+        Cookies.remove("cartChefId");
+        Cookies.remove("cartChefName");
+        Cookies.set("transId", resp.data.tid);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   render() {
@@ -79,9 +134,11 @@ class DisplayCart extends Component {
   }
 
   componentDidMount() {
-    this.setState({
-      data: JSON.parse(Cookies.get("cart")),
-    });
+    if (Cookies.get("cart")) {
+      this.setState({
+        data: JSON.parse(Cookies.get("cart")),
+      });
+    }
   }
 
   render() {
@@ -124,6 +181,12 @@ class DisplayCart extends Component {
             </thead>
             <tbody>{data}</tbody>
           </table>
+        </Fragment>
+      );
+    } else {
+      return (
+        <Fragment>
+          <h3>Your Cart is Empty</h3>
         </Fragment>
       );
     }

@@ -43,13 +43,34 @@ router.get("/get_orders", auth, get_orders);
 
 function get_orders(req, res) {
   Transaction.find(
+    { chefId: req.user._id },
+    { chefName: 1, date: 1, amount: 1, rating: 1, feedBack: 1 },
+    { multi: true }
+  )
+    .then((orders) => {
+      res.status(200).send(orders);
+    })
+    .catch((err) => {
+      console.log("get orders error: ", err);
+      res.status(400).send(err);
+    });
+}
+router.get("/get_user_orders", auth, get_user_orders);
+
+function get_user_orders(req, res) {
+  Transaction.find(
     { custId: req.user._id },
     { chefName: 1, date: 1, amount: 1, rating: 1, feedBack: 1 },
     { multi: true }
-  ).then((orders) => {
-    // console.log(orders);
-    res.send(orders);
-  });
+  )
+    .then((orders) => {
+      // console.log(orders);
+      res.status(200).send(orders);
+    })
+    .catch((err) => {
+      console.log("get orders error: ", err);
+      res.status(400).send(err);
+    });
 }
 
 router.get("/chef_rating", auth, chef_rating);
@@ -185,13 +206,14 @@ function getPaymentData(userID, chefID, chef_name, itemData, callback) {
   });
 }
 
-router.post("/order", auth, payment);
+router.get("/order", auth, payment);
 
 function payment(req, res) {
   const userId = req.user._id;
-  const chefId = req.body.chefid;
-  const chefName = req.body.chefname;
-  const itemData = req.body.cart;
+  const chefId = req.query.chefid;
+  const chefName = req.query.chefname;
+  const itemData = JSON.parse(req.query.cart);
+  // console.log(JSON.parse(itemData));
   User.findOne({
     _id: userId,
   })
@@ -210,33 +232,13 @@ function payment(req, res) {
               email: user.email,
               phoneNumber: new String(user.internalAuth.phoneNum),
             };
-
             console.log("\n" + paymentData + "\n");
 
             transactions.payment(paymentData, (err, params) => {
               if (err) {
                 res.status(200).send({ message: "error!!!" });
               } else {
-                let txn_url = "https://securegw-stage.paytm.in/order/process";
-
-                let form_fields = "";
-                for (x in params) {
-                  form_fields +=
-                    "<input type='hidden' name='" +
-                    x +
-                    "' value='" +
-                    params[x] +
-                    "'/>";
-                }
-                var html =
-                  '<html><body><center><h2>Please wait! Do not refresh the page</h2></center><form method="post" action="' +
-                  txn_url +
-                  '" name="f1">' +
-                  form_fields +
-                  '</form><script type="text/javascript">document.f1.submit()</script></body></html>';
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.write(html);
-                res.end();
+                res.status(200).send({ message: params, tid: resp.orderID });
               }
             });
           }
@@ -277,7 +279,8 @@ function success(req, res) {
             if (err) {
               res.status(400).send({ message: "something went wrong!!!" });
             } else {
-              res.status(400).send({ message: response.RESPMSG });
+              // res.status(400).send({ message: response.RESPMSG });
+              res.redirect("http://localhost:3000/#/Feedback");
             }
           }
         );
@@ -290,7 +293,8 @@ function success(req, res) {
             if (err) {
               res.status(200).send({ message: "something went wrong!!!" });
             } else {
-              res.status(200).send({ message: response.RESPMSG });
+              // res.status(200).send({ message: response.RESPMSG });
+              res.redirect("http://localhost:3000/#/Feedback");
             }
           }
         );
