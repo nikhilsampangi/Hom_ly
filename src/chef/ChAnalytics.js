@@ -6,6 +6,9 @@ import change_bg from "../index";
 import Axios from "axios";
 import Rating from "react-rating";
 import { Bar, Line } from "react-chartjs-2";
+import * as jsPDF from "jspdf";
+import $ from "jquery";
+import html2canvas from "html2canvas";
 
 export default class ChAnalytics extends Component {
   constructor() {
@@ -13,6 +16,44 @@ export default class ChAnalytics extends Component {
     this.state = {
       data: [],
     };
+    this.downloadPDF = this.downloadPDF.bind(this);
+  }
+
+  downloadPDF(target_id) {
+    var HTML_Width = $(target_id).width();
+    var HTML_Height = $(target_id).height();
+    var top_left_margin = 15;
+    var PDF_Width = HTML_Width + top_left_margin * 2;
+    var PDF_Height = PDF_Width * 1.5 + top_left_margin * 2;
+    var canvas_image_width = HTML_Width;
+    var canvas_image_height = HTML_Height;
+
+    var totalPDFPages = Math.ceil(HTML_Height / PDF_Height) - 1;
+
+    html2canvas($(target_id)[0]).then(function (canvas) {
+      var imgData = canvas.toDataURL("image/jpeg", 1.0);
+      var pdf = new jsPDF("p", "pt", [PDF_Width, PDF_Height]);
+      pdf.addImage(
+        imgData,
+        "JPG",
+        top_left_margin,
+        top_left_margin,
+        canvas_image_width,
+        canvas_image_height
+      );
+      for (var i = 1; i <= totalPDFPages; i++) {
+        pdf.addPage(PDF_Width, PDF_Height);
+        pdf.addImage(
+          imgData,
+          "JPG",
+          top_left_margin,
+          -(PDF_Height * i) + top_left_margin * 4,
+          canvas_image_width,
+          canvas_image_height
+        );
+      }
+      pdf.save("analytics.pdf");
+    });
   }
   componentDidMount() {
     change_bg("chf_hm");
@@ -76,8 +117,10 @@ export default class ChAnalytics extends Component {
       datasets: [
         {
           label: "Sales",
-          backgroundColor: "#ff515ecc",
+          backgroundColor: "#ff515eaa",
+          pointBackgroundColor: "#ff515e",
           barThickness: 30,
+          fill: false,
           // data: slc_data,
           data: [123, 221, 372, 420, 136, 199, 502, 0, 0, 0, 0, 0],
         },
@@ -94,9 +137,22 @@ export default class ChAnalytics extends Component {
           <br />
           <div className="container">
             <div
+              id="dashboard"
               className="card"
               style={{ fontFamily: "Sen", padding: "2% 5% 2% 5%" }}
             >
+              <div className="text-right">
+                <i
+                  className="fas fa-2x fa-file-pdf text-danger"
+                  style={{ cursor: "pointer" }}
+                  data-toggle="tooltip"
+                  data-placement="bottom"
+                  title="Download as pdf"
+                  onClick={() => {
+                    this.downloadPDF("#dashboard");
+                  }}
+                ></i>
+              </div>
               <div className="card-title text-center">
                 <h3>Analytics Dashboard</h3>
               </div>
@@ -161,6 +217,7 @@ export default class ChAnalytics extends Component {
             <div
               className="card"
               style={{ fontFamily: "Sen", padding: "2% 5% 2% 5%" }}
+              id="ratingsBarGraph"
             >
               <div className="card-title row">
                 <h4 className="col" style={{ fontFamily: "Neptune" }}>
@@ -173,6 +230,9 @@ export default class ChAnalytics extends Component {
                     data-toggle="tooltip"
                     data-placement="bottom"
                     title="Download as pdf"
+                    onClick={() => {
+                      this.downloadPDF("#ratingsBarGraph");
+                    }}
                   ></i>
                 </div>
               </div>
@@ -206,10 +266,11 @@ export default class ChAnalytics extends Component {
             <div
               className="card"
               style={{ fontFamily: "Sen", padding: "2% 5% 2% 5%" }}
+              id="salesLineChart"
             >
               <div className="card-title row">
                 <h4 className="col" style={{ fontFamily: "Neptune" }}>
-                  SaLeS LinE CHaRt
+                  SaLES LinE CHaRt
                 </h4>
                 <div className="col text-right">
                   <i
@@ -218,6 +279,9 @@ export default class ChAnalytics extends Component {
                     data-toggle="tooltip"
                     data-placement="bottom"
                     title="Download as pdf"
+                    onClick={() => {
+                      this.downloadPDF("#salesLineChart");
+                    }}
                   ></i>
                 </div>
               </div>
