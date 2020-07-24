@@ -122,7 +122,7 @@ export default class EditProfile extends Component {
                   {this.state.response}
                   <br />
                   {this.state.redFlag ? (
-                    <Link to="/Profile">Back to Profile ></Link>
+                    <Link to="/Profile">Back to Profile &gt;</Link>
                   ) : (
                     <div></div>
                   )}

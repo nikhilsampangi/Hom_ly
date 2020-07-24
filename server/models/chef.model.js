@@ -1,6 +1,36 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
+const ValidationRequest = new Schema({
+  chefId: { type: String, required: true},
+  dishId: { type: String, required: true},
+  date: { type: Date, required: true},
+  reply:  { type: Number, default: 0},
+});
+
+const DishReport = new Schema({
+  chefId : {type: String, required: true},
+  response : {type: Number, default: 0, required: true},
+  rating : {type: Number, required: true},
+  remarks: {type: String, reequired: true},
+});
+
+const MenuSchema = new Schema({
+    itemName: { type: String, required: [true, 'Enter dish name'], unique: [true, 'This dish name already exsists.'] },
+    itemDescr: { type: String, required: [true, 'dish descreption required'] },
+    itemRecpie: { type: String, required: [true, 'dish recipie is required']},
+    itemCost: { type: Number, required: [true, 'dish cost required'] },
+    dishPic: { type: String,  required: [true, 'dish pic required']},
+    isVeg: { type: Boolean, default: true , required: true},
+
+    newDish: { type: Number, required: true},
+    request_status: { type: String}, 
+    validated: {type: Number, default: 0, required: true},
+    dishReport: [DishReport],
+
+    forToday: {type: Number, default: 0}, 
+});
+
 const ChefSchema = new Schema({
   firstName: { type: String, required: [true, "firstname cannot be empty"] },
 
@@ -41,14 +71,15 @@ const ChefSchema = new Schema({
     },
   },
 
-  Address: [
-    {
+  Address: {
       Localty: { type: String },
       City: { type: String },
       State: { type: String },
       Pincode: { type: String },
     },
-  ],
+
+  
+  
 
   bio: {
     type: String,
@@ -71,15 +102,28 @@ const ChefSchema = new Schema({
 
   menu: [
     {
-      itemName: { type: String, required: true },
+      itemName: { type: String, required: [true, 'dish pic required'], unique: [true, 'This dish name already exsists.'] },
       itemDescr: { type: String },
       itemCost: { type: Number, required: true },
-      // Need to add food items photo
       isVeg: { type: Boolean, required: true },
+      dishPic: { type: String,  required: [true, 'dish pic required']},
     },
   ],
 
-  // rating: { type: Number, default: 0 },
+  rating: { type: Number, default: 0 },
+
+  certifiedStatus: { type: Number, default: 0 }, //0-not certified  1-initiated 2-approved 3-notApproved
+
+  chefValidationRequest: [
+    {
+      chefId: { type: String },
+      dishName: { type: String },
+      recipie: { type: String },
+      requestStatus: { type: Number },
+      remarks: { type: String },
+      Date: { type: Date }
+    }
+  ]
 
   // feedbacks: [
   //   {
@@ -91,5 +135,13 @@ const ChefSchema = new Schema({
 });
 
 ChefSchema.set("toJSON", { virtuals: true });
+MenuSchema.set("toJSON", { virtuals: true });
+ValidationRequest.set("toJSON", { virtuals: true });
+DishReport.set("toJSON", { virtuals: true });
 
-module.exports = mongoose.model("chefs", ChefSchema);
+module.exports = {
+  Chef: mongoose.model("chefs", ChefSchema),
+  Menu : mongoose.model("Menu", MenuSchema),
+  ValidationRequest : mongoose.model("ValidationRequest", ValidationRequest),
+  DishReport : mongoose.model("DishReport", DishReport),
+}

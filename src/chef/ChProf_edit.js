@@ -119,7 +119,7 @@ export default class ChProf_edit extends Component {
                   {this.state.response}
                   <br />
                   {this.state.redFlag ? (
-                    <Link to="/Chef/Profile">Back to Profile ></Link>
+                    <Link to="/Chef/Profile">Back to Profile &gt;</Link>
                   ) : (
                     <div></div>
                   )}

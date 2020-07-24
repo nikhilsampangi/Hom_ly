@@ -16,11 +16,15 @@ import Feedbacks from "./chef/Feedbacks";
 import Cust_login from "./authentication/Cust_login";
 import Cust_reg from "./authentication/Cust_reg";
 import Cust from "./customer/Cust";
-import Wlt from "./customer/Wallet";
+import Purchase from "./customer/Purchase";
 import Abt from "./customer/About";
 import Prof from "./customer/Profile";
 import Prof_edit from "./customer/EditProfile";
 import Fdbck from "./customer/Feedback";
+import AddContract from "./customer/AddContract";
+import ViewContracts from "./customer/ViewContracts";
+import ContractStatus from "./customer/ContractStatus";
+import ApplyContract from "./chef/ApplyContract";
 
 export default class App extends Component {
   render() {
@@ -39,6 +43,11 @@ export default class App extends Component {
             <Route exact path="/Chef/Profile/Edit" component={ChProf_edit} />
             <Route exact path="/Chef/Validate" component={Validate} />
             <Route exact path="/Chef/Contracts" component={ChContracts} />
+            <Route
+              exact
+              path="/Chef/Contract/Apply"
+              component={ApplyContract}
+            />
             <Route exact path="/Chef/Menu" component={ChMenu} />
             <Route exact path="/Chef/Analytics" component={ChAnalytics} />
             <Route
@@ -48,11 +57,14 @@ export default class App extends Component {
             />
             {/* Customer url's */}
             <Route exact path="/Home" component={Cust} />
-            <Route exact path="/Wallet" component={Wlt} />
+            <Route exact path="/Purchase" component={Purchase} />
             <Route exact path="/About" component={Abt} />
             <Route exact path="/Profile" component={Prof} />
             <Route exact path="/Profile/Edit" component={Prof_edit} />
             <Route exact path="/Feedback" component={Fdbck} />
+            <Route exact path="/Contracts/add" component={AddContract} />
+            <Route exact path="/Contracts" component={ViewContracts} />
+            <Route exact path="/Contracts/Review" component={ContractStatus} />
           </Switch>
         </Fragment>
       </Router>

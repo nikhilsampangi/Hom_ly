@@ -36,13 +36,13 @@ export default class ChProfile extends Component {
     this.getRatings = this.getRatings.bind(this);
   }
 
-  componentDidMount(event) {
+  componentDidMount() {
     change_bg("chf_hm");
     this.handleProfile();
     this.getRatings();
   }
 
-  handleProfile(event) {
+  handleProfile() {
     axios
       .get("chef/profile", {
         headers: { Authorization: Cookies.get("cheftoken") },
@@ -72,7 +72,7 @@ export default class ChProfile extends Component {
       });
   }
 
-  handleStateCheck(event) {
+  handleStateCheck() {
     const status_upd = {
       email: this.state.email,
       status: !this.state.status,
@@ -82,7 +82,7 @@ export default class ChProfile extends Component {
       .then(this.setState({ status: !this.state.status }));
   }
 
-  getRatings(event) {
+  getRatings() {
     axios
       .get("/transaction/chef_rating", {
         headers: { Authorization: Cookies.get("cheftoken") },
@@ -90,10 +90,12 @@ export default class ChProfile extends Component {
       .then((res) => {
         var len = res.data.length;
         var temp = 0;
-        for (let i = 0; i < len; i++) {
-          temp = temp + res.data[i].rating;
+        if (len !== 0) {
+          for (let i = 0; i < len; i++) {
+            temp = temp + res.data[i].rating;
+          }
+          temp = temp / len;
         }
-        temp = temp / len;
         this.setState({
           rating: temp,
           numR: len,
@@ -240,14 +242,10 @@ export default class ChProfile extends Component {
                       style={{
                         paddingTop: "4%",
                         paddingBottom: "7%",
-                        textAlign: "center",
                       }}
                     >
                       <ul>
-                        <li>List items</li>
-                        <li>List items</li>
-                        <li>List items</li>
-                        <li>List items</li>
+                        <li>No active orders right now!</li>
                       </ul>
                     </div>
                   </div>

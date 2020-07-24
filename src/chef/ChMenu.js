@@ -18,27 +18,35 @@ export default class ChMenu extends Component {
       itemName: "",
       itemCost: "",
       itemDescr: "",
+      dishPic: [],
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSwitchChange = this.handleSwitchChange.bind(this);
+    this.handleFileChange = this.handleFileChange.bind(this);
     this.addItem = this.addItem.bind(this);
   }
 
-  addItem(event) {
-    const item = {
-      itemName: this.state.itemName,
-      itemDescr: this.state.itemDescr,
-      itemCost: this.state.itemCost,
-      isVeg: this.state.itemVegFlag,
-    };
+  addItem() {
+    let item = new FormData();
+    item.append("itemName", this.state.itemName);
+    item.append("itemDescr", this.state.itemDescr);
+    item.append("itemCost", this.state.itemCost);
+    item.append("isVeg", this.state.itemVegFlag);
+    item.append("dishPic", this.state.dishPic);
     axios
       .post("/chef/add_item", item, {
-        headers: { Authorization: Cookies.get("cheftoken") },
+        headers: {
+          Authorization: Cookies.get("cheftoken"),
+          "content-type": "multipart/form-data",
+        },
       })
       .then(() => {
         this.setState({ addItemFlag: false, rrFlag: true });
         window.location.reload(false);
+      })
+      .catch((error) => {
+        console.log(error);
       });
   }
 
@@ -46,11 +54,15 @@ export default class ChMenu extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  handleSwitchChange(event) {
+  handleSwitchChange() {
     this.setState({ itemVegFlag: !this.state.itemVegFlag });
   }
 
-  componentDidMount(event) {
+  handleFileChange(event) {
+    this.setState({ dishPic: event.target.files[0] });
+  }
+
+  componentDidMount() {
     change_bg("chf_hm");
   }
 
@@ -147,7 +159,12 @@ export default class ChMenu extends Component {
                 </div>
                 <div className="col">
                   <span>Item Image</span>
-                  <input type="file" className="form-control" />
+                  <input
+                    type="file"
+                    className="form-control"
+                    name="dishPic"
+                    onChange={this.handleFileChange}
+                  />
                 </div>
               </div>
               <br />
@@ -182,7 +199,7 @@ class ListItems extends Component {
     };
   }
 
-  componentDidMount(event) {
+  componentDidMount() {
     axios
       .get("/chef/profile", {
         headers: { Authorization: Cookies.get("cheftoken") },
@@ -202,6 +219,7 @@ class ListItems extends Component {
           cost={this.state.arr[i].itemCost}
           descr={this.state.arr[i].itemDescr}
           isVeg={this.state.arr[i].isVeg}
+          pic={this.state.arr[i].dishPic}
         />
       );
       items.push(<br />);
@@ -218,12 +236,14 @@ class Item extends Component {
       itemName: "",
       itemCost: "",
       itemDescr: "",
-      isVeg: false,
+      itemVegFlag: false,
+      dishPic: [],
     };
     this.deleteItem = this.deleteItem.bind(this);
     this.handleEdit = this.handleEdit.bind(this);
     this.editItem = this.editItem.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleFileChange = this.handleFileChange.bind(this);
     this.handleSwitchChange = this.handleSwitchChange.bind(this);
   }
 
@@ -231,21 +251,25 @@ class Item extends Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  handleSwitchChange(event) {
-    this.setState({ isVeg: !this.state.isVeg });
+  handleSwitchChange() {
+    this.setState({ itemVegFlag: !this.state.itemVegFlag });
   }
 
-  handleEdit(event) {
+  handleFileChange(event) {
+    this.setState({ dishPic: event.target.files[0] });
+  }
+
+  handleEdit() {
     this.setState({
       itemName: this.props.name,
       itemCost: this.props.cost,
       itemDescr: this.props.descr,
-      isVeg: this.props.isVeg,
+      itemVegFlag: this.props.isVeg,
       editItemFlag: true,
     });
   }
 
-  editItem(event) {
+  editItem() {
     let temp1 = {
       itemName: this.props.name,
     };
@@ -253,20 +277,29 @@ class Item extends Component {
       headers: { Authorization: Cookies.get("cheftoken") },
     });
 
-    let temp2 = {
-      itemName: this.state.itemName,
-      itemCost: this.state.itemCost,
-      itemDescr: this.state.itemDescr,
-      isVeg: this.state.isVeg,
-    };
+    let item = new FormData();
+    item.append("itemName", this.state.itemName);
+    item.append("itemDescr", this.state.itemDescr);
+    item.append("itemCost", this.state.itemCost);
+    item.append("isVeg", this.state.itemVegFlag);
+    item.append("dishPic", this.state.dishPic);
     axios
-      .post("/chef/add_item", temp2, {
-        headers: { Authorization: Cookies.get("cheftoken") },
+      .post("/chef/add_item", item, {
+        headers: {
+          Authorization: Cookies.get("cheftoken"),
+          "content-type": "multipart/form-data",
+        },
       })
-      .then(window.location.reload(false));
+      .then(() => {
+        this.setState({ addItemFlag: false, rrFlag: true });
+        window.location.reload(false);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
-  deleteItem(event) {
+  deleteItem() {
     let temp = {
       itemName: this.props.name,
     };
@@ -298,10 +331,14 @@ class Item extends Component {
                     className="col-3"
                     style={{ padding: "3%", textAlign: "center" }}
                   >
-                    <i
-                      className="fas fa-pizza-slice"
-                      style={{ fontSize: "6em" }}
-                    ></i>
+                    {/* 
+                    Placeholder image
+                    <i className="fas fa-pizza-slice" style={{ fontSize: "6em" }}></i> */}
+                    <img
+                      src={process.env.PUBLIC_URL + "/img/" + this.props.pic}
+                      alt="item_image"
+                      width="200px"
+                    />
                   </div>
                   <div className="col-6">
                     <h5>{this.props.name}</h5>
@@ -399,7 +436,7 @@ class Item extends Component {
                 </span>
                 &nbsp;&nbsp;
                 <Switch
-                  checked={this.state.isVeg}
+                  checked={this.state.itemVegFlag}
                   onChange={this.handleSwitchChange}
                   height={20}
                   width={40}
@@ -407,7 +444,12 @@ class Item extends Component {
               </div>
               <div className="col">
                 <span>Item Image</span>
-                <input type="file" className="form-control" />
+                <input
+                  type="file"
+                  className="form-control"
+                  name="dishPic"
+                  onChange={this.handleFileChange}
+                />
               </div>
             </div>
             <br />

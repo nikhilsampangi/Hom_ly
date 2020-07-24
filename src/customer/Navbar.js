@@ -47,7 +47,7 @@ export default class Navbar extends Component {
           <div className="col-2" style={{ textAlign: "center" }}>
             {this.props.walletPage || this.state.nav_w ? (
               <Link
-                to="/Wallet"
+                to="/Purchase"
                 style={{ textDecoration: "none", color: "#ee3d59" }}
               >
                 <span

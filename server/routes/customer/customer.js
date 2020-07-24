@@ -5,19 +5,46 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const auth = require("../middleware_jwt");
 const speakeasy = require("speakeasy");
-const passport = require('passport');
-const passportSetup= require("../../config/gOAuth/customerPassport");
-const User = require("../../models/customer.model");
-const Customer= require("../../joi_models/customer.model"); 
-const transactions= require('../transactions');
-const passwordCheck= require('../../joi_models/passwordCheck.model'); 
-const Order= require('../../models/transactions.model');
+const passport = require("passport");
+const passportSetup = require("../../config/gOAuth/customerPassport");
+const Customer = require("../../joi_models/customer.model");
+const transactions = require("../transactions");
+const passwordCheck = require("../../joi_models/passwordCheck.model");
+const Order = require("../../models/transactions.model");
 const email = require("../send_email");
-
+const mongoose = require("mongoose");
+const { User } = require("../../models/customer.model");
+const { Chef } = require("../../models/chef.model");
+const { contract } = require("../../models/customer.model");
+// const {
+//   default: Chef_auth,
+// } = require("../../../src/authentication/Chef_login");
 
 router.use(cors());
 
 process.SECRET_KEY = "hackit";
+
+/* Google Authentication API. */
+
+router.get(
+  "/auth/google",
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+  })
+);
+
+router.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/customer/auth/google",
+    session: false,
+  }),
+  (req, res) => {
+    const token = req.user;
+    console.log("\n" + token + "\n");
+    res.redirect("http://localhost:3000/" + `${token}`);
+  }
+);
 
 function gen_OTP(secret_token) {
   var token = speakeasy.totp({
@@ -47,9 +74,6 @@ function register(req, res) {
   })
     .then((user) => {
       if (user) {
-        // In front-end check the status,
-        // if status is '1' call send_otp api and load otp component,
-
         if (user.isVerified === false) {
           res
             .status(200)
@@ -59,80 +83,75 @@ function register(req, res) {
         }
       } else {
         var secret = speakeasy.generateSecret({ length: 20 });
-        
         const userData = {
-            firstName: req.body.firstname,
-            lastName: req.body.lastname,
-            email: req.body.email,
+          firstName: req.body.firstname,
+          lastName: req.body.lastname,
+          email: req.body.email,
+          phoneNum: req.body.phonenumber,
+          internalAuth: {
+            hashedPassword: req.body.hashedPassword,
+            passwordResetToken: secret.base32,
+          },
+        };
+        const { error, value } = Customer.validate(userData);
 
-            internalAuth:{
-              hashedPassword: req.body.hashedPassword,
-              passwordResetToken: secret.base32,
-              phoneNum: req.body.phonenumber,
-            }
-          };
-
-        const {error, value} = Customer.validate(userData);
-
-        if(error) {
-        
-          res.status(400).send({message: error.message});
-        
-        }else {
-
+        if (error) {
+          res.status(400).send({ message: error.message });
+        } else {
           bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
-            
-            userData.internalAuth.hashedPassword= hash;
+            userData.internalAuth.hashedPassword = hash;
 
             User.create(userData)
-            .then(customer => {
-              var token = gen_OTP(customer.internalAuth.passwordResetToken);
+              .then((customer) => {
+                var token = gen_OTP(customer.internalAuth.passwordResetToken);
 
-              email.send_verification_token(token, customer.email);
+                email.send_verification_token(token, customer.email);
 
-              res.status(200).send({ message: "Please enter OTP!!!", status: "1" });
-            })
-            .catch(err => {
-              res.status(400).send({ message: "Something went wrong, please try again!!!" });
-            }); 
-        
+                res
+                  .status(200)
+                  .send({ message: "Please enter OTP!!!", status: "1" });
+              })
+              .catch((err) => {
+                res.status(400).send({
+                  message: "Something went wrong, please try again!!!",
+                });
+              });
           });
-          
         }
       }
-
     })
     .catch((err) => {
       res
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
     });
-
 }
-
 
 router.post("/send_otp", resend);
 
 function resend(req, res) {
-  console.log("\n"+"send_otp called"+"\n");
+  console.log("\n" + "send_otp called" + "\n");
   User.findOne({
-    email: req.body.email
-  })
-  .then(customer=>{
-    if(!customer){
+    email: req.body.email,
+  }).then((customer) => {
+    if (!customer) {
       res.status(400).send({
         message: "account does not exist, please register!!!",
-        status: "1"
+        status: "1",
       });
-    }else {
-
+    } else {
       var secret = speakeasy.generateSecret({ length: 20 });
 
-      const newValues = { $set: { "internalAuth.passwordResetToken": secret.base32 } };
-    
-      User.updateOne({ 
-        email: customer.email,
-      }, newValues, function(err, success) {
+      const newValues = {
+        $set: { "internalAuth.passwordResetToken": secret.base32 },
+      };
+
+      User.updateOne(
+        {
+          email: customer.email,
+        },
+        newValues,
+        function (err, success) {
           if (err) {
             res
               .status(400)
@@ -141,15 +160,14 @@ function resend(req, res) {
             var token = gen_OTP(secret.base32);
 
             email.send_verification_token(token, req.body.email);
-      
+
             res.status(200).send("OTP sent!!!");
           }
-      });
+        }
+      );
     }
-  })
-
+  });
 }
-
 
 router.post("/verify_registration_otp", verifyRegistrationOtp);
 
@@ -171,38 +189,37 @@ function verifyRegistrationOtp(req, res) {
         if (!tokenValidates) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
-            const newValues = { $set: { isVerified: true } };
+          const newValues = { $set: { isVerified: true } };
 
-            User.updateOne({ _id: customer._id }, newValues, function (
-              err,
-              success
-            ) {
-              if (err) {
-                res.status(400).send({
-                  message: "Something went wrong, please try again!!!",
-                });
-              } else {
-                res.status(200).send("Successfully registered your account!!!");
-              }
-            });
+          User.updateOne({ _id: customer._id }, newValues, function (
+            err,
+            success
+          ) {
+            if (err) {
+              res.status(400).send({
+                message: "Something went wrong, please try again!!!",
+              });
+            } else {
+              res.status(200).send("Successfully registered your account!!!");
+            }
+          });
         }
       }
     })
-    .catch(err => {
+    .catch((err) => {
       res
         .status(400)
         .send({ message: "Something went wrong, please try again!!!" });
     });
 }
 
-
 router.post("/verify_reset_password_otp", verifyPasswordOtp);
 
 function verifyPasswordOtp(req, res) {
   User.findOne({
-    email: req.body.email
+    email: req.body.email,
   })
-    .then(customer => {
+    .then((customer) => {
       if (!customer) {
         res
           .status(400)
@@ -216,21 +233,20 @@ function verifyPasswordOtp(req, res) {
         if (!tokenValidates) {
           res.status(400).send({ message: "INVALID OTP!!!" });
         } else {
+          const newValues = { $set: { isValidated: true, isVerified: true } };
 
-            const newValues = { $set: {isValidated: true, isVerified: true} };
-
-            User.updateOne({ _id: customer._id }, newValues, function (
-              err,
-              success
-            ) {
-              if (err) {
-                res.status(400).send({
-                  message: "Something went wrong, please try again!!!",
-                });
-              } else {
-                res.status(200).send("Validated!!!");
-              }
-            });
+          User.updateOne({ _id: customer._id }, newValues, function (
+            err,
+            success
+          ) {
+            if (err) {
+              res.status(400).send({
+                message: "Something went wrong, please try again!!!",
+              });
+            } else {
+              res.status(200).send("Validated!!!");
+            }
+          });
         }
       }
     })
@@ -249,14 +265,13 @@ function reset(req, res) {
   })
     .then((user) => {
       if (user.isValidated === true) {
-        const {error, value}= passwordCheck.validate({password: req.body.newPassword})
+        const { error, value } = passwordCheck.validate({
+          password: req.body.newPassword,
+        });
 
-        if(error) {
-          
-          res.status(400).send({message:error.message});
-
-        }else {
-          
+        if (error) {
+          res.status(400).send({ message: error.message });
+        } else {
           bcrypt.hash(req.body.newPassword, 10, (err, hash) => {
             if (err) {
               res
@@ -264,24 +279,28 @@ function reset(req, res) {
                 .send({ message: "Something went wrong, please try again!!!" });
             } else {
               const newValues = {
-                $set: { "internalAuth.hashedPassword": hash, isValidated: false }
+                $set: {
+                  "internalAuth.hashedPassword": hash,
+                  isValidated: false,
+                },
               };
-  
-              User.updateOne({ 
-                email: user.email, 
-              }, newValues, function(
-                err,
-                success
-              ) {
-                if (err) {
-                  console.log("\n"+err+"\n");
-                  res.status(400).send({
-                    message: "Something went wrong, please try again!!!"
-                  });
-                } else {
-                  res.status(200).send("Password updated!!!");
+
+              User.updateOne(
+                {
+                  email: user.email,
+                },
+                newValues,
+                function (err, success) {
+                  if (err) {
+                    // console.log("\n"+err+"\n");
+                    res.status(400).send({
+                      message: "Something went wrong, please try again!!!",
+                    });
+                  } else {
+                    res.status(200).send("Password updated!!!");
+                  }
                 }
-              });
+              );
             }
           });
         }
@@ -305,11 +324,17 @@ function login(req, res) {
   User.findOne({
     email: req.body.email,
   })
-    .then(user => {
+    .then((user) => {
       if (!user || user.isVerified === false) {
         res.status(400).send({ message: "Invalid credentials" });
       } else {
-        if (bcrypt.compareSync(req.body.hashedPassword, user.internalAuth.hashedPassword)) {
+        console.log("Error: ", user.internalAuth);
+        if (
+          bcrypt.compareSync(
+            req.body.hashedPassword,
+            user.internalAuth.hashedPassword
+          )
+        ) {
           // Passwords match
           const payload = {
             _id: user._id,
@@ -321,187 +346,76 @@ function login(req, res) {
             expiresIn: 86400,
           });
           res.status(200).send(token);
-        }else {
+        } else {
           // Passwords don't match
           res.status(400).send({ message: "Incorrect Password" });
         }
       }
     })
     .catch((err) => {
+      console.log("Customer Login Error: ", err);
       res
         .status(400)
         .send({ messsage: "Something went wrong, please try again!!!" });
     });
 }
 
-router.get("/order", payment)
+router.post("/success", success);
 
-function payment(req, res){
-  const userId= "5e8e350607ccf30b789be8b1";
-  User.findOne({
-    _id: userId
-  }).then(user=>{
-    if(!user) {
-      res.status(400).send({message: "No User Exist!!!"});
-    }else {
+function success(req, res) {
+  transactions.success(req.body, (err, resData) => {
+    if (err) {
+      res.status(400).send({ message: err });
+    } else {
+      const response = JSON.parse(resData);
+      // console.log("\n"+response+"\n");
       var date = new Date();
       date = date.toISOString();
-      
-      const orderData= {
-          custId: user._id,
-          chefId: "5e8e350607",
-          createdAt: date,
-          status: "initiated",
-          items: [
-            {
-              itemName: "CHICKEN MAGGI",
-              itemCost: 10
-            },
-
-            {
-              itemName: "CHICKEN DOSA",
-              itemCost: 20
-            },
-
-            {
-              itemName: "CHICKEN NOODLES",
-              itemCost: 30
-            },
-
-            {
-              itemName: "CHICKEN RICE",
-              itemCost: 40
-            },
-
-          ]
-      };
-      Order.create(orderData)
-        .then(order=>{
-            console.log("\nItems added!!!\n");
-            Order.aggregate(
-              [
-                { $match : { _id: order._id } },
-                { $unwind : '$items' }, 
-                { $group : 
-                  {
-                    _id: null,
-                    totalCost: {$sum: '$items.itemCost'}
-                  }
-                }
-              ]).then(costData=>{
-                console.log("\ncost calculated!!!\n "+costData[0].totalCost);
-
-                const paymentData= {
-                  orderId: new String(order._id),
-                  customerId: new String(user._id),
-                  amount: new String(costData[0].totalCost),
-                  email: user.email,
-                  phoneNumber: new String(user.internalAuth.phoneNum)
-                };
-
-                console.log(paymentData);
-            
-                transactions.payment(paymentData, (err, params)=>{
-                  if(err){
-                    res.status(200).send({message: "error!!!"});
-                  }else {
-                    let txn_url = "https://securegw-stage.paytm.in/order/process"
-
-                    let form_fields = "";
-                    for(x in params)
-                    {
-                        form_fields += "<input type='hidden' name='"+x+"' value='"+params[x]+"'/>"
-
-                    }
-                    var html = '<html><body><center><h2>Please wait! Do not refresh the page</h2></center><form method="post" action="'+txn_url+'" name="f1">'+form_fields +'</form><script type="text/javascript">document.f1.submit()</script></body></html>'
-                    res.writeHead(200,{'Content-Type' : 'text/html'});
-                    res.write(html);
-                    res.end();
-                  }
-
-                });
-                
-              }).catch(err=>{
-                console.log(err);
-                res.status(400).send({message: err});
-              })
-        }).catch(err=>{
-          console.log(err);
-          res.status(400).send({message: err});
-        })
-    }
-  }).catch(err=>{
-    res.status(400).send({message: "something went wrong!!!"});
-  })        
-}
-
-router.post('/success', success)
-
-function success(req, res){
-
-  transactions.success(req.body, (err, resData)=>{
-    if(err) {
-      res.status(400).send({message: err});
-    }else {
-      const response= JSON.parse(resData);
-      console.log("\n"+response+"\n");
-      var date = new Date();
-      date = date.toISOString();
-      const newValues= {
+      const newValues = {
         transactionId: response.TXNID,
         amount: response.TXNAMOUNT,
         updatedAt: date,
         referenceId: response.BANKTXNID,
         modeOfPayment: response.PAYMENTMODE,
-        bankName: response.BANKNAME
+        bankName: response.BANKNAME,
       };
 
-      if(response.STATUS === "TXN_FAILURE"){
-        newValues['status']= 'failed';
-        Order.updateOne({_id: response.ORDERID}, newValues, (err, Success)=>{
-          if(err){
-            res.status(400).send({message: "something went wrong!!!"});
-          }else {
-            res.status(400).send({message: response.RESPMSG});
+      if (response.STATUS === "TXN_FAILURE") {
+        newValues["status"] = "failed";
+        Order.updateOne(
+          { _id: response.ORDERID },
+          newValues,
+          (err, Success) => {
+            if (err) {
+              res.status(400).send({ message: "something went wrong!!!" });
+            } else {
+              res.status(400).send({ message: response.RESPMSG });
+            }
           }
-        });
-      }else {
-        newValues['status']= 'completed';
-        Order.updateOne({_id: response.ORDERID}, newValues, (err, Success)=>{
-          if(err){
-            res.status(200).send({message: "something went wrong!!!"});
-          }else {
-            res.status(200).send({message: response.RESPMSG});
+        );
+      } else {
+        newValues["status"] = "completed";
+        Order.updateOne(
+          { _id: response.ORDERID },
+          newValues,
+          (err, Success) => {
+            if (err) {
+              res.status(200).send({ message: "something went wrong!!!" });
+            } else {
+              res.status(200).send({ message: response.RESPMSG });
+            }
           }
-        });
+        );
       }
     }
-  })
-
+  });
 }
 
-
-/* Google Authentication API. */
-
-router.get(
-  "/auth/google",
-  passport.authenticate("google", { 
-      scope: ["profile", "email"] 
-  })
-);
-
-router.get(
-  "/auth/google/callback",
-  passport.authenticate("google", { failureRedirect: "/customer/auth/google", session: false }), (req, res) => {
-      const token= req.user;
-      console.log("\n"+token+"\n");
-      res.redirect("http://localhost:3000/"+`${token}`);
-  }
-);
-
+// send customer profile details
 router.get("/profile", auth, get_profile);
 
 function get_profile(req, res) {
+  // console.log("Customer profile", req.user);
   User.findOne({
     _id: req.user._id,
   })
@@ -517,6 +431,7 @@ function get_profile(req, res) {
     });
 }
 
+// edit customer profile details
 router.post("/edit_profile", edit_profile);
 
 function edit_profile(req, res) {
@@ -557,5 +472,143 @@ function edit_profile(req, res) {
         .send({ message: "Something went wrong, please try again!!!" });
     });
 }
+
+// when customer likes an item
+router.post("/item_liked", auth, like_item);
+
+function like_item(req, res) {
+  User.findByIdAndUpdate(
+    { _id: req.user._id },
+    {
+      $push: {
+        favChef: {
+          chefId: req.body.chef_id,
+        },
+      },
+    }
+  );
+}
+
+//  contracts  //
+
+// Add new contract
+router.post("/add_contract", auth, (req, res) => {
+  var userContract = new contract({
+    deliveryDate: req.body.deliveryDate,
+    contrTitle: req.body.contrTitle,
+    contrType: req.body.contrType,
+    contrDescription: req.body.contrDescription,
+    contrStatus: 0,
+  });
+  User.findById(req.user._id, (err, userProfile) => {
+    if (err) {
+      console.log("Add Contract Error: user not found", err);
+      res.status(400).send({ err: "User not found" });
+    } else {
+      userProfile.contracts.push(userContract);
+      userProfile
+        .save()
+        .then((contractProfile) => {
+          res.status(200).send({ msg: "Contract Added" });
+        })
+        .catch((err) => {
+          res.status(400).send({ err: err });
+          console.log("Add Contract Error: ", err);
+        });
+    }
+  });
+});
+
+// get All Customer Contracts
+router.get("/get_contracts", auth, (req, res) => {
+  User.findById(req.user._id, (err, user) => {
+    if (err) {
+      console.log("Add Contract Error: user not found", err);
+      res.status(400).send({ err: "User not found" });
+    } else {
+      res.status(200).send({ data: user.contracts });
+    }
+  });
+});
+
+// customer see his upcoming accepted contracts
+router.get("/getApprovedContracts", (req, res) => {
+  User.aggregate(
+    [
+      { $match: { _id: mongoose.Types.ObjectId(req.body.userId) } },
+      { $unwind: "$contracts" },
+      { $unwind: "$contracts.chefs" },
+      {
+        $match: {
+          $and: [
+            { "contracts.deliveryDate": { $gte: new Date.now() } },
+            { "contracts.contrStatus": { $eq: 1 } },
+            { "contracts.chefs.chefStatus": { $eq: 1 } },
+          ],
+        },
+      },
+    ],
+    (err, getApprovedContracts) => {
+      if (err) {
+        res.send({ msg: err });
+      } else {
+        res.send({ msg: getApprovedContracts });
+      }
+    }
+  );
+});
+
+//customer accept chefs intrest
+router.post("/acceptChef", auth, (req, res) => {
+  User.updateOne(
+    { _id: mongoose.Types.ObjectId(req.user._id) },
+    {
+      $set: {
+        "contracts.$[outter].chefs.$[inner].chefStatus": 1,
+        "contracts.$[outter].contrStatus": 1,
+      },
+    },
+    {
+      arrayFilters: [
+        { "outter._id": mongoose.Types.ObjectId(req.body.contractId) },
+        { "inner.chefId": mongoose.Types.ObjectId(req.body.chefId) },
+      ],
+    },
+    (err, acceptChef) => {
+      if (err) {
+        res.send({ msg: err });
+      } else {
+        res.send({ msg: acceptChef });
+        //make all chefstatus to 2
+      }
+    }
+  );
+});
+
+//customer reject chefs intrest
+router.post("/rejectChef", (req, res) => {
+  User.updateOne(
+    { _id: mongoose.Types.ObjectId(req.body.userId) },
+    {
+      $set: {
+        "contracts.$[outter].chefs.$[inner].chefStatus": 2,
+        "contracts.$[outter].contrStatus": 0,
+      },
+    },
+    {
+      arrayFilters: [
+        { "outter._id": mongoose.Types.ObjectId(req.body.contractId) },
+        { "inner.chefId": mongoose.Types.ObjectId(req.body.chefId) },
+      ],
+    },
+    (err, acceptChef) => {
+      if (err) {
+        res.send({ msg: err });
+      } else {
+        res.send({ msg: acceptChef });
+      }
+    }
+  );
+});
 
 module.exports = router;

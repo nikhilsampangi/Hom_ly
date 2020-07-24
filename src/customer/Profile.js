@@ -26,15 +26,16 @@ export default class Profile extends Component {
     this.handleOrders = this.handleOrders.bind(this);
   }
 
-  componentDidMount(event) {
+  componentDidMount() {
     change_bg("cust_hm");
     this.handleProfile();
     this.handleOrders();
   }
 
+  // Get customer profile info
   handleProfile(event) {
     axios
-      .get("customer/profile", {
+      .get("/customer/profile", {
         headers: { Authorization: Cookies.get("usertoken") },
       })
       .then((res) => {
@@ -46,7 +47,7 @@ export default class Profile extends Component {
           veg: res.data.isVeg,
         });
 
-        if (res.data.Address[0]) {
+        if (res.data.Address.length !== 0) {
           this.setState({
             localty: res.data.Address[0].Localty,
             city: res.data.Address[0].City,
@@ -57,9 +58,9 @@ export default class Profile extends Component {
       });
   }
 
-  handleOrders(event) {
+  handleOrders() {
     axios
-      .get("/transaction/get_orders", {
+      .get("/transaction/get_user_orders", {
         headers: { Authorization: Cookies.get("usertoken") },
       })
       .then((res) => {
@@ -83,7 +84,7 @@ export default class Profile extends Component {
         recOrd.push(
           <li style={{ marginBottom: "7px" }}>
             <span style={{ color: "dimgrey", fontSize: "small" }}>
-              {this.state.orders[i].date}
+              {this.state.orders[i].date.split("T")[0]}
             </span>
             &nbsp;-&nbsp;
             <i className="fas fa-user-circle"></i>
@@ -244,21 +245,23 @@ export default class Profile extends Component {
                         textAlign: "center",
                       }}
                     >
-                      <button
+                      <Link
                         className="btn btn-outline-info"
                         style={{ borderRadius: "0" }}
+                        to="/Contracts/add"
                       >
                         <i className="far fa-plus-square"></i>&nbsp;Post
                         Contracts
-                      </button>
+                      </Link>
                       <br />
                       <br />
-                      <button
-                        className="btn btn-outline-warning"
+                      <Link
+                        className="btn btn-outline-danger"
                         style={{ borderRadius: "0" }}
+                        to="/Contracts"
                       >
                         View Contract Status
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -289,7 +292,7 @@ export default class Profile extends Component {
                       }}
                     >
                       <ul>
-                        <li>Dish name</li>
+                        <li>You havent liked any dishes yet</li>
                       </ul>
                     </div>
                   </div>
@@ -318,7 +321,7 @@ export default class Profile extends Component {
                       }}
                     >
                       <ul>
-                        <li>Chef name</li>
+                        <li>You haven't liked any chefs yet</li>
                       </ul>
                     </div>
                   </div>
@@ -391,9 +394,6 @@ export default class Profile extends Component {
                 </div>
               </div>
             </div>
-            {/* <button className="btn" onClick={this.logOut}>
-              Log out
-            </button> */}
           </div>
         </Fragment>
       );
