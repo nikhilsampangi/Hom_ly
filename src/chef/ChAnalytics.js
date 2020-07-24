@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 import change_bg from "../index";
 import Axios from "axios";
 import Rating from "react-rating";
-import { Bar, Line } from "react-chartjs-2";
+import { Bar, Line, Radar } from "react-chartjs-2";
 import * as jsPDF from "jspdf";
 import $ from "jquery";
 import html2canvas from "html2canvas";
@@ -123,6 +123,29 @@ export default class ChAnalytics extends Component {
           fill: false,
           // data: slc_data,
           data: [123, 221, 372, 420, 136, 199, 502, 0, 0, 0, 0, 0],
+        },
+      ],
+    };
+    let ipc = {
+      labels: [
+        "Item 1",
+        "Item 2",
+        "Item 3",
+        "Item 4",
+        "Item 5",
+        "Item 6",
+        "Item 7",
+      ],
+      datasets: [
+        {
+          label: "No of Orders",
+          backgroundColor: "#17a2b822",
+          borderColor: "#17a2b8",
+          pointBackgroundColor: "#17a2b8",
+          pointBorderColor: "#fff",
+          pointHoverBackgroundColor: "#fff",
+          pointHoverBorderColor: "rgba(179,181,198,1)",
+          data: [65, 59, 90, 81, 56, 55, 40],
         },
       ],
     };
@@ -306,6 +329,43 @@ export default class ChAnalytics extends Component {
                 />
               </div>
             </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            {/* Item Popularity Curve */}
+            <div
+              className="card"
+              style={{ fontFamily: "Sen", padding: "2% 5% 2% 5%" }}
+              id="itemPopCurve"
+            >
+              <div className="card-title row">
+                <h4 className="col" style={{ fontFamily: "Neptune" }}>
+                  itEM PoPULaRitY CUrVE
+                </h4>
+                <div className="col text-right">
+                  <i
+                    className="fas fa-2x fa-file-pdf text-danger"
+                    style={{ cursor: "pointer" }}
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Download as pdf"
+                    onClick={() => {
+                      this.downloadPDF("#itemPopCurve");
+                    }}
+                  ></i>
+                </div>
+              </div>
+              <br />
+              <br />
+              <div className="card-body">
+                <Radar data={ipc} />
+              </div>
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
           </div>
         </Fragment>
       );
