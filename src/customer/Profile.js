@@ -60,7 +60,7 @@ export default class Profile extends Component {
 
   handleOrders() {
     axios
-      .get("/transaction/get_orders", {
+      .get("/transaction/get_user_orders", {
         headers: { Authorization: Cookies.get("usertoken") },
       })
       .then((res) => {

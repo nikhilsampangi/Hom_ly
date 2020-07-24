@@ -43,13 +43,34 @@ router.get("/get_orders", auth, get_orders);
 
 function get_orders(req, res) {
   Transaction.find(
+    { chefId: req.user._id },
+    { chefName: 1, date: 1, amount: 1, rating: 1, feedBack: 1 },
+    { multi: true }
+  )
+    .then((orders) => {
+      res.status(200).send(orders);
+    })
+    .catch((err) => {
+      console.log("get orders error: ", err);
+      res.status(400).send(err);
+    });
+}
+router.get("/get_user_orders", auth, get_user_orders);
+
+function get_user_orders(req, res) {
+  Transaction.find(
     { custId: req.user._id },
     { chefName: 1, date: 1, amount: 1, rating: 1, feedBack: 1 },
     { multi: true }
-  ).then((orders) => {
-    // console.log(orders);
-    res.send(orders);
-  });
+  )
+    .then((orders) => {
+      // console.log(orders);
+      res.satus(200).send(orders);
+    })
+    .catch((err) => {
+      console.log("get orders error: ", err);
+      res.status(400).send(err);
+    });
 }
 
 router.get("/chef_rating", auth, chef_rating);
@@ -185,13 +206,14 @@ function getPaymentData(userID, chefID, chef_name, itemData, callback) {
   });
 }
 
-router.post("/order", auth, payment);
+router.get("/order", auth, payment);
 
 function payment(req, res) {
   const userId = req.user._id;
-  const chefId = req.body.chefid;
-  const chefName = req.body.chefname;
-  const itemData = req.body.cart;
+  const chefId = req.query.chefid;
+  const chefName = req.query.chefname;
+  const itemData = JSON.parse(req.query.cart);
+  // console.log(JSON.parse(itemData));
   User.findOne({
     _id: userId,
   })
@@ -210,7 +232,6 @@ function payment(req, res) {
               email: user.email,
               phoneNumber: new String(user.internalAuth.phoneNum),
             };
-
             console.log("\n" + paymentData + "\n");
 
             transactions.payment(paymentData, (err, params) => {

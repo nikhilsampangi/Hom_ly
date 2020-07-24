@@ -8,21 +8,25 @@ import Axios from "axios";
 export default class Purchase extends Component {
   constructor() {
     super();
-    this.state = {};
+    this.state = {
+      html: [],
+    };
     this.OrderItems = this.OrderItems.bind(this);
   }
 
   OrderItems() {
-    Axios.post(
-      "/transaction/order",
-      {
+    Axios.get("/transaction/order", {
+      params: {
         chefid: Cookies.get("cartChefId"),
         chefname: Cookies.get("cartChefName"),
-        cart: JSON.parse(Cookies.get("cart")),
+        cart: Cookies.get("cart"),
       },
-      { headers: { Authorization: Cookies.get("usertoken") } }
-    ).then((res) => {
+      headers: { Authorization: Cookies.get("usertoken") },
+    }).then((res) => {
       console.log(res.data);
+      this.setState({
+        html: res.data,
+      });
     });
   }
 
@@ -65,6 +69,11 @@ export default class Purchase extends Component {
           </div>
           <div className="col-1"></div>
         </div>
+        <div
+          dangerouslySetInnerHTML={{
+            __html: this.state.html,
+          }}
+        ></div>
       </Fragment>
     );
   }
