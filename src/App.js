@@ -16,7 +16,7 @@ import Feedbacks from "./chef/Feedbacks";
 import Cust_login from "./authentication/Cust_login";
 import Cust_reg from "./authentication/Cust_reg";
 import Cust from "./customer/Cust";
-import Wlt from "./customer/Wallet";
+import Purchase from "./customer/Purchase";
 import Abt from "./customer/About";
 import Prof from "./customer/Profile";
 import Prof_edit from "./customer/EditProfile";
@@ -57,7 +57,7 @@ export default class App extends Component {
             />
             {/* Customer url's */}
             <Route exact path="/Home" component={Cust} />
-            <Route exact path="/Wallet" component={Wlt} />
+            <Route exact path="/Purchase" component={Purchase} />
             <Route exact path="/About" component={Abt} />
             <Route exact path="/Profile" component={Prof} />
             <Route exact path="/Profile/Edit" component={Prof_edit} />

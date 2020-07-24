@@ -360,117 +360,6 @@ function login(req, res) {
     });
 }
 
-router.get("/order", payment);
-
-function payment(req, res) {
-  const userId = "5e8e350607ccf30b789be8b1";
-  User.findOne({
-    _id: userId,
-  })
-    .then((user) => {
-      if (!user) {
-        res.status(400).send({ message: "No User Exist!!!" });
-      } else {
-        var date = new Date();
-        date = date.toISOString();
-
-        const orderData = {
-          custId: user._id,
-          chefId: "5e8e350607",
-          createdAt: date,
-          status: "initiated",
-          items: [
-            {
-              itemName: "CHICKEN MAGGI",
-              itemCost: 10,
-            },
-
-            {
-              itemName: "CHICKEN DOSA",
-              itemCost: 20,
-            },
-
-            {
-              itemName: "CHICKEN NOODLES",
-              itemCost: 30,
-            },
-
-            {
-              itemName: "CHICKEN RICE",
-              itemCost: 40,
-            },
-          ],
-        };
-        Order.create(orderData)
-          .then((order) => {
-            console.log("\nItems added!!!\n");
-            Order.aggregate([
-              { $match: { _id: order._id } },
-              { $unwind: "$items" },
-              {
-                $group: {
-                  _id: null,
-                  totalCost: { $sum: "$items.itemCost" },
-                },
-              },
-            ])
-              .then((costData) => {
-                console.log("\ncost calculated!!!\n " + costData[0].totalCost);
-
-                const paymentData = {
-                  orderId: new String(order._id),
-                  customerId: new String(user._id),
-                  amount: new String(costData[0].totalCost),
-                  email: user.email,
-                  phoneNumber: new String(user.phoneNum),
-                };
-
-                console.log(paymentData);
-
-                transactions.payment(paymentData, (err, params) => {
-                  if (err) {
-                    res.status(200).send({ message: "error!!!" });
-                  } else {
-                    let txn_url =
-                      "https://securegw-stage.paytm.in/order/process";
-
-                    let form_fields = "";
-                    for (x in params) {
-                      form_fields +=
-                        "<input type='hidden' name='" +
-                        x +
-                        "' value='" +
-                        params[x] +
-                        "'/>";
-                    }
-                    var html =
-                      '<html><body><center><h2>Please wait! Do not refresh the page</h2></center><form method="post" action="' +
-                      txn_url +
-                      '" name="f1">' +
-                      form_fields +
-                      '</form><script type="text/javascript">document.f1.submit()</script></body></html>';
-                    res.writeHead(200, { "Content-Type": "text/html" });
-                    res.write(html);
-                    res.end();
-                  }
-                });
-              })
-              .catch((err) => {
-                console.log(err);
-                res.status(400).send({ message: err });
-              });
-          })
-          .catch((err) => {
-            console.log(err);
-            res.status(400).send({ message: err });
-          });
-      }
-    })
-    .catch((err) => {
-      res.status(400).send({ message: "something went wrong!!!" });
-    });
-}
-
 router.post("/success", success);
 
 function success(req, res) {
@@ -696,7 +585,7 @@ router.post("/acceptChef", auth, (req, res) => {
   );
 });
 
-//custermer reject chefs intrest
+//customer reject chefs intrest
 router.post("/rejectChef", (req, res) => {
   User.updateOne(
     { _id: mongoose.Types.ObjectId(req.body.userId) },
