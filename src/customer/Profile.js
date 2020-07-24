@@ -84,7 +84,7 @@ export default class Profile extends Component {
         recOrd.push(
           <li style={{ marginBottom: "7px" }}>
             <span style={{ color: "dimgrey", fontSize: "small" }}>
-              {this.state.orders[i].date}
+              {this.state.orders[i].date.split("T")[0]}
             </span>
             &nbsp;-&nbsp;
             <i className="fas fa-user-circle"></i>

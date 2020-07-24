@@ -65,7 +65,7 @@ function get_user_orders(req, res) {
   )
     .then((orders) => {
       // console.log(orders);
-      res.satus(200).send(orders);
+      res.status(200).send(orders);
     })
     .catch((err) => {
       console.log("get orders error: ", err);
@@ -235,11 +235,10 @@ function payment(req, res) {
             console.log("\n" + paymentData + "\n");
 
             transactions.payment(paymentData, (err, params) => {
-              
-              if(err){
-                res.status(200).send({message: "error!!!"});
-              }else {
-                res.status(200).send({message : params})
+              if (err) {
+                res.status(200).send({ message: "error!!!" });
+              } else {
+                res.status(200).send({ message: params, tid: resp.orderID });
               }
             });
           }
@@ -280,7 +279,8 @@ function success(req, res) {
             if (err) {
               res.status(400).send({ message: "something went wrong!!!" });
             } else {
-              res.status(400).send({ message: response.RESPMSG });
+              // res.status(400).send({ message: response.RESPMSG });
+              res.redirect("http://localhost:3000/#/Feedback");
             }
           }
         );
@@ -293,7 +293,8 @@ function success(req, res) {
             if (err) {
               res.status(200).send({ message: "something went wrong!!!" });
             } else {
-              res.status(200).send({ message: response.RESPMSG });
+              // res.status(200).send({ message: response.RESPMSG });
+              res.redirect("http://localhost:3000/#/Feedback");
             }
           }
         );

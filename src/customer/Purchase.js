@@ -14,45 +14,45 @@ export default class Purchase extends Component {
     this.OrderItems = this.OrderItems.bind(this);
   }
 
-  isDate(val){
+  isDate(val) {
     // Cross realm comptatible
-    return Object.prototype.toString.call(val) === '[object Date]'
+    return Object.prototype.toString.call(val) === "[object Date]";
   }
-  
+
   isObj(val) {
-    return typeof val === 'object'
+    return typeof val === "object";
   }
-  
+
   stringifyValue(val) {
     if (this.isObj(val) && !this.isDate(val)) {
-      return JSON.stringify(val)
+      return JSON.stringify(val);
     } else {
-      return val
+      return val;
     }
   }
-  
+
   buildForm({ action, params }) {
-    const form = document.createElement('form')
-    form.setAttribute('method', 'post')
-    form.setAttribute('action', action)
+    const form = document.createElement("form");
+    form.setAttribute("method", "post");
+    form.setAttribute("action", action);
     // form.setAttribute('target', target)
-  
-    Object.keys(params).forEach(key => {
-      const input = document.createElement('input')
-      input.setAttribute('type', 'hidden')
-      input.setAttribute('name', key)
-      input.setAttribute('value', this.stringifyValue(params[key]))
-      form.appendChild(input)
-  })
-  
-    return form
+
+    Object.keys(params).forEach((key) => {
+      const input = document.createElement("input");
+      input.setAttribute("type", "hidden");
+      input.setAttribute("name", key);
+      input.setAttribute("value", this.stringifyValue(params[key]));
+      form.appendChild(input);
+    });
+
+    return form;
   }
-  
+
   post(details) {
-    const form = this.buildForm(details)
-    document.body.appendChild(form)
-    form.submit()
-    form.remove()
+    const form = this.buildForm(details);
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
   }
 
   OrderItems() {
@@ -63,15 +63,22 @@ export default class Purchase extends Component {
         cart: Cookies.get("cart"),
       },
       headers: { Authorization: Cookies.get("usertoken") },
-    }).then((resp) => {
-      var details = {
-        action : "https://securegw-stage.paytm.in/order/process",
-        params : resp.data.message
-      }
-      this.post(details)
-    }).catch(err => {
-      console.log(err)
     })
+      .then((resp) => {
+        var details = {
+          action: "https://securegw-stage.paytm.in/order/process",
+          params: resp.data.message,
+        };
+        this.post(details);
+        // remove cookies
+        Cookies.remove("cart");
+        Cookies.remove("cartChefId");
+        Cookies.remove("cartChefName");
+        Cookies.set("transId", resp.data.tid);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 
   render() {
@@ -113,11 +120,6 @@ export default class Purchase extends Component {
           </div>
           <div className="col-1"></div>
         </div>
-        <div
-          dangerouslySetInnerHTML={{
-            __html: this.state.html,
-          }}
-        ></div>
       </Fragment>
     );
   }
@@ -132,9 +134,11 @@ class DisplayCart extends Component {
   }
 
   componentDidMount() {
-    this.setState({
-      data: JSON.parse(Cookies.get("cart")),
-    });
+    if (Cookies.get("cart")) {
+      this.setState({
+        data: JSON.parse(Cookies.get("cart")),
+      });
+    }
   }
 
   render() {
@@ -177,6 +181,12 @@ class DisplayCart extends Component {
             </thead>
             <tbody>{data}</tbody>
           </table>
+        </Fragment>
+      );
+    } else {
+      return (
+        <Fragment>
+          <h3>Your Cart is Empty</h3>
         </Fragment>
       );
     }

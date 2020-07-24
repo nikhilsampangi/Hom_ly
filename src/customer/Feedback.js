@@ -28,13 +28,14 @@ export default class Feedback extends Component {
 
   submitFeedback(event) {
     var temp = {
-      id: this.props.location.state.id,
+      id: Cookies.get("transId"),
       rating: this.state.rating,
       fb: this.state.fb,
     };
-    Axios.post("/transaction/feedback", temp).then(
-      this.setState({ redFlag: true })
-    );
+    Axios.post("/transaction/feedback", temp).then(() => {
+      this.setState({ redFlag: true });
+      Cookies.remove("transId");
+    });
   }
 
   render() {
