@@ -235,29 +235,11 @@ function payment(req, res) {
             console.log("\n" + paymentData + "\n");
 
             transactions.payment(paymentData, (err, params) => {
-              if (err) {
-                res.status(200).send({ message: "error!!!" });
-              } else {
-                let txn_url = "https://securegw-stage.paytm.in/order/process";
-
-                let form_fields = "";
-                for (x in params) {
-                  form_fields +=
-                    "<input type='hidden' name='" +
-                    x +
-                    "' value='" +
-                    params[x] +
-                    "'/>";
-                }
-                var html =
-                  '<html><body><center><h2>Please wait! Do not refresh the page</h2></center><form method="post" action="' +
-                  txn_url +
-                  '" name="f1">' +
-                  form_fields +
-                  '</form><script type="text/javascript">document.f1.submit()</script></body></html>';
-                res.writeHead(200, { "Content-Type": "text/html" });
-                res.write(html);
-                res.end();
+              
+              if(err){
+                res.status(200).send({message: "error!!!"});
+              }else {
+                res.status(200).send({message : params})
               }
             });
           }

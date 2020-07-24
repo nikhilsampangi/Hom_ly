@@ -14,6 +14,47 @@ export default class Purchase extends Component {
     this.OrderItems = this.OrderItems.bind(this);
   }
 
+  isDate(val){
+    // Cross realm comptatible
+    return Object.prototype.toString.call(val) === '[object Date]'
+  }
+  
+  isObj(val) {
+    return typeof val === 'object'
+  }
+  
+  stringifyValue(val) {
+    if (this.isObj(val) && !this.isDate(val)) {
+      return JSON.stringify(val)
+    } else {
+      return val
+    }
+  }
+  
+  buildForm({ action, params }) {
+    const form = document.createElement('form')
+    form.setAttribute('method', 'post')
+    form.setAttribute('action', action)
+    // form.setAttribute('target', target)
+  
+    Object.keys(params).forEach(key => {
+      const input = document.createElement('input')
+      input.setAttribute('type', 'hidden')
+      input.setAttribute('name', key)
+      input.setAttribute('value', this.stringifyValue(params[key]))
+      form.appendChild(input)
+  })
+  
+    return form
+  }
+  
+  post(details) {
+    const form = this.buildForm(details)
+    document.body.appendChild(form)
+    form.submit()
+    form.remove()
+  }
+
   OrderItems() {
     Axios.get("/transaction/order", {
       params: {
@@ -22,12 +63,15 @@ export default class Purchase extends Component {
         cart: Cookies.get("cart"),
       },
       headers: { Authorization: Cookies.get("usertoken") },
-    }).then((res) => {
-      console.log(res.data);
-      this.setState({
-        html: res.data,
-      });
-    });
+    }).then((resp) => {
+      var details = {
+        action : "https://securegw-stage.paytm.in/order/process",
+        params : resp.data.message
+      }
+      this.post(details)
+    }).catch(err => {
+      console.log(err)
+    })
   }
 
   render() {
